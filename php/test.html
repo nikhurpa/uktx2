@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Form Tracker</title>
+</head>
+<body>
+  <form id="myForm">
+    <input type="text" name="username" placeholder="Enter name"><br>
+    <input type="email" name="email" placeholder="Enter email"><br>
+    <input type="checkbox" name="subscribe" value="yes"> Subscribe<br>
+    <select name="country">
+      <option value="us">USA</option>
+      <option value="uk">UK</option>
+      <option value="in">India</option>
+    </select><br>
+  </form>
+
+  <script>
+  function trackFormEvents(formId) { 
+    const form = document.getElementById(formId);
+
+    if (!form) {
+      console.error("Form not found:", formId);
+      return;
+    }
+
+    // Listen to both "input" (typing) and "change" (select/checkbox/radio)
+    form.addEventListener("input", logValues);
+    form.addEventListener("change", logValues);
+
+    function logValues() {
+      const formData = new FormData(form);
+      const formValues = Object.fromEntries(formData.entries());
+      console.log(Object.keys(formValues).length)
+      
+      Object.entries(formValues).forEach(([key, value]) => {
+        console.log(key + ":", value);
+      });
+    }
+  }
+
+  // ✅ Call it after DOM loads
+  document.addEventListener("DOMContentLoaded", () => {
+    trackFormEvents("myForm");
+  });
+  </script>
+</body>
+</html>
