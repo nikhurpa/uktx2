@@ -1,0 +1,5 @@
+.marker-label {
+    -webkit-text-stroke: .1px white; /* white border around font */
+        /* for other browsers */
+    margin-left: 40px;              /* move label right of marker */
+  }

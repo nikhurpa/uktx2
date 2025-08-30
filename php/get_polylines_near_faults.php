@@ -12,7 +12,8 @@ try {
     $fault_lat = isset($_GET['lat']) ? floatval($_GET['lat']) : null;
     $fault_lng = isset($_GET['lng']) ? floatval($_GET['lng']) : null;
     $radius_km = isset($_GET['radius']) ? floatval($_GET['radius']) : 10; // Default 10km
-    
+    $kmz_filter = isset($_GET['kmz_file']) ? $_GET['kmz_file'] : null;
+
     if ($fault_lat === null || $fault_lng === null) {
         echo json_encode([
             'success' => false,
@@ -33,6 +34,13 @@ try {
     $min_lng = $fault_lng - $lng_degree_radius;
     $max_lng = $fault_lng + $lng_degree_radius;
     
+    $filequery ="";
+
+    if ($kmz_filter) {
+        $filequery = " AND ( kmz_filename IN ($kmz_filter) ) ";
+        // $params[] = "( " .$kmz_filter . " )";
+    }
+
     // Query polylines that intersect with the bounding box
     $sql = "
         SELECT 
@@ -61,7 +69,7 @@ try {
                 (start_lat < ? AND end_lat > ?) OR (start_lat > ? AND end_lat < ?)
             ) AND (
                 (start_lng < ? AND end_lng > ?) OR (start_lng > ? AND end_lng < ?)
-            )
+            ) $filequery
         )
         ORDER BY 
             -- Prioritize polylines with start/end points closer to fault
@@ -119,6 +127,7 @@ try {
             'lng' => $fault_lng
         ],
         'search_radius_km' => $radius_km,
+        'sql'=> $sql,
         'bounding_box' => [
             'min_lat' => $min_lat,
             'max_lat' => $max_lat,

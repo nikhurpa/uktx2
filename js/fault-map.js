@@ -76,6 +76,7 @@ function loadFaultMapPage() {
     
     // Load KMZ files for filter
     loadKMZFilesForFilter();
+    loadPendingFaultsForFilter();
 }
 
 let map;
@@ -89,9 +90,10 @@ let MY_MAP = {
     btsloaded : false,
     oltloaded : false,
     routeloaded : false,
-    bts : {},
-    route : {},
-    olt : {},
+    BTS :{markers: [],title_fields :["TSP_SITE_NAME","OA"],sts_field:"STATUS"},
+    OLT : {markers: [],title_fields :["LOCATION","OA"],sts_field:"STATUS"},
+    Faults : {markers: [],title_fields :[".FAULT_ID","ROUTE_BRIEF"],sts_field:"RESTORATION_DATE"},
+    Routes : {markers: [],title_fields :["polyline_name","kmz_filename"],sts_field:"STATUS"},
     oaselected : "ALL",
     routeselected : "ALL",
     radious : "ALL",
@@ -119,7 +121,7 @@ let MAP_FORM = {
 
 }
 
-let MAP_OA = ["ALM","DDN","HWR","DDN","NTL","NWT","SGR"]
+let MAP_OA = ["ALM","DDN","HWR","NTL","NWT","SGR"]
 let MAP_FORM2= {
     BTS: "on",
     OLT: "on",
@@ -163,7 +165,7 @@ function initMap() {
     });
     
     // Load pending faults on map by default
-    loadPendingFaultsOnMap();
+    //loadPendingFaultsOnMap();
 }
 
 function loadKMZFilesForFilter() {
@@ -186,6 +188,29 @@ function loadKMZFilesForFilter() {
     });
 }
 
+
+function loadPendingFaultsForFilter(){
+
+    $.ajax({
+        url: 'php/get_pending_faults.php',
+        type: 'GET',
+        // data: { limit: 1 }, // Just to get the KMZ files list
+        dataType: 'json',
+        success: function(response) {
+            if (response.success && response.faults) {
+                const mapFaults = $('#mapFaults');
+                response.faults.forEach(fault => {
+                    mapFaults.append(`<option value="${fault.FAULT_ID}">${fault.FAULT_ID}</option>`);
+                });
+            }
+        },
+        error: function() {
+            console.log('Failed to load Faults for filter');
+        }
+    });
+
+   
+}
 function loadPendingFaultsOnMap() {
     console.log("pending")
     currentMapMode = 'pending';
@@ -254,11 +279,11 @@ function displayFaultsOnMap(faults, mode = 'pending') {
                 bounds.extend(coords);
                 hasValidCoordinates = true;
                
-                // now populate sidebar fault select element
+               // now populate sidebar fault select element
                 const mapFaults = $('#mapFaults');
                 mapFaults.append(`<option value="${fault.FAULT_ID}">${fault.FAULT_ID}</option>`);
                 
-                // Count by status
+               // Count by status
                 if (fault.RESTORATION_DATE) {
                     resolvedCount++;
                 } else {
@@ -507,62 +532,6 @@ function restoreFault(faultId) {
     }
 }
 
-function showAlert(message, type) {
-
-    toastr.options = {
-        "closeButton": false,
-        "debug": false,
-        "newestOnTop": false,
-        "progressBar": false,
-        "positionClass": "toast-top-center",
-        "preventDuplicates": false,
-        "onclick": null,
-        "showDuration": "300",
-        "hideDuration": "1000",
-        "timeOut": "3000",
-        "extendedTimeOut": "1000",
-        "showEasing": "swing",
-        "hideEasing": "linear",
-        "showMethod": "fadeIn",
-        "hideMethod": "fadeOut"
-      }
-    // alert(message)
-    // info,danger,warning,success
-    switch(type) {
-        case 'danger':
-          toastr.error(message)
-          break;
-        case 'success':
-          toastr.success(message)
-          break;
-        case 'info':
-          toastr.info(message)
-          break;
-        case 'warning':
-          toastr.warning(message)
-          break;
-        default:
-          toastr.info(message)
-          break;
-            
-    }
-
-
-    // const alertDiv = $('<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
-    //     message +
-    //     '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-    //     '</div>');
-    
-    // $('#page-content').prepend(alertDiv);
-    
-    // Auto-hide after 5 seconds
-    // setTimeout(function() {
-    //     // toastr.clear();
-    //     // toastr.remove();
-    //     // alertDiv.alert('close');
-    // }, 5000);
-}
-
 function resolveFaultFromMap(faultId) {
     // Close info window
     google.maps.event.trigger(map, 'closeclick');
@@ -573,17 +542,17 @@ function resolveFaultFromMap(faultId) {
 
 function loadPolylinesNearFaults() {
     clearPolylines()
-    
-    if (markers.length === 0) {
+    let faultmarkers= MY_MAP["Faults"].markers;
+    if (faultmarkers.length === 0) {
         showAlert('No faults loaded on map. Please load faults first.', 'warning');
         return;
     }
-    
+    const kmzFilter = $('#kmzFilter').val();
     // Get the first fault marker as reference point
-    const firstMarker = markers[0];
+    const firstMarker = faultmarkers[0];
     // const position = firstMarker.getPosition();
     const radius = $('#searchRadius').val();
-    for (let marker of markers) {
+    for (let marker of faultmarkers) {
         position = marker.getPosition();
         $.ajax({
             url: 'php/get_polylines_near_faults.php',
@@ -591,6 +560,7 @@ function loadPolylinesNearFaults() {
             data: {
                 lat: position.lat(),
                 lng: position.lng(),
+                kmz_file: kmzFilter.map(file => `'${file}'`).join(','),
                 radius: radius
             },
             dataType: 'json',
@@ -621,7 +591,7 @@ function loadAllPolylines() {
         url: 'php/get_all_polylines.php',
         type: 'GET',
         data: {
-            kmz_file: kmzFilter,
+            kmz_file: kmzFilter.map(file => `'${file}'`).join(','),
             name: nameFilter,
             limit: 100
         },
@@ -890,8 +860,6 @@ function clearPolylines() {
 
 ////////////////////////////////////////////////////////////
 
-
-
 function loadMapSideBar() {
 
     const mapsidebar = `
@@ -1039,67 +1007,477 @@ function trackFormEvents(formId) {
 }
 
 function mapLoad(name,type,value) {
+    let oanames ={
+     ALM:"ALMORA",
+     DDN:"DEHRADUN",
+     HWR:"HARIDWAR",
+     NTL:"NAINITAL",
+     NWT:"UTTARKASHI",
+     SGR:"KOTDWARA",
+    }
     let selected_oa= []
     MAP_OA.forEach(oa => {
-        if (("#" + oa).prop("checked") ) {
-            selected_oa.push(oa);
+        if ($("#" + oa).prop("checked") ) {
+            selected_oa.push(oanames[oa]);
            }
     });   
+    if (selected_oa.length==0){
+        showAlert("No OA selected");
+        clearMapMarker("BTS");
+        clearMapMarker("OLT");
+        return;
+    } 
 
-    let oa_query= " OA IN (" + selected_oa.map(name => `"${name}"`).join(", ") + ") ";
+    let oa_query= " UPPER(OA) IN (" + selected_oa.map(name => `"${name}"`).join(", ") + ") ";
+    let sql = { BTS:"",OLT:"",Faults:"",Routes:""}
 
-    let sql_btsquery="SELECT * FROM BTS WHERE " + oa_query ;
-    let sql_oltquery="SELECT * FROM OLT WHERE " + oa_query ;
-    
+    sql["BTS"]="SELECT * FROM BTS WHERE " + oa_query +  "AND LOCATION_LATLONG IS NOT NULL AND LOCATION_LATLONG != ''";
+    sql["OLT"]="SELECT * FROM OLT WHERE " + oa_query +  "AND LOCATION_LATLONG IS NOT NULL AND LOCATION_LATLONG != ''";
+    sql["Faults"] = "SELECT * FROM Faults WHERE " +  oa_query + " AND RESTORATION_DATE IS NULL AND LOCATION_LATLONG IS NOT NULL AND LOCATION_LATLONG != ''";
+
+    if(name == "BTS" || name=="OLT" || name=="Faults") {
+
+        ($(`#${name}`).prop("checked") == true)?  getData(sql[name],loarMarker,name) :  clearMapMarker(name);
+       
+        // getData(sql[name],loarMarker,name);
+    } else if (MAP_OA.includes(name)) {
+
+        // ($(`#${name}`).prop("checked") == true)?  getData(sql[name],loarMarker,name) :  clearMapMarker(name);
+        ($(`#BTS`).prop("checked") == true)?  getData(sql["BTS"],loarMarker,"BTS") :  clearMapMarker("BTS");
+        ($(`#OLT`).prop("checked") == true)?  getData(sql["OLT"],loarMarker,"OLT") :  clearMapMarker("OLT");
+        ($(`#Faults`).prop("checked") == true)?  getData(sql["Faults"],loarMarker,"Faults") :  clearMapMarker("Faults");
+       
+        // if ($("#BTS").prop("checked") == true) {
+        //     getData(sql["BTS"],loarMarker,"BTS");
+        // } else {
+        //     clearMapMarker("BTS")
+        // }
+
+        // if ($("#OLT").prop("checked") == true) {
+        //     getData(sql["OLT"],loarMarker,"OLT");
+        // }
+        // if ($("#Faults").prop("checked") == true) {
+        //     getData(sql["Faults"],loarMarker,"Faults");
+        // }
+    } else if (name == "Route") {
+
+    }
+
     // FAULTS COMBINATION
-    let sql_fault_query="SELECT * FROM FAULTS WHERE " + oa_query ;
+    // let sql_fault_query="SELECT * FROM FAULTS WHERE " + oa_query ;
 
-    let nearbypending_query= " OA IN (" + selected_oa.map(name => `"${name}"`).join(", ") + ") ";
-    let nearbyrestored_query= " OA IN (" + selected_oa.map(name => `"${name}"`).join(", ") + ") ";
-    let fault_query= " FAULT_ID= ";
-    let file_query= " FILES IN (" + Files.map(name => `"${name}"`).join(", ") + ") ";
-    let radius_qry = " LAT BETWEEN AND LONG BETWEEN ";
-    let name_qry = " ROUTE_NAME LIKE `` ";
+    // let nearbypending_query= " OA IN (" + selected_oa.map(name => `"${name}"`).join(", ") + ") ";
+    // let nearbyrestored_query= " OA IN (" + selected_oa.map(name => `"${name}"`).join(", ") + ") ";
+    // let fault_query= " FAULT_ID= ";
+    // let file_query= " FILES IN (" + Files.map(name => `"${name}"`).join(", ") + ") ";
+    // let radius_qry = " LAT BETWEEN AND LONG BETWEEN ";
+    // let name_qry = " ROUTE_NAME LIKE `` ";
     
 
 }
-  
-function getFormValuesManually(form) {
-    // const form = document.getElementById(formId);
-    const formElements = form.elements;
-    const values = {};
-  
-    for (let i = 0; i < formElements.length; i++) {
-      const element = formElements[i];
-      const { name, value, type, checked } = element;
-  
-      // Skip elements without a name, buttons, or file inputs for simplicity
-      if (!name || type === 'submit' || type === 'button' || type === 'reset' || type === 'file') {
-        continue;
-      }
-  
-      if (type === 'checkbox') {
-        if (checked) {
-          // If the key already exists, convert it to an array and push the new value
-          if (values[name]) {
-            if (!Array.isArray(values[name])) {
-              values[name] = [values[name]]; // Convert existing value to array
+function clearMapMarker(marker_type){
+       //clear marker
+       MY_MAP[marker_type]["markers"].forEach(map_marker => {
+        map_marker.setMap(null);
+    });
+    MY_MAP[marker_type]["markers"]=[];
+
+}
+function loarMarker(markers,marker_type){
+
+       //clear marker
+       clearMapMarker(marker_type);
+
+    // MY_MAP[marker_type]["markers"].forEach(map_marker => {
+    //     map_marker.setMap(null);
+    // });
+    // MY_MAP[marker_type]["markers"]=[];
+
+    const bounds = new google.maps.LatLngBounds();
+    let hasValidCoordinates = false;
+    // load new market
+    markers.forEach(marker => {
+        if (marker.LOCATION_LATLONG && marker.LOCATION_LATLONG.trim() !== '') {
+            const coords = parseCoordinates(marker.LOCATION_LATLONG);
+            if (coords) {
+                const map_marker = createMarker(marker, coords,marker_type);
+                MY_MAP[marker_type]["markers"].push(map_marker);
+                bounds.extend(coords);
+                hasValidCoordinates = true;
+               
             }
-            values[name].push(value);
-          } else {
-            values[name] = value;
-          }
         }
-      } else if (type === 'radio') {
-        if (checked) {
-          values[name] = value;
+    });
+
+    if (hasValidCoordinates) {
+        map.fitBounds(bounds);
+        
+        // If only one marker, zoom in a bit
+        if (MY_MAP[marker_type]["markers"].length === 1) {
+            map.setZoom(12);
         }
-      } else {
-        values[name] = value;
-      }
+        
+        const statusMessage = `${MY_MAP[marker_type]["markers"].length} ${marker_type} shown`
+        showAlert(statusMessage, 'success');
+    } else {
+        showAlert(`No ${marker_type} coordinates found`, 'warning');
+    }
+
+
+
+
+}
+function createMarker(marker_data, position,marker_type) {
+    // Create custom marker icon based on OA and status
+    const marker_status = marker_data[MY_MAP[marker_type].sts_field] || true;
+    const fault_type = marker_data.FAULT_TYPE || "normal";
+    const marker_title = `${marker_data[MY_MAP[marker_type].title_fields[0]]} - ${marker_data[MY_MAP[marker_type].title_fields[1]]} (${marker_status ? 'Resolved' : 'Pending'})`
+    const marker_label = marker_data[MY_MAP[marker_type].title_fields[0]];
+
+    const icon = {
+        url: getIcons(marker_type, marker_status, fault_type),
+        scaledSize: new google.maps.Size(24, 24),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(12, 24)
+    };
+    
+    const marker = new google.maps.Marker({
+        position: position,
+        map: map,
+        icon: getIcons(marker_type, marker_status, fault_type),
+        title: `${marker_title} (${ marker_status ? 'OK' : 'Down'})`,
+        // label: {
+        //     text: marker_label,
+        //     color: "#000",
+        //     fontSize: "14px",
+        //     fontWeight: "bold",
+        //     className: "marker-label"
+        //   }
+    });
+    
+    const overlayLabel= new LabelOverlay(marker.getPosition(), marker_label, map,14);
+    // Create info window
+    const infoWindow = new google.maps.InfoWindow({
+        content: createInfoWindow(marker_data, marker_type)
+    });
+    
+    // Add click listener
+    marker.addListener('click', function() {
+        infoWindow.open(map, marker);
+    });
+    
+    return marker;
+}
+
+
+function getIcons(marker_type, marker_status = true, faultType = 'normal'){
+
+   
+
+        let mapPin = {
+                path: "M256 0C156 0 76 80 76 180c0 134 180 332 180 332s180-198 180-332c0-100-80-180-180-180zm0 240c-33 0-60-27-60-60s27-60 60-60 60 27 60 60-27 60-60 60z",
+                fillColor: "#e60026", // red
+                fillOpacity: .8,
+                strokeWeight: .8,
+                strokeColor: "yellow",
+                scale: 0.04, // adjust size for Google Maps
+                anchor: new google.maps.Point(256, 512) // bottom tip of pin
+            };
+            // Circle
+        let circleMarker = {
+            path: "M16,8 A8,8 0 1,0 15.999,8 Z",
+            fillColor: "red",
+            fillOpacity: 0.6,
+            strokeWeight: 1,
+            strokeColor: "black",
+            scale: 2,
+            anchor: new google.maps.Point(16, 16)
+        };
+        
+        // Square
+        let squareMarker = {
+            path: "M0 0 H20 V20 H0 Z",
+            fillColor: "green",
+            fillOpacity: 0.6,
+            strokeWeight: 1,
+            strokeColor: "black",
+            scale: 1.5,
+            anchor: new google.maps.Point(10, 10)
+        };
+        
+        // Triangle (pointing up)
+        let triangleMarker = {
+            path: "M10 0 L20 20 L0 20 Z",
+            fillColor: "orange",
+            fillOpacity: 0.8,
+            strokeWeight: .7,
+            strokeColor: "orange",
+            scale: .5,
+            anchor: new google.maps.Point(10, 20)
+        };
+        
+        // Star
+        let starMarker = {
+            path: "M10 1 L12.4 7.5 L19.5 7.5 L13.5 11.5 L15.5 18.5 L10 14.5 L4.5 18.5 L6.5 11.5 L0.5 7.5 L7.6 7.5 Z",
+            fillColor: "gold",
+            fillOpacity: 0.9,
+            strokeWeight: 1,
+            strokeColor: "black",
+            scale: .9,
+            anchor: new google.maps.Point(10, 10)
+        };
+
+        let pinMarker = {
+            path: "M12 2C8 2 5 5.6 5 9.5c0 5.2 7 12.5 7 12.5s7-7.3 7-12.5C19 5.6 16 2 12 2zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z",
+            fillColor: "red",
+            fillOpacity: 0.9,
+            strokeWeight: 1,
+            strokeColor: "white",
+            scale: 1.5,
+            anchor: new google.maps.Point(12, 22)
+        };
+
+        let shieldMarker = {
+            path: "M12 2L2 7v6c0 5 3.6 9.7 10 13 6.4-3.3 10-8 10-13V7l-10-5z",
+            fillColor: "blue",
+            fillOpacity: 0.8,
+            strokeWeight: 1,
+            strokeColor: "black",
+            scale: 1.5,
+            anchor: new google.maps.Point(12, 22)
+        };
+
+        let pushPinMarker = {
+            path: "M12 2C9 2 7 4 7 7c0 1.5.6 3 1.6 4L8 20l4-2 4 2-0.6-9c1-1 1.6-2.5 1.6-4 0-3-2-5-5-5z",
+            fillColor: "purple",
+            fillOpacity: 0.9,
+            strokeWeight: 1,
+            strokeColor: "white",
+            scale: 1.5,
+            anchor: new google.maps.Point(12, 20)
+        };
+
+        let teardropMarker = {
+            path: "M12 2C8 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3-7-7-7z",
+            fillColor: "green",
+            fillOpacity: 0.9,
+            strokeWeight: 1,
+            strokeColor: "Yellow",
+            scale: 1.5,
+            anchor: new google.maps.Point(12, 22)
+        };
+        let badgeMarker = {
+            path: "M12 2l2.39 4.84L20 8.27l-3.9 3.81L17.8 18l-5.8-3.05L6.2 18l1.7-5.92L4 8.27l5.61-1.43z",
+            fillColor: "gold",
+            fillOpacity: 0.9,
+            strokeWeight: 1,
+            strokeColor: "black",
+            scale: 1.8,
+            anchor: new google.maps.Point(12, 20)
+        };
+
+        const mapIkons = {
+            BTS:[mapPin,"green","red","gold"],
+            OLT:[triangleMarker,"blue","orange","gold"],
+            Faults:[starMarker,"red","green","gold"]
+        }
+
+        let ikon = mapIkons[marker_type][0];
+
+            if (marker_status == true ) { 
+                ikon.fillColor=mapIkons[marker_type][1]
+            } else {
+                ikon.fillColor=mapIkons[marker_type][2]
+            }
+        //console.log(ikon)    
+        return ikon;
+
+}
+
+function getMarkerIcons(marker_type, marker_status = true, faultType = 'normal') {
+
+    const rectColor = "skyblue";
+    const triColor = "orange";
+    const circleColor = "green";
+    const starColor = "gold";
+    const shapeSize = 60; // change this to make them bigger/smaller
+    // Center and size for triangle
+    const triBase = shapeSize * 3.6;   // wider base
+    const triHeight = shapeSize;       // height
+    const triCenterX = 220;
+    const triBaseY = 100;
+
+    // Triangle points
+    const triPoints = `
+    ${triCenterX - triBase/2},${triBaseY} 
+    ${triCenterX + triBase/2},${triBaseY} 
+    ${triCenterX},${triBaseY - triHeight}
+`;
+    
+    const svgColor = (marker_status)? "green" : "red";
+
+    let svgTemplate = `<svg width="${shapeSize * 7}" height="${shapeSize * 2}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120"> `;
+
+    if (marker_type=="Faults") {
+        // svgTemplate = svgTemplate + `<rect x="30" y="30" width="${shapeSize*2}" height="${shapeSize * .6}" fill="${svgColor }" stroke="blue" stroke-width="2" /> </svg>`;  // RECTANGLE
+    
+
+       svgTemplate =svgTemplate + `<polygon points="340,35 348,55 370,55 352,68 360,90 340,78 320,90 328,68 310,55 332,55" fill="${svgColor }" stroke="$pink" stroke-width="2"/> </svg>`;  //STAR
+    } else if (marker_type=="BTS") {
+        // svgTemplate = svgTemplate + `<rect x="30" y="30" width="${shapeSize*2}" height="${shapeSize * .6}" fill="${svgColor }" stroke="black" stroke-width="1" /> </svg>`;  // RECTANGLE
+        
+        svgTemplate =svgTemplate + `<polygon points="${triPoints}"  width="${shapeSize*.8}" height="${shapeSize * 0.5}" fill="${svgColor}" stroke="yellow" stroke-width="2" /> </svg>`;  // TRIANCLE
+    } else if (marker_type=="OLT") {
+         svgTemplate = svgTemplate + `<rect x="30" y="30" width="${shapeSize*2}" height="${shapeSize * .6}" fill="${svgColor }" stroke="blue" stroke-width="2" /> </svg>`;  // RECTANGLE
+    
+    } else {
+        svgTemplate =svgTemplate + `<circle cx="280" cy="60" r="${shapeSize/2}" fill="${svgColor }" stroke="black" stroke-width="2" /> </svg>`  // Circle
+
+    }    
+    const dataUri = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svgTemplate);
+
+    return dataUri;
+
+}
+
+function createInfoWindow(dataObj, titleKey) {
+    const title = dataObj[MY_MAP[titleKey].title_fields[0]] || "Details";
+    // Build table rows
+    let rows = "";
+    for (const [key, value] of Object.entries(dataObj)) {
+      if (key === titleKey) continue; // skip title field
+      rows += `
+        <tr>
+          <td class="key-cell">${key}</td>
+          <td class="value-cell">${value}</td>
+        </tr>
+      `;
     }
   
-    return values;
+    // Build complete HTML
+    const content = `
+      <div class="infowindow-container">
+        <h3 class="infowindow-title">${title}</h3>
+        <table class="infowindow-table">
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+      <style>
+        .infowindow-container {
+          font-family: Arial, sans-serif;
+          padding: 8px;
+          max-width: 330px;
+        }
+        .infowindow-title {
+          margin: 0 0 8px 0;
+          font-size: 16px;
+          font-weight: bold;
+          color: #2c3e50;
+          text-align: center;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 4px;
+        }
+        .infowindow-table {
+          border-collapse: collapse;
+          width: 100%;
+        }
+        .infowindow-table td {
+          padding: 4px 6px;
+          border-bottom: 1px solid #eee;
+          font-size: 13px;
+        }
+        .infowindow-table .key-cell {
+          font-weight: bold;
+          color: #34495e;
+          width: 40%;
+        }
+        .infowindow-table .value-cell {
+          color: #555;
+        }
+      </style>
+    `;
+  
+    return content;
+}
+
+///////////////////////////////////////////////////////
+function getData(sql,fn,name){
+    let postData = {query : sql};
+
+    $.ajax({
+        url: 'php/query.php',
+        type: 'POST',
+        data: postData,
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                fn(response.data, name);
+            } else {
+                showAlert('Error loading all faults: ' + response.error, 'danger');
+            }
+        },
+        error: function() {
+            showAlert('Failed to load data from database', 'danger');
+        }
+    });
+}
+
+function showAlert(message, type) {
+
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toast-top-center",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "3000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+      }
+    // alert(message)
+    // info,danger,warning,success
+    switch(type) {
+        case 'danger':
+          toastr.error(message)
+          break;
+        case 'success':
+          toastr.success(message)
+          break;
+        case 'info':
+          toastr.info(message)
+          break;
+        case 'warning':
+          toastr.warning(message)
+          break;
+        default:
+          toastr.info(message)
+          break;
+            
+    }
+
+
+    // const alertDiv = $('<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+    //     message +
+    //     '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+    //     '</div>');
+    
+    // $('#page-content').prepend(alertDiv);
+    
+    // Auto-hide after 5 seconds
+    // setTimeout(function() {
+    //     // toastr.clear();
+    //     // toastr.remove();
+    //     // alertDiv.alert('close');
+    // }, 5000);
 }
 
 function buildSQLQuery(filters) {
@@ -1119,3 +1497,68 @@ function buildSQLQuery(filters) {
     const whereClause = conditions.length ? " WHERE " + conditions.join(" AND ") : "";
     return `SELECT * FROM faults${whereClause};`;
 }
+
+
+////////////////////////////////////////////////////////////
+
+class LabelOverlay extends google.maps.OverlayView {
+    constructor(position, text, map, minZoom = 14) {
+      super();
+      this.position = position;
+      this.text = text;
+      this.minZoom = minZoom; // minimum zoom level to show the label
+      this.div = null;
+      this.map = map;
+      this.setMap(map);
+    }
+  
+    onAdd() {
+      this.div = document.createElement("div");
+      this.div.style.position = "absolute";
+      this.div.style.whiteSpace = "nowrap";
+      this.div.style.fontSize = "14px";
+      this.div.style.fontWeight = "bold";
+      this.div.style.color = "black";
+      this.div.style.webkitTextStroke = ".05px yellow"; // white border
+      this.div.style.textStroke = "2px white";       // fallback
+      this.div.innerHTML = this.text;
+  
+      this.getPanes().overlayLayer.appendChild(this.div);
+  
+      // toggle initially
+      this.updateVisibility();
+  
+      // listen to zoom changes
+      google.maps.event.addListener(this.map, "zoom_changed", () => {
+        this.updateVisibility();
+      });
+    }
+  
+    draw() {
+      if (!this.div) return;
+  
+      const proj = this.getProjection();
+      const pos = proj.fromLatLngToDivPixel(this.position);
+  
+      // Position label to the right of marker
+      this.div.style.left = (pos.x + 10) + "px";
+      this.div.style.top = (pos.y - 20) + "px";
+    }
+  
+    updateVisibility() {
+      const currentZoom = this.map.getZoom();
+      if (currentZoom >= this.minZoom) {
+        this.div.style.display = "block";
+      } else {
+        this.div.style.display = "none";
+      }
+    }
+  
+    onRemove() {
+      if (this.div) {
+        this.div.parentNode.removeChild(this.div);
+        this.div = null;
+      }
+    }
+  }
+  

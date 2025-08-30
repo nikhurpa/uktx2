@@ -34,9 +34,10 @@ try {
     
     $params = [];
     
-    if ($kmz_filter) {
-        $sql .= " AND kmz_filename LIKE ?";
-        $params[] = "%$kmz_filter%";
+    
+    if ($kmz_filter && $kmz_filter !="''") {
+        $sql .= " AND kmz_filename IN ($kmz_filter)";
+        // $params[] = "( " .$kmz_filter . " )";
     }
     
     if ($name_filter) {
@@ -47,7 +48,7 @@ try {
     
     // $sql .= " ORDER BY created_at DESC LIMIT ?";
     // $params[] = $limit;
-    
+    // echo $sql;
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     

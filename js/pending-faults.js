@@ -19,13 +19,13 @@ function loadPendingFaultsPage() {
                     <div class="col-md-3">
                         <label for="filterOA" class="form-label">Filter by OA</label>
                         <select class="form-select" id="filterOA">
-                            <option value="">All OA</option>
-                            <option value="ALM">ALM</option>
-                            <option value="DDN">DDN</option>
-                            <option value="HWR">HWR</option>
-                            <option value="NTL">NTL</option>
-                            <option value="NWT">NWT</option>
-                            <option value="SGR">SGR</option>
+                                    <option value="">Select OA</option>
+                                    <option value="ALMORA">ALM</option>
+                                    <option value="DEHRADUN">DDN</option>
+                                    <option value="HARIDWAR">HWR</option>
+                                    <option value="NAINITAL">NTL</option>
+                                    <option value="UTTARKASHI">NWT</option>
+                                    <option value="KOTDWARA">SGR</option>
                         </select>
                     </div>
                     <div class="col-md-2">

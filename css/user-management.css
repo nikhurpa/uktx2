@@ -1,0 +1,86 @@
+/* User Management Styles */
+.user-photo-preview {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.user-photo-preview:hover {
+    border-color: #007bff;
+}
+
+.camera-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 10;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #dee2e6;
+}
+
+.camera-button:hover {
+    opacity: 1;
+}
+
+.photo-upload-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.user-table-photo {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid #dee2e6;
+}
+
+.modal-lg .modal-body {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.form-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.form-section h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 8px;
+}
+
+/* Camera modal styles */
+#userCameraVideo {
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+}
+
+#userCameraControls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-lg {
+        margin: 10px;
+    }
+    
+    .photo-upload-section {
+        padding: 10px;
+    }
+    
+    .form-section {
+        padding: 10px;
+    }
+}

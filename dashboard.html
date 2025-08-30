@@ -34,6 +34,9 @@
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" integrity="sha512-3pIirOrwegjM6erE5gPSwkUzO+3cTjpnV9lexlNZqvupR64iZBnOOTiiLPb9M36zpMScbmUNIcHUqKD47M719g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="css/user-management.css">
+  <link rel="stylesheet" href="css/map.css">
+  <link rel="stylesheet" href="plugins/jsgrid/jsgrid.min.css">
+  <link rel="stylesheet" href="plugins/jsgrid/jsgrid-theme.min.css">
   <!-- <link rel="stylesheet" href="dist/css/uktx.css"> -->
   
   <style>
@@ -1068,7 +1071,7 @@
         <!-- Main row -->
         <div class="row">
           <!-- Left col -->
-          <section class="col-lg-7 connectedSortable">
+          <section class="col-lg-6 connectedSortable d-none">
 
             <!-- Map card -->
             <div class="card bg-gradient-primary">
@@ -1249,19 +1252,32 @@
             <!-- /.card -->
           </section>
           
-         
+          <!-- Main content -->
+          <section class="col-lg-6 content">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">OA Wise Faults</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div id="jsGrid1"  ></div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </section>
           <!-- right col -->
-          <section class="col-lg-5 connectedSortable">
+          <section class="col-lg-6 connectedSortable">
 
             <!-- Map card -->
-            <div class="card bg-gradient-primary">
-              <div class="card-header border-0">
+            <div class="card">
+              <div class="card-header">
                 <h3 class="card-title">
                   <i class="fas fa-map-marker-alt mr-1"></i>
                   Map
                 </h3>
                 <!-- card tools -->
-                <div class="card-tools">
+                <div class="card-tools  d-none">
                   <button type="button" class="btn btn-primary btn-sm daterange" title="Date range">
                     <i class="far fa-calendar-alt"></i>
                   </button>
@@ -1272,10 +1288,10 @@
                 <!-- /.card-tools -->
               </div>
               <div class="card-body">
-                <div id="dashboardMap" style="height: 250px; width: 100%;"></div>
+                <div  id="dashboardMap" style="height: 400px; width: 100%;"></div>
               </div>
               <!-- /.card-body-->
-              <div class="card-footer bg-transparent">
+              <div class="card-footer bg-transparent d-none">
                 <div class="row">
                   <div class="col-4 text-center">
                     <div id="sparkline-1"></div>
@@ -1382,5 +1398,6 @@
 <script src="js/fault-map.js"></script>
 <script src="js/restoration-form.js"></script>
 <script src="js/map-sidebar.js"></script>
+<script src="plugins/jsgrid/jsgrid.min.js"></script>
 </body>
 </html>

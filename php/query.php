@@ -29,12 +29,19 @@ try {
     // If result is SELECT (or similar)
     if ($stmt->columnCount() > 0) {
         $output = $stmt->fetchAll();
+        $count = $stmt->rowCount();
     } else {
         // For INSERT, UPDATE, DELETE
         $output = ["affected_rows" => $stmt->rowCount()];
     }
 
-    echo json_encode($output, JSON_PRETTY_PRINT);
+    // echo json_encode($output, JSON_PRETTY_PRINT);
+    echo json_encode ([
+            'success' => true,
+            'data' => $output,
+            'count' => $count ]
+            , JSON_PRETTY_PRINT);
+
 } catch (PDOException $e) {
     echo json_encode(["error" => $e->getMessage()]);
 }
