@@ -73,7 +73,8 @@ function loadFaultMapPage() {
     
     // Initialize map
     initMap();
-    
+ 
+
     // Load KMZ files for filter
     loadKMZFilesForFilter();
     loadPendingFaultsForFilter();
@@ -148,6 +149,9 @@ const polylineColor = {
 };
 
 function initMap() {
+  
+
+     
     // Default center (you can change this to your preferred location)
     const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // India center
     
@@ -875,14 +879,14 @@ function loadMapSideBar() {
                              <div class="mb-3">
                                 <label class="form-label small">Select OA</label>
                             <div style="display:flex; gap:1rem; align-items:center;">
-                            <label><input type="checkbox" id="DDN" name="DDN" checked> DDN</label>
-                            <label><input type="checkbox" id="HWR" name="HWR" checked> HWR</label>
-                            <label><input type="checkbox"id="NTL"  name="NTL" checked> NTL</label>
+                            <label><input type="checkbox" id="DDN" name="DDN" > DDN</label>
+                            <label><input type="checkbox" id="HWR" name="HWR" > HWR</label>
+                            <label><input type="checkbox"id="NTL"  name="NTL" > NTL</label>
                             </div>
                             <div style="display:flex; gap:1rem; align-items:center;">
-                            <label><input type="checkbox" id="NWT" name="NWT"   checked> NWT</label>
-                            <label><input type="checkbox" id="SGR" name="SGR" checked> SGR</label>
-                            <label><input type="checkbox" id="ALM" name="ALM" checked> ALM</label>
+                            <label><input type="checkbox" id="NWT" name="NWT"   > NWT</label>
+                            <label><input type="checkbox" id="SGR" name="SGR" > SGR</label>
+                            <label><input type="checkbox" id="ALM" name="ALM" > ALM</label>
                             </div>
                                <!-- <select id="searchRadius" name="oa" class="form-select form-select-sm" multiple>
                                     <option value="ALL">All</option>
@@ -964,6 +968,19 @@ function loadMapSideBar() {
     
     $sidebar.append($container)
     $container.append(mapsidebar)
+
+    let useroa = localStorage.getItem('user_oa') ;
+        let OA_CODE={
+            ALMORA:"ALM",
+            DEHRADUN:"DDN",
+            HARIDWAR:"HWR",
+            NAINITAL:"NTL",
+            UTTARKASHI:"NWT",
+            KOTDWARA:"SGR"
+        }
+    
+        $("#" + OA_CODE[useroa]).prop("checked", true)
+   
     
 }
 
@@ -1033,7 +1050,7 @@ function mapLoad(name,type,value) {
 
     sql["BTS"]="SELECT * FROM BTS WHERE " + oa_query +  "AND LOCATION_LATLONG IS NOT NULL AND LOCATION_LATLONG != ''";
     sql["OLT"]="SELECT * FROM OLT WHERE " + oa_query +  "AND LOCATION_LATLONG IS NOT NULL AND LOCATION_LATLONG != ''";
-    sql["Faults"] = "SELECT * FROM Faults WHERE " +  oa_query + " AND RESTORATION_DATE IS NULL AND LOCATION_LATLONG IS NOT NULL AND LOCATION_LATLONG != ''";
+    sql["Faults"] = "SELECT * FROM FAULTS WHERE " +  oa_query + " AND RESTORATION_DATE IS NULL AND LOCATION_LATLONG IS NOT NULL AND LOCATION_LATLONG != ''";
 
     if(name == "BTS" || name=="OLT" || name=="Faults") {
 
