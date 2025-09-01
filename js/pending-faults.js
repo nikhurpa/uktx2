@@ -1,3 +1,4 @@
+let pendingFaults = [];
 function loadPendingFaultsPage() {
 
     $('#page-content').html(`
@@ -5,7 +6,7 @@ function loadPendingFaultsPage() {
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Pending Faults</h5>
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportPendingFaults()">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportPending()">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
                     <button type="button" class="btn btn-outline-success btn-sm" onclick="refreshPendingFaults()">
@@ -193,7 +194,7 @@ function loadPendingFaultsPage() {
     loadPendingFaults();
     
     // Add event listeners for filters
-    $('#filterOA, #filterMaintainedBy').on('change', function() {
+    $('#filterOA, #filterMaintainedBy, #filterRouteOwner').on('change', function() {
         applyFilters();
     });
     
@@ -217,6 +218,7 @@ function loadPendingFaults(filters = {}) {
         success: function(response) {
             if (response.success) {
                 displayPendingFaults(response.faults);
+                pendingFaults=response.faults;
             } else {
                 showAlert('Error loading pending faults: ' + response.message, 'danger');
             }
@@ -638,4 +640,7 @@ function getDeleteButton(fault) {
     }
     
     return ''; // No delete button shown for other roles
+}
+function exportPending() {
+    exportToExcel(pendingFaults);
 }
