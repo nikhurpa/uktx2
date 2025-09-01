@@ -5,11 +5,13 @@ header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
     // Database configuration
-    $host = 'localhost';
-    $dbname = 'TRANSMISSION1';
-    $username = 'uktx';
-    $password = 'uktx123';
+    // $host = 'localhost';
+    // $dbname = 'TRANSMISSION1';
+    // $username = 'uktx';
+    // $password = 'uktx123';
     
+    require_once 'db_connection.php';
+
     // Get user role and OA from session or request
     $user_role = isset($_POST['user_role']) ? trim($_POST['user_role']) : '';
     $user_oa = isset($_POST['user_oa']) ? trim($_POST['user_oa']) : '';

@@ -1,9 +1,11 @@
 <?php
 // Database configuration
-$host = 'localhost';
-$dbname = 'TRANSMISSION1';
-$username = 'uktx';
-$password = 'uktx123';
+    // $host = 'localhost';
+    // $dbname = 'TRANSMISSION1';
+    // $username = 'uktx';
+    // $password = 'uktx123';
+    
+    require_once 'db_connection.php';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
