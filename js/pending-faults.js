@@ -1,5 +1,5 @@
 let pendingFaults = [];
-function loadPendingFaultsPage() {
+function loadPendingFaultsPage(pagetype='') {
 
     $('#page-content').html(`
         <div class="card">
@@ -189,9 +189,10 @@ function loadPendingFaultsPage() {
             </div>
         </div>
     `);
-    
+    let page={};
+    page.type=pagetype;
     // Load pending faults
-    loadPendingFaults();
+    loadPendingFaults(page);
     
     // Add event listeners for filters
     $('#filterOA, #filterMaintainedBy, #filterRouteOwner').on('change', function() {

@@ -1,5 +1,5 @@
 let restoredFaults = [];
-function loadRestoredFaultsPage() {
+function loadRestoredFaultsPage(pagetype='') {
 
     $('#page-content').html(`
         <div class="card">
@@ -196,9 +196,10 @@ function loadRestoredFaultsPage() {
             </div>
         </div>
     `);
-    
+    let page={};
+    page.type=pagetype;
     // Load pending faults
-    loadRestoredFaults();
+    loadRestoredFaults(page);
     
     // Add event listeners for filters
     $('#filterOA_restored, #filterMaintainedBy_restored , #filterRouteOwner_restored').on('change', function() {
@@ -243,7 +244,11 @@ function loadRestoredFaults(filters = {}) {
     if(filters.date_to){
         sql += ` AND RESTORATION_DATE <= '${filters.date_to}'`;
       
+    } if (filters.type=='today'){
+        sql += ` AND RESTORATION_DATE = CURDATE()`;
+      
     }
+
     let postData = {query : sql};
 console.log(sql)
     $.ajax({

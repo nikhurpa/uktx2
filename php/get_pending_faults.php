@@ -54,6 +54,16 @@ try {
         $sql .= " AND ROUTE_BRIEF LIKE ?";
         $params[] = '%' . $_GET['route'] . '%';
     }
+
+    if (isset($_GET['type']) && !empty($_GET['type'])) {
+        if ($_GET['type'] == 'recent') {
+            $sql .= " AND FAULT_DATE >= CURDATE() - INTERVAL 2 DAY";
+        } else if ($_GET['type'] == 'week') {
+            $sql .= " AND FAULT_DATE < CURDATE() - INTERVAL 1 WEEK";
+        }
+       
+    }
+    
     
     // Order by creation date (newest first)
    // $sql .= " ORDER BY CREATED_AT DESC";
