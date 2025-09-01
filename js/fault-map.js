@@ -869,20 +869,20 @@ function loadMapSideBar() {
                             <div style="display:flex; gap:1rem; align-items:center;">
                             <label><input type="checkbox" id="BTS" name="BTS"> BTS</label>
                             <label><input type="checkbox" id="OLT" name="OLT"> OLT</label>
-                            <label><input type="checkbox" id="Faults" name="Faults"> Faults</label>
+                            <label><input type="checkbox" id="Faults" name="Faults" checked> Faults</label>
                             </div>
     
                              <div class="mb-3">
                                 <label class="form-label small">Select OA</label>
                             <div style="display:flex; gap:1rem; align-items:center;">
-                            <label><input type="checkbox" id="DDN" name="DDN"> DDN</label>
-                            <label><input type="checkbox" id="HWR" name="HWR"> HWR</label>
-                            <label><input type="checkbox"id="NTL"  name="NTL"> NTL</label>
+                            <label><input type="checkbox" id="DDN" name="DDN" checked> DDN</label>
+                            <label><input type="checkbox" id="HWR" name="HWR" checked> HWR</label>
+                            <label><input type="checkbox"id="NTL"  name="NTL" checked> NTL</label>
                             </div>
                             <div style="display:flex; gap:1rem; align-items:center;">
-                            <label><input type="checkbox" id="NWT" name="NWT"> NWT</label>
-                            <label><input type="checkbox" id="SGR" name="SGR"> SGR</label>
-                            <label><input type="checkbox" id="ALM" name="ALM"> ALM</label>
+                            <label><input type="checkbox" id="NWT" name="NWT"   checked> NWT</label>
+                            <label><input type="checkbox" id="SGR" name="SGR" checked> SGR</label>
+                            <label><input type="checkbox" id="ALM" name="ALM" checked> ALM</label>
                             </div>
                                <!-- <select id="searchRadius" name="oa" class="form-select form-select-sm" multiple>
                                     <option value="ALL">All</option>
