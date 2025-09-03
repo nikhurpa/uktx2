@@ -91,6 +91,7 @@ function setActiveButton(buttonId) {
         resizeButton?.classList.add('active');
     }
 }
+
 function initUI() {
     setActiveButton('point-mode');
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Terra Draw with MapLibre</title>
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <!-- Terra Draw core -->
+    <script src="https://unpkg.com/terra-draw/dist/terra-draw.umd.js"></script>
+    <!-- Terra Draw MapLibre adapter -->
+    <script src="https://unpkg.com/terra-draw-maplibre-gl-adapter/dist/terra-draw-maplibre-gl-adapter.umd.js"></script>
+
+    <style>
+      html, body { margin: 0; height: 100%; }
+      #map { width: 100%; height: 100%; }
+      #toolbar {
+        position: absolute; top: 10px; left: 10px; z-index: 1000;
+        background: white; padding: 6px; border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      }
+      #toolbar button {
+        margin: 2px; padding: 6px 10px;
+        border: none; border-radius: 4px;
+        background: #0078d7; color: white; cursor: pointer;
+      }
+      #toolbar button:hover { background: #005fa3; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="toolbar">
+      <button id="drawLineBtn">Draw Line</button>
+      <button id="stopBtn">Stop</button>
+    </div>
+
+    <script>
+      const map = new maplibregl.Map({
+        container: "map",
+        style: "https://demotiles.maplibre.org/style.json",
+        center: [0, 0],
+        zoom: 2,
+      });
+
+      map.on("load", () => {
+        const draw = new TerraDraw({
+          adapter: new TerraDrawMapLibreGLAdapter({ map }),
+          modes: [
+            new TerraDrawLineStringMode({
+              doubleClick: true,
+              freehand: true,
+            }),
+          ],
+        });
+
+        draw.start();
+
+        document.getElementById("drawLineBtn").onclick = () => draw.setMode("linestring");
+        document.getElementById("stopBtn").onclick = () => draw.setMode("static");
+
+        map.on("dblclick", () => {
+          console.log("Line completed:", draw.getSnapshot());
+          draw.setMode("static");
+        });
+      });
+    </script>
+  </body>
+</html>

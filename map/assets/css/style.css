@@ -1,0 +1,60 @@
+/* Ensure content wrapper and map fill the screen */
+.content-wrapper, .content, .container-fluid {
+    height: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#map {
+    height: calc(100vh); /* Full viewport height minus navbar height */
+    width: 100%;
+}
+
+/* Custom Toolbox on the map */
+#map-toolbox {
+    position: absolute;
+    top: 10px;
+    left: 60px; /* Position next to the sidebar toggle */
+    z-index: 5;
+    background-color: white;
+    padding: 5px;
+    border: 1px solid #999;
+    border-radius: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    display: flex;
+    gap: 4px;
+}
+
+.toolbox-icon {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+    opacity: 0.7;
+}
+
+.toolbox-icon:hover {
+    background-color: #f0f0f0;
+    opacity: 1;
+}
+
+.toolbox-icon.active {
+    border: 1px solid #3385ff;
+    background-color: #e6f0ff;
+    opacity: 1;
+}
+
+/* Sidebar layer list styling */
+#layer-list .layer-item {
+    cursor: pointer;
+    padding: 5px;
+    border-bottom: 1px solid #4f5962;
+}
+
+#layer-list .layer-item:hover {
+    background-color: #495057;
+}
