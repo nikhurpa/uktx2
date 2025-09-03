@@ -1,15 +1,44 @@
 let map;
-      let marker;
-      let pathCoords = [];
-      let polyline;
+let marker;
+let pathCoords = [];
+let polyline;
+// List of map events to log
+const mapEvents = [
+"click",
+"dblclick",
+"rightclick",
+"mousemove",
+"mousedown",
+"mouseup",
+"mouseover",
+"mouseout",
+"bounds_changed",
+"center_changed",
+"zoom_changed",
+"dragstart",
+"drag",
+"dragend",
+"idle",
+"tilesloaded",
+"projection_changed",
+"maptypeid_changed",
+];
 
-function initMap() {
-// Initialize map
-map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 28.6139, lng: 77.2090 }, // Delhi
-    zoom: 15,
-});
-
+// List of marker events to log
+const markerEvents = [
+"click",
+"dblclick",
+"rightclick",
+"dragstart",
+"drag",
+"dragend",
+"mousedown",
+"mouseup",
+"mouseover",
+"mouseout",
+"position_changed",
+"visible_changed",
+];
 // Custom arrow icon
 const arrowIcon1 = {
     path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -40,6 +69,17 @@ const arrowIcon = {
     anchor: new google.maps.Point(0, 0), // tip of arrow = crosshair point
 };
 
+function initMap() {
+// Initialize map
+map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 28.6139, lng: 77.2090 }, // Delhi
+    zoom: 15,
+    draggableCursor: "crosshair",   // normal state
+    draggingCursor: "grabbing",     // while dragging
+});
+
+
+
 // Place draggable marker
 marker = new google.maps.Marker({
     position: { lat: 28.6139, lng: 77.2090 },
@@ -65,21 +105,34 @@ polyline = new google.maps.Polyline({
 
 
 
+// Distance based sampling
+// google.maps.event.addListener(marker, "drag", (e) => {
+//   const latlng = e.latLng.toJSON();
+//   if (pathCoords.length === 0) {
+//     pathCoords.push(latlng);
+//     polyline.setPath(pathCoords);
+//   } else {
+//     const last = pathCoords[pathCoords.length - 1];
+//     if (haversine(last.lat, last.lng, latlng.lat, latlng.lng) > 1) {
+//       // capture only if >5 meters apart
+//       pathCoords.push(latlng);
+//       polyline.setPath(pathCoords);
+//     }
+//   }
+// });
 
+
+// time based sampling
+let lastTime = 0;
 google.maps.event.addListener(marker, "drag", (e) => {
-  const latlng = e.latLng.toJSON();
-  if (pathCoords.length === 0) {
-    pathCoords.push(latlng);
+  const now = Date.now();
+  if (now - lastTime > 200) { // every 200ms
+    pathCoords.push(e.latLng.toJSON());
     polyline.setPath(pathCoords);
-  } else {
-    const last = pathCoords[pathCoords.length - 1];
-    if (haversine(last.lat, last.lng, latlng.lat, latlng.lng) > 1) {
-      // capture only if >5 meters apart
-      pathCoords.push(latlng);
-      polyline.setPath(pathCoords);
-    }
+    lastTime = now;
   }
 });
+
 
 // Optional: log when drag ends
 google.maps.event.addListener(marker, "dragend", () => {
@@ -100,7 +153,7 @@ function haversine(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
- function setupModeButtons() {
+function setupModeButtons() {
     const modeUI = document.getElementById('mode-ui');
     if (!modeUI) {
         return;
@@ -110,9 +163,7 @@ function haversine(lat1, lng1, lat2, lng2) {
         'point-mode': 'point',
         'linestring-mode': 'linestring',
         'polygon-mode': 'polygon',
-        'rectangle-mode': 'rectangle',
-        'circle-mode': 'circle',
-        'freehand-mode': 'freehand',
+        'route-mode': 'polygon',
         'clear-mode': 'static'
     };
     for (const buttonId in modeButtons) {
@@ -121,16 +172,17 @@ function haversine(lat1, lng1, lat2, lng2) {
             button.onclick = () => {
                 setActiveButton(buttonId);
                 const modeName = modeButtons[buttonId];
-                if (!draw) {
-                    return;
-                }
-                if (modeName === 'static') {
-                    draw.clear();
-                    draw.setMode('static');
-                }
-                else if (modeName) {
-                    draw.setMode(modeName);
-                }
+                // if (!draw) {
+                //     return;
+                // }
+                // if (modeName === 'static') {
+                //     draw.clear();
+                //     draw.setMode('static');
+                // }
+                // else if (modeName) {
+                //     draw.setMode(modeName);
+                // }
+
             };
         }
     }
@@ -152,8 +204,5 @@ function setActiveButton(buttonId) {
         resizeButton?.classList.add('active');
     }
 }     
-
-
-
 
 window.onload = initMap;
