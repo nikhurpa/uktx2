@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Validate OA if provided
         if (!empty($oa)) {
-            $valid_oa = ['ALM', 'DDN', 'HWR', 'NTL', 'NWT', 'SGR'];
+            $valid_oa = ['ALMORA', 'DEHRADUN', 'HARIDWAR', 'NAINITAL', 'UTTARKASHI', 'KOTDWARA'];
             if (!in_array($oa, $valid_oa)) {
                 echo json_encode(['success' => false, 'message' => 'Invalid OA value']);
                 exit;

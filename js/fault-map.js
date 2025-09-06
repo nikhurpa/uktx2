@@ -93,7 +93,7 @@ let MY_MAP = {
     routeloaded : false,
     BTS :{markers: [],title_fields :["TSP_SITE_NAME","OA"],sts_field:"STATUS"},
     OLT : {markers: [],title_fields :["LOCATION","OA"],sts_field:"STATUS"},
-    Faults : {markers: [],title_fields :[".FAULT_ID","ROUTE_BRIEF"],sts_field:"RESTORATION_DATE"},
+    Faults : {markers: [],title_fields :["FAULT_ID","ROUTE_BRIEF"],sts_field:"RESTORATION_DATE"},
     Routes : {markers: [],title_fields :["polyline_name","kmz_filename"],sts_field:"STATUS"},
     oaselected : "ALL",
     routeselected : "ALL",
@@ -981,7 +981,13 @@ function loadMapSideBar() {
     
         $("#" + OA_CODE[useroa]).prop("checked", true)
    
-    
+        if(localStorage.getItem('user_role')=="Suadmin" ){
+            Object.entries(OA_CODE).forEach(([key, value]) => {
+                $("#" + value).prop("checked", true)
+              });
+         
+
+        }
 }
 
 function hideMapSideBar(){

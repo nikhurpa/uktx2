@@ -12,6 +12,15 @@ header('Access-Control-Allow-Headers: Content-Type');
     
     require_once 'db_connection.php';
 
+    $OA_CODE = [
+        "ALMORA" => "ALM",
+        "NAINITAL" => "NNT",
+        "DEHRADUN" => "DDN",
+        "UTTARKASHI"=> "NWT",
+        "HARIDWAR" => "HWR",
+        "KOTDWARA"=>"SGR"
+    ];
+
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -30,18 +39,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         
         // Validate OA
-        $valid_oa = ['ALM', 'DDN', 'HWR', 'NTL', 'NWT', 'SGR'];
+        $valid_oa =  ['ALMORA', 'DEHRADUN', 'HARIDWAR', 'NAINITAL', 'UTTARKASHI', 'KOTDWARA'];
         if (!in_array($oa, $valid_oa)) {
             echo json_encode(['success' => false, 'message' => 'Invalid OA value']);
             exit;
         }
         
         // Generate fault ID
-        $fault_id = generateUniqueFaultId($pdo, $oa);
+        $fault_id = generateUniqueFaultId($pdo, $oa,$OA_CODE);
         
         echo json_encode([
             'success' => true,
-            'fault_id' => $fault_id
+            'fault_id' => $fault_id,
+            'oa_code'=> $OA_CODE[$oa]
         ]);
         
     } catch(Exception $e) {
@@ -51,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
 
-function generateUniqueFaultId($pdo, $oa) {
+function generateUniqueFaultId($pdo, $oa,$OA_CODE) {
     $maxAttempts = 10;
     $attempt = 0;
     
@@ -60,12 +70,14 @@ function generateUniqueFaultId($pdo, $oa) {
         
         // Generate fault ID components
         $now = new DateTime();
-        $dateStr = $now->format('ymd'); // YYMMDD
+        $dateStr = $now->format('dmy'); // DDMMYY -YYMMDD
         $timeStr = $now->format('His'); // HHMMSS
         $randomNum = str_pad(mt_rand(0, 999), 3, '0', STR_PAD_LEFT);
+
+        $oacode= $OA_CODE[$oa];
         
-        $fault_id = $oa . $dateStr . $timeStr . $randomNum;
-        
+        $fault_id =  $oacode . $dateStr ."#". $timeStr ."#". $randomNum;
+        // echo $fault_id;
         // Check if this ID already exists
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM FAULTS WHERE FAULT_ID = ?");
         $stmt->execute([$fault_id]);
@@ -81,6 +93,6 @@ function generateUniqueFaultId($pdo, $oa) {
     
     // If we still have conflicts after max attempts, add more randomness
     $extraRandom = str_pad(mt_rand(0, 999), 3, '0', STR_PAD_LEFT);
-    return $oa . $dateStr . $timeStr . $randomNum . $extraRandom;
+    return $OA_CODE[$oa] . $dateStr . $timeStr . $randomNum . $extraRandom;
 }
 ?> 
