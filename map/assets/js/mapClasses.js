@@ -1,5 +1,5 @@
 class PolylineManager {
-  constructor(map) {
+  constructor(map,onVertexClick) {
     this.map = map;
     this.polyline = null;
     this.vertexMarkers = [];
@@ -8,6 +8,8 @@ class PolylineManager {
     this.isDrawing = false;
     this.tempPath = [];
     this.metadata={};
+    this.curindex=null;
+    this.onVertexClick = onVertexClick; // callback passed in from main
   }
 
   /** Create polyline from array of LatLngs */
@@ -78,8 +80,14 @@ class PolylineManager {
     this._clearVertexMarkers();
   }
 
+  pushNodes(latlng,idx){
+
+
+  }
+
   addVertexMarker(position, idx) {
-      const squareDiv = document.createElement("div");
+
+        const squareDiv = document.createElement("div");
         squareDiv.style.width = "6px";
         squareDiv.style.height = "6px";
         squareDiv.style.backgroundColor = "red";
@@ -91,35 +99,42 @@ class PolylineManager {
 
         // const m = new DraggableAdvancedMarker(this.map,position,squareDiv);
 
-      const m = new google.maps.marker.AdvancedMarkerElement({
-        position: position,
-        map: this.map,
-        content:squareDiv,
-        gmpDraggable: true
-      });
+        const m = new google.maps.marker.AdvancedMarkerElement({
+          position: position,
+          map: this.map,
+          content:squareDiv,
+          gmpDraggable: true,
+          zIndex : 9999,
+        });
         m.metadata = {index:null} // m.metadata = {index:null}
         m.metadata.index = idx;
-                
+        
+        m.addListener("gmp-click", (e) => {
+            // console.log("Marker clicked at:", m.position.toJSON());
+            const indx = this.vertexMarkers.findIndex(vm => vm === m);
+            if (this.onVertexClick) {
+              this.onVertexClick(indx, m, this); 
+            }
+        });
         m.addListener("dragstart", () => {
             console.log("Drag started");
         });
 
         m.addListener("drag", () => {
-            console.log("Dragging:", m.position);
+            // console.log("Dragging:", m.position);
             const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
-            this.polyline.getPath().setAt(idx-1,newPoint)
+            const indx = this.vertexMarkers.findIndex(vm => vm === m);
+            this.polyline.getPath().setAt(indx,newPoint)
         });
 
         m.addListener("dragend", () => {
             console.log("Final position:", m.position);
             const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
-            this.polyline.getPath().setAt(idx-1,newPoint)
+            const indx = this.vertexMarkers.findIndex(vm => vm === m);
+            this.polyline.getPath().setAt(indx,newPoint)
 
         });
-        m.addListener("click", (e) => {
-            console.log("Marker clicked at:", m.position.toJSON());
-            alert("Red square marker clicked!");
-        });
+
 
 
     //   m.addListener("drag", (ev) => {
@@ -133,7 +148,8 @@ class PolylineManager {
     //     });
 
 
-      this.vertexMarkers.push(m);
+      // this.vertexMarkers.push(m);
+      this.vertexMarkers.splice(idx,0,m);
 
       return m;
 
