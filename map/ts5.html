@@ -62,6 +62,7 @@
   </script>
 
   <script>
+
 let map, mode = null, statusEl, ctxMenu, selectedTarget;
 
 async function initMap() {
@@ -88,6 +89,9 @@ function bindToolButtons(AdvancedMarkerElement) {
   document.getElementById("btnMarker").onclick = () => setMode("Marker");
   document.getElementById("btnLine").onclick = () => setMode("Line");
   document.getElementById("btnRoute").onclick = () => setMode("Route");
+  google.maps.event.clearInstanceListeners(map);
+
+
 
   // Marker mode
   map.addListener("click", (e) => {
@@ -110,6 +114,23 @@ function bindToolButtons(AdvancedMarkerElement) {
       selectedTarget = marker;
       showContextMenu(evt, "Marker");
     });
+
+    marker.addListener("gmp-click", () => {
+          if (selectedMarker) {
+            selectedMarker.content.classList.remove("selected");
+          }
+          selectedMarker = marker;
+          selectedMarker.content.classList.add("selected");
+        });
+     // Mouse down → start drag
+     marker.content.addEventListener("mousedown", (e) => {
+          if (selectedMarker === marker) {
+            dragging = true;
+            e.stopPropagation();
+          }
+     });    
+
+
   });
 
   // Line mode: click 2 points
@@ -138,11 +159,20 @@ function bindToolButtons(AdvancedMarkerElement) {
     map, strokeColor: "green", strokeWeight: 3
   });
 
+ 
+
   map.addListener("mousedown", (e) => {
-    if (mode !== "Route") return;
-    drawing = true;
-    routePath = [e.latLng];
-    polyline.setPath(routePath);
+ 
+    if (dragging && selectedMarker) {
+          selectedMarker.position = e.latLng;
+        }
+ 
+    // if (mode !== "Route") return;
+    // drawing = true;
+    // routePath = [e.latLng];
+    // polyline.setPath(routePath);
+
+     
   });
   map.addListener("mousemove", (e) => {
     if (mode !== "Route" || !drawing) return;
