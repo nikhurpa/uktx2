@@ -1,0 +1,29 @@
+CREATE TABLE places (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255),
+  lat DOUBLE,
+  lng DOUBLE,
+  notes TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE poi (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255),
+  latlng VARCHAR(64),
+  info TEXT
+);
+
+CREATE TABLE roads (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255),
+  polyline TEXT,
+  notes TEXT
+);
+
+CREATE TABLE parks (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255),
+  encoded_polygon TEXT,
+  notes TEXT
+);

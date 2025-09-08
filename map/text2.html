@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .tree ul { list-style-type: none; padding-left: 20px; }
+    .tree li { margin: 2px 0; position: relative; }
+    .caret {
+      cursor: pointer;
+      user-select: none;
+      margin-right: 4px;
+    }
+    .caret::before {
+      content: "▶"; /* right arrow */
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .caret-down::before {
+      content: "▼"; /* down arrow */
+    }
+    .nested { display: none; }
+    .active { display: block; }
+
+    /* Context menu */
+    .context-menu {
+      display: none;
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .context-menu ul {
+      list-style: none;
+      margin: 0;
+      padding: 4px 0;
+    }
+    .context-menu ul li {
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .context-menu ul li:hover {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+<h3>📂 My Places</h3>
+<div id="myPlaces" class="tree"></div>
+
+<h3>📂 Temporary Places</h3>
+<div id="tempPlaces" class="tree"></div>
+
+<!-- Context menu -->
+<div id="contextMenu" class="context-menu">
+  <ul>
+    <li id="menuEdit">✏️ Edit</li>
+    <li id="menuDelete">🗑️ Delete</li>
+    <li id="menuSave">💾 Save to My Places</li>
+  </ul>
+</div>
+
+<script>
+const myPlaces = [
+  { name: "Home", children: [{ name: "House.kml" }, { name: "Garden.kml" }] },
+  { name: "Work", children: [{ name: "Office.kml" }] }
+];
+
+const tempPlaces = [
+  { name: "Imported.kml", children: [{ name: "Point A" }, { name: "Point B" }] }
+];
+
+let currentNode = null;   // store the clicked node
+let currentTree = null;   // "myPlaces" or "tempPlaces"
+
+function buildTree(containerId, data, treeType) {
+  const ul = document.createElement("ul");
+
+  data.forEach(item => {
+    const li = document.createElement("li");
+
+    if (item.children && item.children.length > 0) {
+      const span = document.createElement("span");
+      span.classList.add("caret");
+      span.textContent = item.name;
+      li.appendChild(makeCheckbox(span, item));
+      li.appendChild(span);
+
+      const subtree = buildTree(containerId, item.children, treeType);
+      subtree.classList.add("nested");
+      li.appendChild(subtree);
+
+      span.addEventListener("click", () => {
+        span.classList.toggle("caret-down");
+        subtree.classList.toggle("active");
+      });
+
+    } else {
+      const textNode = document.createTextNode(item.name);
+      li.appendChild(makeCheckbox(textNode, item));
+      li.appendChild(textNode);
+    }
+
+    // Right-click for context menu
+    li.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      currentNode = item;
+      currentTree = treeType;
+      showContextMenu(e.pageX, e.pageY, treeType);
+    });
+
+    ul.appendChild(li);
+  });
+
+  return ul;
+}
+
+function makeCheckbox(after, item) {
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.style.marginRight = "6px";
+
+  checkbox.addEventListener("change", () => {
+    // cascade to children
+    const li = checkbox.parentElement;
+    if (li) {
+      li.querySelectorAll("input[type=checkbox]").forEach(c => {
+        c.checked = checkbox.checked;
+      });
+    }
+  });
+
+  return checkbox;
+}
+
+// Build trees
+document.getElementById("myPlaces").appendChild(buildTree("myPlaces", myPlaces, "myPlaces"));
+document.getElementById("tempPlaces").appendChild(buildTree("tempPlaces", tempPlaces, "tempPlaces"));
+
+// Context menu handling
+const menu = document.getElementById("contextMenu");
+
+function showContextMenu(x, y, treeType) {
+  document.getElementById("menuSave").style.display = (treeType === "tempPlaces") ? "block" : "none";
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+  menu.style.display = "block";
+}
+
+document.addEventListener("click", () => {
+  menu.style.display = "none"; // hide menu on outside click
+});
+
+// Menu actions
+document.getElementById("menuEdit").addEventListener("click", () => {
+  if (currentNode) {
+    const newName = prompt("Enter new name:", currentNode.name);
+    if (newName) {
+      currentNode.name = newName;
+      location.reload(); // for simplicity rebuild tree
+    }
+  }
+});
+
+document.getElementById("menuDelete").addEventListener("click", () => {
+  if (currentNode) {
+    alert(`Deleting ${currentNode.name} from ${currentTree}`);
+    // TODO: remove from data and DB
+  }
+});
+
+document.getElementById("menuSave").addEventListener("click", () => {
+  if (currentNode && currentTree === "tempPlaces") {
+    alert(`Saving ${currentNode.name} to My Places`);
+    // TODO: move to DB and rebuild tree
+  }
+});
+</script>
+</body>
+</html>

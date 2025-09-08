@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>KML Tree with Google Maps</title>
+  <style>
+    body { display: flex; font-family: sans-serif; }
+    #map { flex: 1; height: 100vh; }
+    #sidebar { width: 300px; border-right: 1px solid #ccc; padding: 8px; overflow:auto; }
+    ul.tree-root { list-style: none; padding-left: 0; }
+    ul.nested { list-style: none; padding-left: 20px; display: none; }
+    ul.nested.active { display: block; }
+    .caret { cursor: pointer; user-select: none; margin-right: 4px; }
+    .caret::before { content: "▶"; display: inline-block; margin-right: 2px; }
+    .caret.caret-down::before { content: "▼"; }
+    .node-title { cursor: pointer; display: flex; align-items: center; }
+    .node-title.selected { background: #eef; }
+    #contextMenu {
+      position: absolute; display: none;
+      background: white; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    #contextMenu ul { margin: 0; padding: 0; list-style: none; }
+    #contextMenu li { padding: 5px 12px; cursor: pointer; }
+    #contextMenu li:hover { background: #eee; }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h3>Places</h3>
+    <div id="placesTree"></div>
+  </div>
+  <div id="map"></div>
+
+  <div id="contextMenu">
+    <ul>
+      <li onclick="alert('View details')">View details</li>
+      <li onclick="alert('Edit details')">Edit details</li>
+    </ul>
+  </div>
+  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE&libraries=maps,marker"></script>
+
+  <script type="module">
+    let map;
+    let ctxNode = null;
+
+    // Async load Maps API
+    async function initMap() {
+      const { Map } = await google.maps.importLibrary("maps");
+      const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+      map = new Map(document.getElementById("map"), {
+        center: { lat: 28.61, lng: 77.20 },
+        zoom: 5,
+        mapId: "4504f8b37365c3d0",
+      });
+
+      // load KML (replace with your file path)
+      const txt = await fetch("example.kml").then(r => r.text());
+      const xmlDoc = new DOMParser().parseFromString(txt, "text/xml");
+      const treeRoot = parseKmlDocument(xmlDoc);
+
+      renderTreeInto([treeRoot], document.getElementById("placesTree"));
+    }
+
+    // --- Parse KML into tree ---
+    function parseKmlDocument(xmlDoc) {
+      const root = { name: "Temporary Places", children: [], visible: true };
+      xmlDoc.documentElement.childNodes.forEach(node => {
+        if (node.nodeType === 1 && (node.localName === "Folder" || node.localName === "Placemark")) {
+          root.children.push(parseKmlNode(node));
+        }
+      });
+      return root;
+    }
+
+    function parseKmlNode(xmlNode) {
+      const nodeObj = {
+        name: xmlNode.querySelector(":scope > name")?.textContent || "Untitled",
+        children: [],
+        overlay: null,
+        geomType: null,
+        geomData: null,
+        visible: false
+      };
+
+      if (xmlNode.localName === "Placemark") {
+        const geom = parseGeometry(xmlNode);
+        if (geom) {
+          nodeObj.overlay = geom.overlay;
+          nodeObj.geomType = geom.type;
+          nodeObj.geomData = geom.data;
+          nodeObj.visible = true;
+        }
+      }
+
+      xmlNode.childNodes.forEach(child => {
+        if (child.nodeType === 1 && (child.localName === "Folder" || child.localName === "Placemark")) {
+          nodeObj.children.push(parseKmlNode(child));
+        }
+      });
+
+      return nodeObj;
+    }
+
+    function parseGeometry(placemarkEl) {
+      const coordsEl = placemarkEl.querySelector("coordinates");
+      if (!coordsEl) return null;
+
+      const coords = coordsEl.textContent.trim().split(/\s+/).map(c => {
+        const [lng, lat] = c.split(",").map(Number);
+        return { lat, lng };
+      });
+
+      if (placemarkEl.querySelector("Point")) {
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          map,
+          position: coords[0],
+          content: makeSvgPin("red")
+        });
+        return { type: "Point", data: coords[0], overlay: marker };
+      }
+
+      if (placemarkEl.querySelector("LineString")) {
+        const line = new google.maps.Polyline({
+          map,
+          path: coords,
+          strokeColor: "blue"
+        });
+        return { type: "LineString", data: coords, overlay: line };
+      }
+
+      if (placemarkEl.querySelector("Polygon")) {
+        const poly = new google.maps.Polygon({
+          map,
+          paths: coords,
+          strokeColor: "green",
+          fillColor: "lightgreen",
+          fillOpacity: 0.4
+        });
+        return { type: "Polygon", data: [coords], overlay: poly };
+      }
+
+      return null;
+    }
+
+    function makeSvgPin(color) {
+      const div = document.createElement("div");
+      div.innerHTML = `<svg width="12" height="12">
+        <rect width="12" height="12" fill="${color}"/>
+      </svg>`;
+      return div;
+    }
+
+    // --- Render tree ---
+    function renderTreeInto(nodesArray, containerEl) {
+      containerEl.innerHTML = "";
+      const ul = document.createElement("ul");
+      ul.className = "tree-root";
+      nodesArray.forEach(node => ul.appendChild(renderNode(node)));
+      containerEl.appendChild(ul);
+    }
+
+    function renderNode(node) {
+      const li = document.createElement("li");
+
+      const row = document.createElement("div");
+      row.className = "node-title";
+
+      let caret = null;
+      if (node.children && node.children.length) {
+        caret = document.createElement("span");
+        caret.className = "caret";
+        row.appendChild(caret);
+      }
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = node.visible;
+      row.appendChild(checkbox);
+
+      const label = document.createElement("span");
+      label.textContent = node.name;
+      row.appendChild(label);
+
+      li.appendChild(row);
+
+      if (caret) {
+        const nested = document.createElement("ul");
+        nested.className = "nested";
+        node.children.forEach(ch => nested.appendChild(renderNode(ch)));
+        li.appendChild(nested);
+
+        caret.addEventListener("click", () => {
+          caret.classList.toggle("caret-down");
+          nested.classList.toggle("active");
+        });
+
+        checkbox.addEventListener("change", e => {
+          toggleOverlayRec(node, e.target.checked);
+          nested.querySelectorAll("input[type=checkbox]").forEach(c => (c.checked = e.target.checked));
+        });
+      } else {
+        checkbox.addEventListener("change", e => toggleOverlay(node, e.target.checked));
+      }
+
+      label.addEventListener("click", e => {
+        e.stopPropagation();
+        document.querySelectorAll(".node .node-title").forEach(n => n.classList.remove("selected"));
+        row.classList.add("selected");
+      });
+
+      row.addEventListener("contextmenu", ev => {
+        ev.preventDefault();
+        ctxNode = node;
+        showContextMenu(ev.pageX, ev.pageY);
+      });
+
+      return li;
+    }
+
+    // --- Overlay visibility ---
+    function toggleOverlay(node, visible) {
+      if (node.overlay) node.overlay.map = visible ? map : null;
+    }
+    function toggleOverlayRec(node, visible) {
+      toggleOverlay(node, visible);
+      node.children.forEach(ch => toggleOverlayRec(ch, visible));
+    }
+
+    // --- Context menu ---
+    function showContextMenu(x, y) {
+      const menu = document.getElementById("contextMenu");
+      menu.style.left = x + "px";
+      menu.style.top = y + "px";
+      menu.style.display = "block";
+    }
+    document.addEventListener("click", () => {
+      document.getElementById("contextMenu").style.display = "none";
+    });
+
+    // init
+    initMap();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>LayerManager Demo</title></head>
+<body>
+  <div>
+    <input id="table" placeholder="table name"/>
+    <select id="tt"><option value="point">point</option><option value="polyline">polyline</option><option value="polygon">polygon</option></select>
+    <button id="create">Create Layer</button>
+    <button id="addLayer">Load Layer</button>
+    <button id="deleteLayer">Delete Layer</button>
+  </div>
+  <div id="map" style="width:100%;height:80vh"></div>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE&libraries=geometry&callback=initMap" async defer></script>
+  <script src="LayerManager.js"></script>
+  <script>
+    let map, lm;
+    function initMap(){
+      map = new google.maps.Map(document.getElementById('map'), { center:{lat:20,lng:78}, zoom:5 });
+      lm = new LayerManager(map, './api.php');
+
+      document.getElementById('create').onclick = async () => {
+        const t = document.getElementById('table').value.trim();
+        const type = document.getElementById('tt').value;
+        try {
+          await lm.createLayer(t, type);
+          alert('Created and loaded: '+t);
+        } catch (e) { alert('Err: '+e.message); }
+      };
+
+      document.getElementById('addLayer').onclick = async () => {
+        const t = document.getElementById('table').value.trim();
+        try { await lm.addLayer(t); alert('Loaded layer'); } catch(e){ alert(e.message); }
+      };
+
+      document.getElementById('deleteLayer').onclick = async () => {
+        const t = document.getElementById('table').value.trim();
+        try { await lm.deleteLayer(t); alert('Deleted layer'); } catch(e) { alert(e.message); }
+      };
+
+      // Example: click map to add marker to currently loaded point layer (first found)
+      map.addListener('click', async (ev) => {
+        // pick first point layer
+        const table = Object.keys(lm.layers).find(k => lm.layers[k].type === 'point');
+        if (!table) return;
+        if (!confirm('Add marker to '+table+' at clicked location?')) return;
+        try {
+          await lm.addMarkerToTable(table, ev.latLng, { name: 'New' });
+          alert('Added');
+        } catch (e) { alert('Error: '+e.message); }
+      });
+    }
+  </script>
+</body>
+</html>

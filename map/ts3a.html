@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Directions + Projection Demo</title>
+    <meta charset="utf-8" />
+     <link rel="stylesheet" href="assets/css/ts3a.css">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+      #map {
+        height: 100vh;
+        width: 100%;
+      }
+    </style>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE&libraries=geometry"></script> -->
+    
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="status" class="status">Select a mode…</div>
+    <div id="contextMenu" class="context-menu">
+        <div id="menuView">View details</div>
+        <div id="menuEdit">Edit details</div>
+      </div>
+    <div class="myplacesidebar">
+      <h2>Places</h2>
+
+      <div classs="card" style="margin-bottom:8px">
+        <strong>Temporary Places</strong>
+        <div class="info" style="font-size:12px;color:var(--muted)">Upload KML to inspect before saving to My Places.</div>
+      </div>
+
+      <input id="kmlFile" type="file" accept=".kml" />
+      <div class="controls">
+        <button id="saveSelected" class="btn small">Save Selected</button>
+        <button id="saveAll" class="btn primary small">Save All</button>
+        <button id="clearTemp" class="btn small">Clear Temp</button>
+      </div>
+
+      <div class="tree">
+        <div class="card" style="font-weight:600;margin-bottom:6px">My Places</div>
+        <div id="myTree" class="tree-root"></div>
+
+        <div style="height:10px"></div>
+        <div class="card" style="font-weight:600;margin-bottom:6px">Temporary Places</div>
+        <div id="tempTree" class="tree-root"></div>
+      </div>
+    </div>
+
+    </div>
+  <div id="contextMenu1" class="context-menu">
+    <div class="context-item" id="ctxEdit">Edit</div>
+    <div class="context-item" id="ctxDelete">Delete</div>
+    <div class="context-item" id="ctxSave">Save to My Places</div>
+  </div>
+
+     <!-- Top-right mode selection UI -->
+    <div id="mode-ui">
+        <button id="btnMarker" class="mode-button" title="Point"><img src="./img/point.svg" alt="Point" draggable="false"></button>
+        <button id="btnRoute" class="mode-button" title="Route"> <i class="fas fa-route"></i></button>
+        <button id="btnLine" class="mode-button" title="Linestring"><img src="./img/polyline.svg" alt="Linestring" draggable="false"></button>
+        <button id="polygon-mode" class="mode-button" title="Polygon"><img src="./img/polygon.png" alt="Polygon" draggable="false"></button>
+        <button id="scale-mode" class="mode-button" title="Scale"><i class="fas fa-ruler-horizontal"></i></button>
+        <!-- <button id="rectangle-mode" class="mode-button" title="Rectangle"><img src="./img/rectangle.svg" alt="Rectangle" draggable="false"></button> -->
+
+        <!-- <button id="circle-mode" class="mode-button" title="Circle"><img src="./img/circle.svg" alt="Circle" draggable="false"></button>
+        <button id="freehand-mode" class="mode-button" title="Freehand"><img src="./img/freehand.svg" alt="Freehand" draggable="false"></button> -->
+        <button id="btnClear" class="mode-button" title="Select"><img src="./img/select.svg" alt="Select" draggable="false"></button>
+        <button id="resize-button" class="mode-button" title="Resize"><img src="./img/resize.svg" alt="Resize" draggable="false"></button>
+        <button id="btnClear1" class="mode-button" title="Clear"><img src="./img/delete.svg" alt="Clear" draggable="false"></button>
+        <button id="delete-selected-button" class="mode-button" title="Clear last or Selected"><img src="./img/delete-selected.svg" alt="Delete Selected" draggable="false"></button>
+        <button id="undo-button" class="mode-button" title="Undo"><img src="./img/undo.svg" alt="Undo" draggable="false"></button>
+        <button id="redo-button" class="mode-button" title="Redo"><img src="./img/redo.svg" alt="Redo" draggable="false"></button>
+        <button id="export-button" class="mode-button" title="Export"><img src="./img/download.svg" alt="Export" draggable="false"></button>
+        <button id="upload-button" class="mode-button" title="Upload"><img src="./img/upload.svg" alt="Upload" draggable="false"></button>
+        <input type="file" id="upload-input" style="display: none;" accept=".geojson,.json">
+    </div>
+  </body>
+    <script type="module" src="./assets/js/ts3a.js"></script>
+    <!-- <script type="text/javascript" src="./assets/js/ts3a_panel.js"></script> -->
+</html>
