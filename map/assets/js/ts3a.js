@@ -151,32 +151,34 @@ function drawroute(){
                 isDrawing = true;
                   // arrowMarker.position = e.latLng;
                     
-                      const projection = map.getProjection();
-                      if (!projection) return;
+                      // const projection = map.getProjection();
+                      // if (!projection) return;
 
-                      const newPoint = projection.fromLatLngToPoint(e.latLng);
+                      // const newPoint = projection.fromLatLngToPoint(e.latLng);
 
-                        if (!lastPoint) {
-                          // polylines[curpolyline].polyline.getPath().push(e.latLng);
-                          // markerindex = polylines[curpolyline].polyline.getPath().length;
-                          // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
-                          polylines[curpolyline].pushPath(e.latLng)
-                          lastPoint = newPoint;
+                      //   if (!lastPoint) {
+                      //     // polylines[curpolyline].polyline.getPath().push(e.latLng);
+                      //     // markerindex = polylines[curpolyline].polyline.getPath().length;
+                      //     // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
+                      //     polylines[curpolyline].pushPath(e.latLng,markerindex)
+                      //     markerindex = markerindex != null ? markerindex + 1 : markerindex ;
+                      //     lastPoint = newPoint;
                          
-                        } else {
-                          const dx = newPoint.x - lastPoint.x;
-                          const dy = newPoint.y - lastPoint.y;
-                          if (Math.sqrt(dx*dx + dy*dy) > minPixelDistance / Math.pow(2, map.getZoom())) {
-                          // polylines[curpolyline].polyline.getPath().push(e.latLng);
-                          // markerindex = polylines[curpolyline].polyline.getPath().length;
-                          // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
-                          polylines[curpolyline].pushPath(e.latLng)
+                      //   } else {
+                      //     const dx = newPoint.x - lastPoint.x;
+                      //     const dy = newPoint.y - lastPoint.y;
+                      //     if (Math.sqrt(dx*dx + dy*dy) > minPixelDistance / Math.pow(2, map.getZoom())) {
+                      //     // polylines[curpolyline].polyline.getPath().push(e.latLng);
+                      //     // markerindex = polylines[curpolyline].polyline.getPath().length;
+                      //     // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
+                      //     polylines[curpolyline].pushPath(e.latLng,markerindex)
+                      //     markerindex = markerindex != null ? markerindex + 1 : markerindex ;
                           
-                          lastPoint = newPoint;
-                          polylines[curpolyline].setMarkersVisibility(true);
+                      //     lastPoint = newPoint;
+                      //     polylines[curpolyline].setMarkersVisibility(true);
                           
-                          }
-                      }
+                      //     }
+                      // }
                    
               }
 
@@ -190,7 +192,7 @@ function drawroute(){
             map.addListener("mousemove", (e) => {
          
           
-               if(isDragging&&curpolyline+1 ){
+               if(isDragging && curpolyline+1 && e.domEvent.buttons === 1){
                 isDrawing = true;
                  console.log("mousemmove->" + curpolyline)
                   // arrowMarker.position = e.latLng;
@@ -204,7 +206,9 @@ function drawroute(){
                             // polylines[curpolyline].polyline.getPath().push(e.latLng);
                             // markerindex = polylines[curpolyline].polyline.getPath().length;
                             // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
-                            polylines[curpolyline].pushPath(e.latLng)
+                            markerindex = markerindex != null ? markerindex + 1 : markerindex ;
+                          polylines[curpolyline].pushPath(e.latLng,markerindex)
+                         
                           lastPoint = newPoint;
                         } else {
                           const dx = newPoint.x - lastPoint.x;
@@ -213,7 +217,12 @@ function drawroute(){
                             // polylines[curpolyline].polyline.getPath().push(e.latLng);
                             // markerindex = polylines[curpolyline].polyline.getPath().length;
                             // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
-                            polylines[curpolyline].pushPath(e.latLng)
+                          
+                            markerindex = markerindex != null ? markerindex + 1 : markerindex ;
+                              polylines[curpolyline].pushPath(e.latLng,markerindex)
+                            
+                          
+                            
                             
                             lastPoint = newPoint;
                             polylines[curpolyline].setMarkersVisibility(true);
@@ -247,6 +256,7 @@ function mouseuproute(e){
        curpolyline=null;
        lastPoint=null;
        polylineSelected=false;
+       markerindex=null;
       setMode("Clear")
 
 }

@@ -166,10 +166,9 @@ class PolylineManager {
       // this.vertexMarkers.push(m);
      
       if(idx) {
-        this.vertexMarkers.slice(idx,0,m);
+        this.vertexMarkers.splice(idx,0,m);
       } else {
          this.vertexMarkers.push(m);
-         
       }
       return m;
 
