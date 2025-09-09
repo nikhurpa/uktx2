@@ -107,8 +107,6 @@ class PolylineManager {
         squareDiv.style.backgroundColor = "red";
         squareDiv.style.border = "1px solid black";
         squareDiv.style.boxSizing = "border-box";
-
-
         squareDiv.style.transform = "translate(2px, 2px)"; // align tip to latLng
 
         // const m = new DraggableAdvancedMarker(this.map,position,squareDiv);
@@ -129,9 +127,12 @@ class PolylineManager {
             if (this.onVertexClick) {
               this.onVertexClick(indx, m, this); 
             }
+            this.selectMarker(m,indx);
+
         });
         m.addListener("dragstart", () => {
             console.log("marker Drag started");
+            this.unselectMarker(m);
         });
 
         m.addListener("drag", () => {
@@ -197,15 +198,28 @@ class PolylineManager {
   }
 
    selectMarker(mrk,idx) {
-    mrk.enableDragging()
-    m.map.setOptions({gestureHandling: "greedy"});
+   
+    mrk.map.setOptions({gestureHandling: "greedy"});
+    mrk.contentstyle.backgroundColor = "yellow";
+    // const squareDiv = document.createElement("div");
+    // squareDiv.style.width = "6px";
+    // squareDiv.style.height = "6px";
+    // squareDiv.style.backgroundColor = "yellow";
+    // squareDiv.style.border = "1px solid black";
+    // squareDiv.style.boxSizing = "border-box";
+    // squareDiv.style.transform = "translate(2px, 2px)"; // align tip to latLng
+    // m.setOptions({content:squareDiv})
+
    }
 
     unselectMarker(mrk,idx) {
-    mrk.disableDragging()
-    m.map.setOptions({gestureHandling: "greedy"});
-   }
+   
+    mrk.map.setOptions({gestureHandling: "greedy"});
+    mrk.contentstyle.backgroundColor = "red";
+ 
 
+   }
+    
 
   setMarkersVisibility(visible) {
     this.markersVisible = visible;
