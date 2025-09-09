@@ -1,5 +1,5 @@
 class PolylineManager {
-  constructor(map,onVertexClick,index) {
+  constructor(map) {
     this.map = map;
     this.polyline = null;
     this.vertexMarkers = [];
@@ -8,8 +8,6 @@ class PolylineManager {
     this.isDrawing = false;
     this.tempPath = [];
     this.metadata={};
-    this.index=index;
-    this.onVertexClick = onVertexClick; // callback passed in from main
   }
 
   /** Create polyline from array of LatLngs */
@@ -48,23 +46,22 @@ class PolylineManager {
     this.setMarkersVisibility(false)
   }
 
-  // getPath(){
-  //   return this.polyline.getPath();
+  getPath(){
+    return this.polyline.getPath();
 
-  // }
+  }
 
-  pushPath(position,idx=null){
-    if(idx){
-      this.polyline.getPath().insertAt(idx,position);
-      this.addVertexMarker(position, idx)
+  pushPath(latlng,index=null){
+    if(index){
+    this.polyline.getPath().slice(index,0,latlng);
+    this.addVertexMarker(latlng, index)
     } else {
-      this.polyline.getPath().push(position);
-      this.addVertexMarker(position)
+      this.polyline.getPath().push(latlng);
+      this.addVertexMarker(latlng)
 
     }
 
   }
-
   /** Enable editing */
   enableEdit() {
     if (!this.polyline) return;
@@ -97,11 +94,8 @@ class PolylineManager {
     this._clearVertexMarkers();
   }
 
- 
-
   addVertexMarker(position, idx=null) {
-
-        const squareDiv = document.createElement("div");
+      const squareDiv = document.createElement("div");
         squareDiv.style.width = "6px";
         squareDiv.style.height = "6px";
         squareDiv.style.backgroundColor = "red";
@@ -113,43 +107,35 @@ class PolylineManager {
 
         // const m = new DraggableAdvancedMarker(this.map,position,squareDiv);
 
-        const m = new google.maps.marker.AdvancedMarkerElement({
-          position: position,
-          map: this.map,
-          content:squareDiv,
-          gmpDraggable: true,
-          zIndex : 9999,
-        });
-        // m.metadata = {index:null} // m.metadata = {index:null}
-        // m.metadata.index = idx;
-        
-        m.addListener("gmp-click", (e) => {
-            // console.log("Marker clicked at:", m.position.toJSON());
-            const indx = this.vertexMarkers.findIndex(vm => vm === m);
-            if (this.onVertexClick) {
-              this.onVertexClick(indx, m, this); 
-            }
-        });
+      const m = new google.maps.marker.AdvancedMarkerElement({
+        position: position,
+        map: this.map,
+        content:squareDiv,
+        gmpDraggable: true
+      });
+        m.metadata = {index:null} // m.metadata = {index:null}
+        m.metadata.index = idx;
+                
         m.addListener("dragstart", () => {
-            console.log("marker Drag started");
+            console.log("Drag started");
         });
 
         m.addListener("drag", () => {
-            // console.log("Dragging:", m.position);
+            console.log("Dragging:", m.position);
             const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
-            const indx = this.vertexMarkers.findIndex(vm => vm === m);
-            this.polyline.getPath().setAt(indx,newPoint)
+            this.polyline.getPath().setAt(idx-1,newPoint)
         });
 
         m.addListener("dragend", () => {
-            
+            console.log("Final position:", m.position);
             const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
-            const indx = this.vertexMarkers.findIndex(vm => vm === m);
-            this.polyline.getPath().setAt(indx,newPoint)
-            console.log("marker drag end Final position:", indx);
+            this.polyline.getPath().setAt(idx-1,newPoint)
 
         });
-
+        m.addListener("click", (e) => {
+            console.log("Marker clicked at:", m.position.toJSON());
+            alert("Red square marker clicked!");
+        });
 
 
     //   m.addListener("drag", (ev) => {
@@ -162,18 +148,12 @@ class PolylineManager {
     //     console.log(e.latLng)
     //     });
 
-
-      // this.vertexMarkers.push(m);
-     
       if(idx) {
         this.vertexMarkers.slice(idx,0,m);
       } else {
-         this.vertexMarkers.push(m);
-         
+      this.vertexMarkers.push(m);
       }
       return m;
-
-   
 
 //   const dot = document.createElement("div");
 //     dot.style.width = "8px";

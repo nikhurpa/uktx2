@@ -10,14 +10,15 @@ d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(n,...o)=>r.add(n)&&f(
 ({key:"AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE", v:"weekly"});
 
 let map, mode = null, statusEl, ctxMenu, selectedTarget,isMouseDown,isDragging=false,arrowMarker,isDrawing = false;
-let polylineSelected=false,markerSelected=false;
-let curpolyline,curmarker;
+let polylineSelected=false;
+let curpolyline;
 let lastPoint = null;
-const minPixelDistance = 8; 
+const minPixelDistance = 8;
+let marker;
 let pathCoords = [];
-let polyline,marker;
-let polylines=[],markers=[];
-let polylineindex=0;
+let polyline;
+let polylines=[];
+let polylineinded=0;
 let markerindex;
 
 async function initMap() {
@@ -80,14 +81,10 @@ function setMode(newMode) {
 
   
       if(mode=="Route") {
-          drawroute()
+          routedrawing()
  
         }
 
-      if(mode=="Marker") {
-          drawmarker()
- 
-        }
 
 
 }
@@ -103,7 +100,7 @@ function clear () {
         // addDrawnPath(polyline.getPath());
         // }
 }
-function drawroute(){
+function routedrawing(){
 
             let mapoptions_startroute={draggableCursor: "crosshair",draggingCursor: "crosshair" 
                             ,scrollwheel: true, gestureHandling: "greedy"}
@@ -116,14 +113,22 @@ function drawroute(){
               console.log("Polylines:" + polylines.length + ",ID:" + id)
               let metadata ={id:id,index:id-1,visible:true}
 
-              polyline = new PolylineManager(map,handleVertexClick,id-1)
+              polyline = new PolylineManager(map)
               polyline.create(pathCoords,metadata);
-  
+              // polyline = new google.maps.Polyline({
+              // map: map,
+              // path: pathCoords,
+              // strokeColor: "red",
+              // strokeWeight: 3,
+              // geodesic: true,
+              
+              // });
+
+
               polylines.push(polyline)
               curpolyline=id-1;
 
               let p= polylines[curpolyline].polyline
-
 
               google.maps.event.addListener(p, "click", (e) => {
               isDrawing=false;
@@ -132,7 +137,7 @@ function drawroute(){
               console.log("click:"+p.metadata.index)
               polylines.forEach( p2 => {p2.setMarkersVisibility(false)})
               p.parent.select();
-              // setMode("Route")
+              setMode("Route")
 
             });
 
@@ -142,7 +147,7 @@ function drawroute(){
 
             console.log("create->" + curpolyline)
 
-           map.addListener("mousedown", (e) => {
+            map.addListener("mousedown", (e) => {
                
            if (e.domEvent.button === 0 && curpolyline+1) {
                 hideContextMenu()
@@ -160,7 +165,7 @@ function drawroute(){
                           // polylines[curpolyline].polyline.getPath().push(e.latLng);
                           // markerindex = polylines[curpolyline].polyline.getPath().length;
                           // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
-                          polylines[curpolyline].pushPath(e.latLng)
+                          polylines[curpolyline].pushPath(e.latlng)
                           lastPoint = newPoint;
                          
                         } else {
@@ -170,11 +175,9 @@ function drawroute(){
                           // polylines[curpolyline].polyline.getPath().push(e.latLng);
                           // markerindex = polylines[curpolyline].polyline.getPath().length;
                           // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
-                          polylines[curpolyline].pushPath(e.latLng)
-                          
+                          // polylines[curpolyline].setMarkersVisibility(true);
+                          polylines[curpolyline].pushPath(e.latlng)
                           lastPoint = newPoint;
-                          polylines[curpolyline].setMarkersVisibility(true);
-                          
                           }
                       }
                    
@@ -188,7 +191,7 @@ function drawroute(){
                
             // mouse move → only log if dragging
             map.addListener("mousemove", (e) => {
-         
+          console.log(e)
           
                if(isDragging&&curpolyline+1 ){
                 isDrawing = true;
@@ -204,7 +207,8 @@ function drawroute(){
                             // polylines[curpolyline].polyline.getPath().push(e.latLng);
                             // markerindex = polylines[curpolyline].polyline.getPath().length;
                             // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
-                            polylines[curpolyline].pushPath(e.latLng)
+                            polylines[curpolyline].pushPath(e.latlng)
+
                           lastPoint = newPoint;
                         } else {
                           const dx = newPoint.x - lastPoint.x;
@@ -213,11 +217,9 @@ function drawroute(){
                             // polylines[curpolyline].polyline.getPath().push(e.latLng);
                             // markerindex = polylines[curpolyline].polyline.getPath().length;
                             // polylines[curpolyline].addVertexMarker(e.latLng,markerindex);
-                            polylines[curpolyline].pushPath(e.latLng)
-                            
+                            // polylines[curpolyline].setMarkersVisibility(true);
+                            polylines[curpolyline].pushPath(e.latlng)
                             lastPoint = newPoint;
-                            polylines[curpolyline].setMarkersVisibility(true);
-                            
                           }
                       }
                    
@@ -230,7 +232,7 @@ function drawroute(){
 
             // right click on map to show context menu  
             map.addListener("rightclick", (e) => {
-               //showContextMenu(e.domEvent, mode);
+               showContextMenu(e.domEvent, mode);
              });  
              // click on polyline
 
@@ -250,57 +252,6 @@ function mouseuproute(e){
       setMode("Clear")
 
 }
-
-function handleVertexClick(index, marker, wrapper) {
-  console.log("Clicked vertex index:", index ," of polyline :", wrapper.index);
-  console.log("LatLng:", marker.position.toJSON());
-  markerindex=index;
-  isDragging = true;
-  isDragging = true;
-  curpolyline= wrapper.index;
- 
-  setMode("Route")
-
-}
-
-function drawmarker(){
-            let mapoptions_startmarker={draggableCursor: "crosshair",draggingCursor: "crosshair" 
-                            ,scrollwheel: true, gestureHandling: "greedy"}
-
-            map.setOptions(mapoptions_startmarker);
-            console.log("markerSelected:" + markerSelected + "," + curmarker)
-            
-            map.addListener("click", (e) => {
-              const dot = document.createElement("div");
-              dot.style.width = "8px";
-              dot.style.height = "8px";
-              dot.style.borderRadius = "50%";
-              dot.style.background = "red";
-              dot.style.border = "1px solid white";
-              dot.style.cursor = "pointer";
-              dot.style.pointerEvents = "auto";
-
-              let m = new google.maps.marker.AdvancedMarkerElement({
-                position: e.latLng,
-                map: map,
-                content: dot,   // ✅ unique DOM node each time
-                gmpDraggable: true,
-              });
-
-              markers.push(m);
-
-              m.addListener("gmp-click", () => {   // ✅ use gmp-click for AdvancedMarker
-                markerSelected = true;
-                const indx = markers.findIndex(vm => vm === m);
-                curmarker = indx;
-                console.log("Marker clicked index:", indx);
-              });
-            });
-                      
-
-
-}
-
 
 
 let vertexMarkers = [];  // store all vertex markers
