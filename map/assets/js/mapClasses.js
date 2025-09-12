@@ -10,6 +10,11 @@ class PolylineManager {
     this.metadata={};
     this.index=index;
     this.onVertexClick = onVertexClick; // callback passed in from main
+    this.curmarker;
+    this.markerDragging=false;
+    this.markerOldPosition=null;
+    this.prmarkercolor;
+    this.undoMarkers=[];
   }
 
   /** Create polyline from array of LatLngs */
@@ -19,8 +24,8 @@ class PolylineManager {
     this.polyline = new google.maps.Polyline({
       map: this.map,
       path,
-      strokeColor: "#f53a3aff",
-      strokeWeight: 3,
+      strokeColor: "yellow",
+      strokeWeight: 1,
     //   editable: false ,// off initially
       geodesic: true,
     });
@@ -40,11 +45,11 @@ class PolylineManager {
   }
 
   select(){
-    this.polyline.setOptions({strokeColor: "#3af594ff"})
+    // this.polyline.setOptions({strokeColor: "#3af594ff"})
     this.setMarkersVisibility(true)
   }
   unselect(){
-    this.polyline.setOptions({strokeColor: "#f53a3aff"})
+    // this.polyline.setOptions({strokeColor: "#f53a3aff"})
     this.setMarkersVisibility(false)
   }
 
@@ -54,15 +59,18 @@ class PolylineManager {
   // }
 
   pushPath(position,idx=null){
-    if(idx){
+      idx = idx ? idx :   this.vertexMarkers.length;
       this.polyline.getPath().insertAt(idx,position);
-      this.addVertexMarker(position, idx)
-    } else {
-      this.polyline.getPath().push(position);
-      this.addVertexMarker(position)
-
-    }
-
+      this.addVertexMarker( position,idx)
+       
+      // if(idx){
+      //   this.polyline.getPath().insertAt(idx,position);
+      //   this.addVertexMarker( position,idx)
+      // } else {
+      //   this.polyline.getPath().push(position);
+      //   this.addVertexMarker(position)
+      // }
+ 
   }
 
   /** Enable editing */
@@ -99,7 +107,16 @@ class PolylineManager {
 
  
 
-  addVertexMarker(position, idx=null) {
+  addVertexMarker( position,idx=null) {
+
+        const dot = document.createElement("div");
+        dot.style.width = "8px";
+        dot.style.height = "8px";
+        dot.style.borderRadius = "100%";
+        dot.style.backgroundColor = "red";
+        // dot.style.background = "red";
+        dot.style.border = "1px solid white";
+        dot.style.transform = "translate(3px, 3px)";
 
         const squareDiv = document.createElement("div");
         squareDiv.style.width = "6px";
@@ -114,108 +131,135 @@ class PolylineManager {
         const m = new google.maps.marker.AdvancedMarkerElement({
           position: position,
           map: this.map,
-          content:squareDiv,
-          gmpDraggable: true,
+          // content:squareDiv,
+          content:dot,
+          gmpDraggable: false,
           zIndex : 9999,
         });
         // m.metadata = {index:null} // m.metadata = {index:null}
         // m.metadata.index = idx;
+        this.curmarker=m;
         
-        m.addListener("gmp-click", (e) => {
-            // console.log("Marker clicked at:", m.position.toJSON());
-            const indx = this.vertexMarkers.findIndex(vm => vm === m);
-            if (this.onVertexClick) {
-              this.onVertexClick(indx, m, this); 
-            }
-            this.selectMarker(m,indx);
+            m.element.addEventListener("click", (e) => {
+                console.log("Marker clicked at:", m.position.toJSON());
+              
+                    e.stopPropagation();  // 👈 prevent bubbling to map
+                  
+                const indx = this.vertexMarkers.findIndex(vm => vm === m);
+                if (this.onVertexClick) {
+                  this.onVertexClick(indx, m, this); 
+                }
+              this.curmarker=m; 
+              
 
-        });
-        m.addListener("dragstart", () => {
-            console.log("marker Drag started");
-            this.unselectMarker(m);
-        });
+            });
 
-        m.addListener("drag", () => {
-            // console.log("Dragging:", m.position);
-            const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
-            const indx = this.vertexMarkers.findIndex(vm => vm === m);
-            this.polyline.getPath().setAt(indx,newPoint)
-        });
+            m.element.addEventListener("mouseenter", (e) => {
+             if (e.buttons != 1) {
+             const indx = this.vertexMarkers.findIndex(vm => vm === m);
+              
+              console.log("mouse over", indx, "pr col/",this.prmarkercolor);
+              this.prmarkercolor=m.content.style.backgroundColor;
+              m.content.style.backgroundColor = "yellow";
+              let mapoptions_clear={cursor: "default" , draggableCursor: "grab",     // 👈 normal hand cursor for map panning
+                                   draggingCursor: "grabbing" ,scrollwheel: true, gestureHandling: "greedy"}
+              this.map.setOptions( mapoptions_clear);
+              m.gmpDraggable= true
 
-        m.addListener("dragend", () => {
-            
-            const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
-            const indx = this.vertexMarkers.findIndex(vm => vm === m);
-            this.polyline.getPath().setAt(indx,newPoint)
-            console.log("marker drag end Final position:", indx);
+              }
+              });
 
-        });
+            m.element.addEventListener("mouseout", (e) => {
+               if (e.buttons != 1) {
+               const indx = this.vertexMarkers.findIndex(vm => vm === m);
+              console.log("mouse out", indx, "pr col/",this.prmarkercolor);
+              m.content.style.backgroundColor = this.prmarkercolor;
+              let mapoptions_startroute={draggableCursor: "crosshair",draggingCursor: "crosshair" 
+                            ,scrollwheel: true, gestureHandling: "greedy"}
+              this.map.setOptions( mapoptions_startroute);
+              m.gmpDraggable= false
+               }
+              });
 
+            m.addListener("dragstart", () => {
+                console.log("marker Drag started");
+             this.markerDragging=true
+             this.markerOldPosition=m.position;
+            });
 
+            m.addListener("drag", () => {
+              this.markerDragging=true
+                // console.log("Dragging:", m.position);
+                const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
+                const indx = this.vertexMarkers.findIndex(vm => vm === m);
+                this.polyline.getPath().setAt(indx,newPoint)
+            });
 
-    //   m.addListener("drag", (ev) => {
-    //     this.metadata.index=m.metadata.index;
-    //   });
+            m.addListener("dragend", () => {
+                
+                const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
+                const indx = this.vertexMarkers.findIndex(vm => vm === m);
+                this.polyline.getPath().setAt(indx,newPoint)
+                console.log("marker drag end Final position:", indx);
+                this.markerDragging=false
+                this.undoMarkers.push({marker:m,type:"drag",index: indx, oldposition:this.markerOldPosition});
 
-    //   m.addListener("gmp-click", (e) => {
-    //     // path.setAt(idx, e.latLng);
-    //      this.metadata.index=m.metadata.index;
-    //     console.log(e.latLng)
-    //     });
+            });
 
-
-      // this.vertexMarkers.push(m);
      
-      if(idx) {
-        this.vertexMarkers.splice(idx,0,m);
-      } else {
-         this.vertexMarkers.push(m);
-      }
-      return m;
+            this.vertexMarkers.splice(idx,0,m);
+            this.undoMarkers.push({marker:m,type:"add",index: idx, position:null});
+  }
 
+  
+  removeVertexMarker(){
    
+   let undoPop= this.undoMarkers.pop();
+   let lastevent= undoPop.type
+   let lastMarker= undoPop.marker
+   let lastMarkerOldPosition = undoPop.oldposition
 
-//   const dot = document.createElement("div");
-//     dot.style.width = "8px";
-//     dot.style.height = "8px";
-//     dot.style.borderRadius = "50%";
-//     dot.style.background = "red";
-//     dot.style.border = "1px solid white";
+   if(lastevent=="add"){
+   const indx = this.vertexMarkers.findIndex(vm => vm === lastMarker)
+   console.log("unde index:",indx)
+   this.vertexMarkers[indx].setMap(null);
+   this.vertexMarkers.splice(indx,1)
+   this.polyline.getPath().removeAt(indx);
 
-//    const marker = new google.maps.marker.AdvancedMarkerElement({
-//     position,
-//     map: null, // start invisible
-//     content: dot,
-//     gmpDraggable: true
-//   });
+   this.curmarker = this.vertexMarkers.findIndex(vm => vm === this.undoMarkers[this.undoMarkers.length - 1].marker)
+   this.vertexMarkers[this.curmarker].content.style.backgroundColor = "blue";
+   this.vertexMarkers[this.curmarker].gmpDraggable=true;
+   }
+    if(lastevent=="drag"){
+      const indx = this.vertexMarkers.findIndex(vm => vm === lastMarker)
+      lastMarker.position=lastMarkerOldPosition
+      const oldPoint = new google.maps.LatLng({lat:lastMarkerOldPosition.lat,lng:lastMarkerOldPosition.lng});
+      this.polyline.getPath().setAt(indx,oldPoint)
+      this.curmarker=indx;
+      this.vertexMarkers[this.curmarker].content.style.backgroundColor = "blue";
+      this.vertexMarkers[this.curmarker].gmpDraggable=true;
 
-  // // keep polyline in sync while dragging
-  //   marker.addListener("gmp-click", (e) => {
-  //     polyline.getPath().setAt(idx, e.latLng);
-  //    console.log(e.latLng)
-  //   });
+    }
 
   }
 
-   selectMarker(mrk,idx) {
-   
-    mrk.map.setOptions({gestureHandling: "greedy"});
-    mrk.contentstyle.backgroundColor = "yellow";
-    // const squareDiv = document.createElement("div");
-    // squareDiv.style.width = "6px";
-    // squareDiv.style.height = "6px";
-    // squareDiv.style.backgroundColor = "yellow";
-    // squareDiv.style.border = "1px solid black";
-    // squareDiv.style.boxSizing = "border-box";
-    // squareDiv.style.transform = "translate(2px, 2px)"; // align tip to latLng
-    // m.setOptions({content:squareDiv})
 
+  selectMarker(idx) {
+
+    this.vertexMarkers[idx].content.style.backgroundColor = "blue";
+    this.curmarker=idx
+    this.vertexMarkers[idx].gmpDraggable=true;
+    // this.map.setOptions({gestureHandling: "greedy"});
+   
    }
 
-    unselectMarker(mrk,idx) {
-   
-    mrk.map.setOptions({gestureHandling: "greedy"});
-    mrk.contentstyle.backgroundColor = "red";
+    unselectMarker(idx) {
+      console.log("Uncelect:", idx)
+       this.vertexMarkers[idx].gmpDraggable=false
+     
+     this.vertexMarkers[idx].content.style.backgroundColor = "red";
+    
+    // this.map.setOptions({gestureHandling: "greedy"});
  
 
    }
