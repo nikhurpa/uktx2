@@ -13,7 +13,20 @@
       }
     </style>
     <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE&libraries=geometry"></script> -->
-    
+    <link rel="stylesheet" href="./plugins/jqwidgets/styles/jqx.base.css" type="text/css" />
+  
+    <!-- <script type="text/javascript" src="./plugins/jqwidgets/scripts/jquery-1.11.1.min.js"></script> -->
+     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script type="text/javascript" src="./plugins/jqwidgets/jqxcore.js"></script>
+    <script type="text/javascript" src="./plugins/jqwidgets/jqxbuttons.js"></script>
+    <script type="text/javascript" src="./plugins/jqwidgets/jqxcheckbox.js"></script>
+    <script type="text/javascript" src="./plugins/jqwidgets/jqxscrollbar.js"></script>
+    <script type="text/javascript" src="./plugins/jqwidgets/jqxpanel.js"></script>
+    <script type="text/javascript" src="./plugins/jqwidgets/jqxtree.js"></script>
+    <script type="text/javascript" src="./plugins/jqwidgets/jqxmenu.js"></script>
+    <script type="text/javascript" src="./plugins/jqwidgets/jqxdragdrop.js"></script>
+
+
   </head>
   <body>
     <div id="map"></div>
@@ -37,13 +50,12 @@
         <button id="clearTemp" class="btn small">Clear Temp</button>
       </div>
 
-      <div class="tree">
-        <div class="card" style="font-weight:600;margin-bottom:6px">My Places</div>
-        <div id="myTree" class="tree-root"></div>
-
+      <div class="card">
+        <div class="card-header" style="font-weight:600;margin-bottom:6px">My Places</div>
+        <div id="myTree" class="card-body"></div>
         <div style="height:10px"></div>
-        <div class="card" style="font-weight:600;margin-bottom:6px">Temporary Places</div>
-        <div id="tempTree" class="tree-root"></div>
+        <div class="card-header" style="font-weight:600;margin-bottom:6px">Temporary Places</div>
+        <div id="jqxTree" class="card-body"></div>
       </div>
     </div>
 
@@ -67,7 +79,7 @@
         <button id="freehand-mode" class="mode-button" title="Freehand"><img src="./img/freehand.svg" alt="Freehand" draggable="false"></button> -->
         <button id="btnClear" class="mode-button" title="Select"><img src="./img/select.svg" alt="Select" draggable="false"></button>
         <button id="resize-button" class="mode-button" title="Resize"><img src="./img/resize.svg" alt="Resize" draggable="false"></button>
-        <button id="btnClear1" class="mode-button" title="Clear"><img src="./img/delete.svg" alt="Clear" draggable="false"></button>
+        <button id="delete-button" class="mode-button" title="Clear"><img src="./img/delete.svg" alt="Clear" draggable="false"></button>
         <button id="delete-selected-button" class="mode-button" title="Clear last or Selected"><img src="./img/delete-selected.svg" alt="Delete Selected" draggable="false"></button>
         <button id="undo-button"  class="mode-button" title="Undo"><img src="./img/undo.svg" alt="Undo" draggable="false"></button>
         <button id="redo-button" class="mode-button" title="Redo"><img src="./img/redo.svg" alt="Redo" draggable="false"></button>
