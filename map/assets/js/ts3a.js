@@ -51,8 +51,14 @@ async function initMap() {
 
   statusEl = document.getElementById("status");
   ctxMenu = document.getElementById("contextMenu");
-  tempTree =  $("#jqxTree");
+  let treeSource= [
+    {label: "My Places", expanded: true,checked: true ,icon:"./img/earth.jpg",id:"myplaces"},
+    {label: "Temporary Places", expanded: true,checked: true,icon:"./img/folder.jpg",id:"tempplaces" },
 
+  ];
+
+  $("#jqxTree").jqxTree({ source: treeSource, width: "100%", height: "300px", checkboxes: true ,allowDrag: true, allowDrop: true});
+  
   bindToolButtons(Marker);
 
   document.getElementById("undo-button").addEventListener("click",()=>{
@@ -328,9 +334,17 @@ let panel = {
               items: source
             };
 
+            // {label: "Temporary Places"}
+            let elementByID = $('#jqxTree').find("#tempplaces")[0];
+            $("#jqxTree").jqxTree("addTo", fileNode,  elementByID);
+            // source.forEach(node => {
+            //   $("#jqxTree").jqxTree("addTo", fileNode, null);
+            // });
+
+
           // If tree is not initialized yet
-          if (!$("#jqxTree").data("jqxTree")) {
-            $("#jqxTree").jqxTree({ source: [fileNode], width: "100%", height: "300px", checkboxes: true ,allowDrag: true, allowDrop: true});
+          // if (!$("#jqxTree").data("jqxTree")) {
+          //   $("#jqxTree").jqxTree({ source: [fileNode], width: "100%", height: "300px", checkboxes: true ,allowDrag: true, allowDrop: true});
             
             // wire up events once
             $("#jqxTree").on("checkChange", (event) => {
@@ -345,7 +359,7 @@ let panel = {
             $("#jqxTree").on("dragEnd", function (event) {
               const item = event.args.item;
               const dropItem = event.args.dropItem;
-              console.log("Dragged", item.label, "→ dropped into", dropItem ? dropItem.label : "root");
+              console.log("Dragged", item, "→ dropped into", dropItem ? dropItem.label : "root");
             });
 
             $("#jqxTree").on("itemClick", (event) => {
@@ -366,12 +380,12 @@ let panel = {
               }
             });
 
-          } else {
-            // Tree exists → append root node(s) from new file
-            source.forEach(node => {
-              $("#jqxTree").jqxTree("addTo", fileNode, null);
-            });
-          }
+          // } else {
+          //   // Tree exists → append root node(s) from new file
+          //   source.forEach(node => {
+          //     $("#jqxTree").jqxTree("addTo", fileNode, null);
+          //   });
+          // }
 
           // adjust map view to include new file's features
           if ( !bounds.isEmpty()) {
@@ -625,13 +639,13 @@ function treeEdit(){
   // --- Context menu for tree ---
   const menuHtml = `
         <div id="treeMenu" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:5px;">
-          <div id="addFolder">➕ Add Folder</div>
-          <div id="renameItem">✏️ Rename</div>
-          <div id="deleteItem">🗑️ Delete</div>
+          <div class="hover-box" id="addFolder">➕ Add Folder</div>
+          <div class="hover-box" id="renameItem">✏️ Rename</div>
+          <div class="hover-box" id="deleteItem">🗑️ Delete</div>
           <hr>
-          <div id="changeMarkerIcon">📍 Change Marker Icon</div>
-          <div id="changePolylineColor">〰️ Change Line Color</div>
-          <div id="changePolygonColor">⬛ Change Polygon Color</div>
+          <div class="hover-box" id="changeMarkerIcon">📍 Change Marker Icon</div>
+          <div class="hover-box" id="changePolylineColor">〰️ Change Line Color</div>
+          <div class="hover-box" id="changePolygonColor">⬛ Change Polygon Color</div>
         </div>
       `;
       $("body").append(menuHtml);
@@ -712,7 +726,29 @@ function treeEdit(){
     
 }
 
+document.getElementById("btn-hide").addEventListener("click",()=>{
 
+  
+      // duration: 800, // 800 milliseconds
+      // easing: 'easeOutBounce',
+   $('.myplacesidebar').toggleClass("is-active");
+    if ( $('#ikonhide').hasClass("fa fa-minus-square") ) {
+        $('#ikonhide').removeClass("fa fa-minus-square")
+        $('#ikonhide').addClass("fa fa-plus-square")
+       
+        $('#sidepanel' ).hide(1)
+      
+ 
+    } else {
+        $('#ikonhide').removeClass("fa fa-plus-square")
+        $('#ikonhide').addClass("fa fa-minus-square")
+
+          $('#sidepanel' ).show(1);
+       
+
+    }
+
+});
 /////////////////////////////////////////////////////////////////////////////////////
 
 let vertexMarkers = [];  // store all vertex markers

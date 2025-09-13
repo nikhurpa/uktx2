@@ -139,8 +139,8 @@ body {
   
     .myplacesidebar {
         position: fixed;      /* stays at left */
-        right: 20px;
-        top: 20px;
+        right: 10px;
+        top: 60px;
         width: 360px;
         height: 100vh;        /* full height */
         background: #f9f9f9;  /* light background */
@@ -149,7 +149,11 @@ body {
         overflow-y: auto;     /* scroll if content too tall */
         border-right: 1px solid #ddd;
         }
-    /* Card styling */
+        /* Card styling */
+       .myplacesidebar.is-active {
+        height: 54px;
+        width: 54px;
+        }
 
     .tree , .card {
         background: #fff;
@@ -159,3 +163,17 @@ body {
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         border: 1px solid #eee;
         }
+
+     .hover-box {
+      /* padding: 12px 20px; */
+      /* background: lightgray; */
+      background: white;
+      /* display: inline-block; */
+      transition: background 0.3s;
+    }
+
+    .hover-box:hover {
+      /* background: dodgerblue; */
+      background: lightgray;
+      color: white; 
+      }  

@@ -249,9 +249,7 @@ function hideToolbox() {
        
         $('.toolbox-row ' ).hide(1000)
         $('#head_tool' ).hide()
-
-
-  
+ 
     } else {
         $('#ikonhide').removeClass("fa fa-plus-square")
         $('#ikonhide').addClass("fa fa-minus-square")
@@ -262,6 +260,7 @@ function hideToolbox() {
     }
 
 }
+
 function hidenewToolbox() {
     if ( $('#ikonhide_loaddata').hasClass("fa fa-minus-square") ) {
         $('#ikonhide_loaddata').removeClass("fa fa-minus-square")
