@@ -69,8 +69,30 @@ async function initMap() {
     if(mode=="Marker") editMarker.remove();
     if(mode=="Route") editPolyline.remove();
   })
+    document.getElementById("btn-hide").addEventListener("click",()=>{
 
-  // panel.loadTempTree()
+      
+          // duration: 800, // 800 milliseconds
+          // easing: 'easeOutBounce',
+      $('.myplacesidebar').toggleClass("is-active");
+        if ( $('#ikonhide').hasClass("fa fa-minus-square") ) {
+            $('#ikonhide').removeClass("fa fa-minus-square")
+            $('#ikonhide').addClass("fa fa-plus-square")
+          
+            $('#sidepanel' ).hide(1)
+          
+    
+        } else {
+            $('#ikonhide').removeClass("fa fa-plus-square")
+            $('#ikonhide').addClass("fa fa-minus-square")
+
+              $('#sidepanel' ).show(1);
+          
+
+        }
+
+    });
+
   panel.loadKml()
 }
 
@@ -337,15 +359,7 @@ let panel = {
             // {label: "Temporary Places"}
             let elementByID = $('#jqxTree').find("#tempplaces")[0];
             $("#jqxTree").jqxTree("addTo", fileNode,  elementByID);
-            // source.forEach(node => {
-            //   $("#jqxTree").jqxTree("addTo", fileNode, null);
-            // });
 
-
-          // If tree is not initialized yet
-          // if (!$("#jqxTree").data("jqxTree")) {
-          //   $("#jqxTree").jqxTree({ source: [fileNode], width: "100%", height: "300px", checkboxes: true ,allowDrag: true, allowDrop: true});
-            
             // wire up events once
             $("#jqxTree").on("checkChange", (event) => {
               if (suppressCheckChange) return;
@@ -380,14 +394,7 @@ let panel = {
               }
             });
 
-          // } else {
-          //   // Tree exists → append root node(s) from new file
-          //   source.forEach(node => {
-          //     $("#jqxTree").jqxTree("addTo", fileNode, null);
-          //   });
-          // }
 
-          // adjust map view to include new file's features
           if ( !bounds.isEmpty()) {
             map.fitBounds(bounds);
           }
@@ -635,6 +642,129 @@ const folderIcon = "./plugins/jqwidgets/images/folder.png";
       }
     }
 
+     // Build parent chain label like "File1 - Folder A - Point 1"
+    function getParentChainLabelByItem(tree, item) {
+      const labels = [];
+      let current = item;
+      while (current) {
+        labels.unshift(current.label);
+        current = tree.jqxTree('getParentItem', current.element);
+      }
+      return labels.join(" - ");
+    }
+
+    // Find first overlay for an item id (returns first overlay or null)
+    function getFirstOverlay(itemId) {
+      const e = featureLayers[itemId];
+      if (!e) return null;
+      return Array.isArray(e) ? e[0] : e;
+    }
+
+    // Export all items currently in jqxTree to JSON rows and POST to PHP
+    async function exportTreeToServer() {
+      if (!$('#jqxTree').data('jqxTree')) { alert("Tree is empty"); return; }
+      const tree = $('#jqxTree');
+      const allItems = tree.jqxTree('getItems'); // array of items at root level
+      // get flat list of all items by walking the DOM <li> or by recursion
+      const rows = [];
+      // use a helper to visit every LI in the tree
+      $('#jqxTree li').each(function(index, li) {
+        const id = li.id;
+        if (!id) return;
+        const item = tree.jqxTree('getItem', li);
+        if (!item) return;
+        // build parent chain
+        const parentPath = getParentChainLabelByItem(tree, item);
+        const rootFile = parentPath.split(' - ')[0] || '';
+        // coordinates & element_type
+        let coords = '';
+        let element_type = 'Folder';
+        const overlays = featureLayers[id];
+        if (overlays && overlays.length) {
+          // inspect first overlay to decide type
+          const first = overlays[0];
+          if (first instanceof google.maps.Marker) {
+            const p = first.getPosition();
+            coords = `${p.lat()},${p.lng()}`;
+            element_type = 'Point';
+          } else if (first instanceof google.maps.Polyline) {
+            coords = first.getPath().getArray().map(p => `${p.lat()},${p.lng()}`).join(' ');
+            element_type = 'LineString';
+          } else if (first instanceof google.maps.Polygon) {
+            // polygon path (single ring) - join coords with space
+            const paths = first.getPath ? first.getPath().getArray() : [];
+            coords = paths.map(p => `${p.lat()},${p.lng()}`).join(' ');
+            element_type = 'Polygon';
+          }
+        }
+
+        // populate row fields
+        rows.push({
+          id: id,
+          temp: '',
+          file: rootFile,
+          fileid: `file_${rootFile}`,
+          parentfolder: parentPath,
+          element_type: element_type,
+          element_name: item.label,
+          description: '', // we don't capture description into tree label here; extend if needed
+          ikon: item.icon || '',
+          style: '',
+          coordinates: coords,
+          open: (item.checked ? 'true' : 'false'),
+          user_created: 'webuser',
+          user_updated: 'webuser',
+          creation_date_time: new Date().toISOString().slice(0,19).replace('T',' '),
+          updation_date_time: new Date().toISOString().slice(0,19).replace('T',' '),
+          element_sl: index + 1
+        });
+      });
+
+      if (!rows.length) { alert("No elements to export"); return; }
+
+      // POST to PHP
+      try {
+        const resp = await fetch('save_kml_elements.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(rows)
+        });
+        const json = await resp.json();
+        if (json.success) alert(`Inserted/updated ${json.inserted} rows`);
+        else alert('Server error: ' + (json.error || 'unknown'));
+      } catch (err) {
+        console.error(err);
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    // Clear tree and overlays
+    function clearEverything() {
+      // remove overlays
+      for (const k of Object.keys(featureLayers)) {
+        const arr = featureLayers[k];
+        if (Array.isArray(arr)) arr.forEach(o => { if (o && typeof o.setMap === 'function') o.setMap(null); });
+        else if (arr && typeof arr.setMap === 'function') arr.setMap(null);
+        delete featureLayers[k];
+      }
+      try { $('#jqxTree').jqxTree('destroy'); } catch (_) {}
+      $('#jqxTree').empty();
+      idCounter = 0;
+      bounds = new google.maps.LatLngBounds();
+      // reset map view
+      if (map) map.setCenter({ lat:20, lng:0 }), map.setZoom(2);
+    }
+
+    
+
+// // Example usage
+// $('#jqxTree').on('select', function (event) {
+//     let element = event.args.element;
+//     let chainStr = getParentChainLabel('#jqxTree', element);
+//     console.log("Chain:", chainStr);
+// });
+
+
 function treeEdit(){
   // --- Context menu for tree ---
   const menuHtml = `
@@ -726,29 +856,7 @@ function treeEdit(){
     
 }
 
-document.getElementById("btn-hide").addEventListener("click",()=>{
 
-  
-      // duration: 800, // 800 milliseconds
-      // easing: 'easeOutBounce',
-   $('.myplacesidebar').toggleClass("is-active");
-    if ( $('#ikonhide').hasClass("fa fa-minus-square") ) {
-        $('#ikonhide').removeClass("fa fa-minus-square")
-        $('#ikonhide').addClass("fa fa-plus-square")
-       
-        $('#sidepanel' ).hide(1)
-      
- 
-    } else {
-        $('#ikonhide').removeClass("fa fa-plus-square")
-        $('#ikonhide').addClass("fa fa-minus-square")
-
-          $('#sidepanel' ).show(1);
-       
-
-    }
-
-});
 /////////////////////////////////////////////////////////////////////////////////////
 
 let vertexMarkers = [];  // store all vertex markers
