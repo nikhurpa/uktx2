@@ -23,6 +23,7 @@ let polylines=[],markers=[];
 let polylineindex=0;
 let nextmarkerindex,prmarkerindex,markerindex;
 let tempTree;
+let element_types=["point","polyline","polygon","temp_folder","main_folder","file","folder","document","other"]
 
 let mapoptions_clear={cursor: "default" , draggableCursor: "grab",     // 👈 normal hand cursor for map panning
                             draggingCursor: "grabbing" ,scrollwheel: true, gestureHandling: "greedy"}
@@ -52,8 +53,8 @@ async function initMap() {
   statusEl = document.getElementById("status");
   ctxMenu = document.getElementById("contextMenu");
   let treeSource= [
-    {label: "My Places", expanded: true,checked: true ,icon:"./img/earth.jpg",id:"myplaces"},
-    {label: "Temporary Places", expanded: true,checked: true,icon:"./img/folder.jpg",id:"tempplaces" },
+    {label: "My Places", expanded: true,checked: true ,icon:"./img/earth.jpg",id:"myplaces",value:"main_folder"},
+    {label: "Temporary Places", expanded: true,checked: true,icon:"./img/folder.png",id:"tempplaces",value:"temp_folder" },
 
   ];
 
@@ -69,31 +70,40 @@ async function initMap() {
     if(mode=="Marker") editMarker.remove();
     if(mode=="Route") editPolyline.remove();
   })
-    document.getElementById("btn-hide").addEventListener("click",()=>{
+  document.getElementById("btn-hide").addEventListener("click",()=>{
 
-      
-          // duration: 800, // 800 milliseconds
-          // easing: 'easeOutBounce',
-      $('.myplacesidebar').toggleClass("is-active");
-        if ( $('#ikonhide').hasClass("fa fa-minus-square") ) {
-            $('#ikonhide').removeClass("fa fa-minus-square")
-            $('#ikonhide').addClass("fa fa-plus-square")
-          
-            $('#sidepanel' ).hide(1)
-          
     
-        } else {
-            $('#ikonhide').removeClass("fa fa-plus-square")
-            $('#ikonhide').addClass("fa fa-minus-square")
+        // duration: 800, // 800 milliseconds
+        // easing: 'easeOutBounce',
+    $('.myplacesidebar').toggleClass("is-active");
+      if ( $('#ikonhide').hasClass("fa fa-minus-square") ) {
+          $('#ikonhide').removeClass("fa fa-minus-square")
+          $('#ikonhide').addClass("fa fa-plus-square")
+        
+          $('#sidepanel' ).hide(1)
+        
+  
+      } else {
+          $('#ikonhide').removeClass("fa fa-plus-square")
+          $('#ikonhide').addClass("fa fa-minus-square")
 
-              $('#sidepanel' ).show(1);
-          
+            $('#sidepanel' ).show(1);
+        
 
-        }
+      }
 
-    });
+  });
+
+  
+  document.getElementById("clearTemp").addEventListener("click",()=>{
+
+    var items = $('#jqxTree').jqxTree('getItems');
+    console.log(items)
+  })
+
 
   panel.loadKml()
+  
 }
 
 function bindToolButtons(AdvancedMarkerElement) {
@@ -351,9 +361,10 @@ let panel = {
             const fileNode = {
               id: fileNodeId,
               label: file.name,
-              icon: folderIcon,
+              icon: kmlIcon,
               checked: true,
-              items: source
+              items: source,
+              value:"file_" + file.name
             };
 
             // {label: "Temporary Places"}
@@ -400,7 +411,9 @@ let panel = {
           }
 
 
-
+     this.uploadKml("file103")
+     console.log("done")
+   
 
 
         } catch (err) {
@@ -411,11 +424,69 @@ let panel = {
    
         
      treeEdit()
-
+     
   
-  
-}
 
+    
+    
+    
+    },
+
+  uploadKml:function(id){
+    let items = $('#jqxTree').jqxTree('getItems');
+    const fileToMatch = ["blocks.kml"];
+
+    const fileNode = this.createSql(items,id)
+
+    console.log(fileNode);
+
+  }   ,
+
+  getDescendants: function (items, parentId) {
+    const descendants = [];
+
+    function collectChildren(parentId) {
+        items.forEach(item => {
+            if (item.parentId === parentId) {
+                descendants.push(item);
+                collectChildren(item.id); // recurse for deeper children
+            }
+        });
+    }
+
+    collectChildren(parentId);
+    return descendants;
+  },
+  getParentChain: function (items,parentId) {
+     const parent = [];
+    
+    // let items = $('#jqxTree').jqxTree('getItems');
+    function collectionParent(parentId){
+      items.forEach(item => {
+            if (item.id === parentId) {
+                parent.push(item.parentId);
+                
+                collectionParent(item.parentId);
+                 // recurse for deeper children
+            }
+        });
+    }
+    collectionParent(parentId);
+    return parent ;
+
+  },
+  createSql: function(items,parentId){
+    let desc = this.getDescendants(items,parentId);
+    let map_elements=["point","polyline","polygon"];
+    const mapItems = desc.filter(item => map_elements.includes(item.value));
+    console.log(mapItems)
+    mapItems.forEach(item => {
+            item.parentChain= JSON.stringify(this.getParentChain(items,item.parentId))
+        });
+    
+   console.log(mapItems)     
+
+  },
 
 
 
@@ -428,6 +499,9 @@ let panel = {
   //////////////////////////////////
 
 const folderIcon = "./plugins/jqwidgets/images/folder.png";
+const documentIcon = "./img/doc.png";
+const kmlIcon = "./img/kml1.png";
+
     const featureLayers = {}; // id → google maps overlay
     let idCounter = 0;
     let suppressCheckChange = false; // avoid recursion when we programmatically check/uncheck children
@@ -565,7 +639,14 @@ const folderIcon = "./plugins/jqwidgets/images/folder.png";
       const item = { id, label, items: [] };
 
       if (node.tagName === "Folder" || node.tagName === "Document") {
+        if (node.tagName === "Folder"){
         item.icon = folderIcon;
+        item.value="folder";
+        } else if (node.tagName === "Document") {
+        item.icon = documentIcon;
+        item.value="document"  
+        } 
+
         // default folder checked true (so children visible)
         item.checked = true;
         // add Folder/Document children
@@ -578,9 +659,9 @@ const folderIcon = "./plugins/jqwidgets/images/folder.png";
         // decide icon by geometry type (just for tree visual)
         const geom = node.getElementsByTagName("Point")[0] ?? node.getElementsByTagName("LineString")[0] ?? node.getElementsByTagName("Polygon")[0];
         if (geom) {
-          if (geom.tagName === "Point") item.icon = "./img/point_icon.png";
-          else if (geom.tagName === "LineString") item.icon = "./img/polyline.svg";
-          else if (geom.tagName === "Polygon") item.icon = "./img/polygon.png";
+          if (geom.tagName === "Point") {item.icon = "./img/point_icon.png"; item.value="point"}
+          else if (geom.tagName === "LineString") {item.icon = "./img/polyline.svg"; item.value="polyline"}
+          else if (geom.tagName === "Polygon") {item.icon = "./img/polygon.png"; item.value="polygon"}
         }
 
         // Build overlays (array)
@@ -1040,3 +1121,6 @@ function setActiveButton(buttonId) {
 }     
 
 window.onload = initMap;
+
+
+
