@@ -424,10 +424,7 @@ let panel = {
 
 
 
-
-  //////////////////////////////////
-
-const folderIcon = "./plugins/jqwidgets/images/folder.png";
+    const folderIcon = "./plugins/jqwidgets/images/folder.png";
     const featureLayers = {}; // id → google maps overlay
     let idCounter = 0;
     let suppressCheckChange = false; // avoid recursion when we programmatically check/uncheck children
@@ -857,7 +854,7 @@ function treeEdit(){
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////to be deleted ////////////////////////////////////////////////
 
 let vertexMarkers = [];  // store all vertex markers
 let markersVisible = false;
