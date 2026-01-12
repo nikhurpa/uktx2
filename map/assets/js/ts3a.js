@@ -495,17 +495,9 @@ let panel = {
 
 
 
-<<<<<<< HEAD
     const folderIcon = "./plugins/jqwidgets/images/folder.png";
-=======
-
-  //////////////////////////////////
-
-const folderIcon = "./plugins/jqwidgets/images/folder.png";
-const documentIcon = "./img/doc.png";
-const kmlIcon = "./img/kml1.png";
-
->>>>>>> a1b7d8d168329338cdc7999e81a8bf98f0bf46b7
+    const documentIcon = "./img/doc.png";
+    const kmlIcon = "./img/kml1.png";
     const featureLayers = {}; // id → google maps overlay
     let idCounter = 0;
     let suppressCheckChange = false; // avoid recursion when we programmatically check/uncheck children
