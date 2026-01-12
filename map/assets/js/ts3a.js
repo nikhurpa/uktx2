@@ -60,7 +60,40 @@ async function initMap() {
 
   $("#jqxTree").jqxTree({ source: treeSource, width: "100%", height: "300px", checkboxes: true ,allowDrag: true, allowDrop: true});
   
-  bindToolButtons(Marker);
+ 
+
+
+  $("#mode-ui").verticalToolbar({
+  tools: [
+    { id: "point", title: "Point", icon: "./img/point.svg" },
+    { id: "route", title: "Route", html: '<i class="fas fa-route"></i>' },
+    { id: "line", title: "Line", icon: "./img/polyline.svg" },
+    { id: "polygon", title: "Polygon", icon: "./img/polygon.png" },
+    { id: "scale", title: "Scale", html: '<i class="fas fa-ruler-horizontal"></i>' },
+    { id: "select", title: "Select", icon: "./img/select.svg" },
+    { id: "resize", title: "Resize", icon: "./img/resize.svg" },
+    { id: "delete", title: "Delete", icon: "./img/delete.svg" },
+    { id: "undo", title: "Undo", icon: "./img/undo.svg" },
+    { id: "redo", title: "Redo", icon: "./img/redo.svg" },
+    { id: "export", title: "Export", icon: "./img/download.svg" },
+    { id: "upload", title: "Upload", icon: "./img/upload.svg" }
+  ],
+
+  onSelect: function (tool) {
+    console.log("Tool selected:", tool.id);
+  }
+});
+
+
+
+
+
+
+
+ bindToolButtons(Marker);
+
+
+
 
   document.getElementById("undo-button").addEventListener("click",()=>{
     if(mode=="Route") editPolyline.undo();

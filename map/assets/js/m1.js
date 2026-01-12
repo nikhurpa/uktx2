@@ -8,6 +8,7 @@ window.onload = async function () {
 
     // Load  CSS
     await loadCSS("./assets/css/ts3a.css");
+    // await loadCSS("./assets/css/ts3a.css");
     await loadCSS("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css");
     await loadCSS("./plugins/jqwidgets/styles/jqx.base.css");
 
@@ -21,6 +22,7 @@ window.onload = async function () {
     await loadJS("./plugins/jqwidgets/jqxtree.js");
     await loadJS("./plugins/jqwidgets/jqxmenu.js");
     await loadJS("./plugins/jqwidgets/jqxdragdrop.js");
+    await loadJS("./assets/js/jqverticaltoolbar.js");
 
     addDiv({ id: "map" , parent: document.body});
     addDiv({ id: "status", className: "status", parent: document.body,text: "Select a mode…" });
@@ -57,21 +59,22 @@ window.onload = async function () {
 
 //  Top-right mode selection UI
     addDiv({ id: "mode-ui", parent: document.body,
-        innerHTML: `<button id="btnMarker" class="mode-button" title="Point"><img src="./img/point.svg" alt="Point" draggable="false"></button>
-        <button id="btnRoute" class="mode-button" title="Route"> <i class="fas fa-route"></i></button>
-        <button id="btnLine" class="mode-button" title="Linestring"><img src="./img/polyline.svg" alt="Linestring" draggable="false"></button>
-        <button id="polygon-mode" class="mode-button" title="Polygon"><img src="./img/polygon.png" alt="Polygon" draggable="false"></button>
-        <button id="scale-mode" class="mode-button" title="Scale"><i class="fas fa-ruler-horizontal"></i></button>
-        <button id="btnClear" class="mode-button" title="Select"><img src="./img/select.svg" alt="Select" draggable="false"></button>
-        <button id="resize-button" class="mode-button" title="Resize"><img src="./img/resize.svg" alt="Resize" draggable="false"></button>
-        <button id="delete-button" class="mode-button" title="Clear"><img src="./img/delete.svg" alt="Clear" draggable="false"></button>
-        <button id="delete-selected-button" class="mode-button" title="Clear last or Selected"><img src="./img/delete-selected.svg" alt="Delete Selected" draggable="false"></button>
-        <button id="undo-button"  class="mode-button" title="Undo"><img src="./img/undo.svg" alt="Undo" draggable="false"></button>
-        <button id="redo-button" class="mode-button" title="Redo"><img src="./img/redo.svg" alt="Redo" draggable="false"></button>
-        <button id="export-button" class="mode-button" title="Export"><img src="./img/download.svg" alt="Export" draggable="false"></button>
-        <button id="upload-button" class="mode-button" title="Upload"><img src="./img/upload.svg" alt="Upload" draggable="false"></button>
-        <input type="file" id="upload-input" style="display: none;" accept=".geojson,.json">
-   `});
+        // innerHTML: `<button id="btnMarker" class="mode-button" title="Point"><img src="./img/point.svg" alt="Point" draggable="false"></button>
+        // <button id="btnRoute" class="mode-button" title="Route"> <i class="fas fa-route"></i></button>
+        // <button id="btnLine" class="mode-button" title="Linestring"><img src="./img/polyline.svg" alt="Linestring" draggable="false"></button>
+        // <button id="polygon-mode" class="mode-button" title="Polygon"><img src="./img/polygon.png" alt="Polygon" draggable="false"></button>
+        // <button id="scale-mode" class="mode-button" title="Scale"><i class="fas fa-ruler-horizontal"></i></button>
+        // <button id="btnClear" class="mode-button" title="Select"><img src="./img/select.svg" alt="Select" draggable="false"></button>
+        // <button id="resize-button" class="mode-button" title="Resize"><img src="./img/resize.svg" alt="Resize" draggable="false"></button>
+        // <button id="delete-button" class="mode-button" title="Clear"><img src="./img/delete.svg" alt="Clear" draggable="false"></button>
+        // <button id="delete-selected-button" class="mode-button" title="Clear last or Selected"><img src="./img/delete-selected.svg" alt="Delete Selected" draggable="false"></button>
+        // <button id="undo-button"  class="mode-button" title="Undo"><img src="./img/undo.svg" alt="Undo" draggable="false"></button>
+        // <button id="redo-button" class="mode-button" title="Redo"><img src="./img/redo.svg" alt="Redo" draggable="false"></button>
+        // <button id="export-button" class="mode-button" title="Export"><img src="./img/download.svg" alt="Export" draggable="false"></button>
+        // <button id="upload-button" class="mode-button" title="Upload"><img src="./img/upload.svg" alt="Upload" draggable="false"></button>
+        // <input type="file" id="upload-input" style="display: none;" accept=".geojson,.json">`
+   });
+
 
 
     await loadModule("./assets/js/ts3a.js");
