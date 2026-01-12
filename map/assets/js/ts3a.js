@@ -478,13 +478,39 @@ let panel = {
   createSql: function(items,parentId){
     let desc = this.getDescendants(items,parentId);
     let map_elements=["point","polyline","polygon"];
+    let rows=[];
     const mapItems = desc.filter(item => map_elements.includes(item.value));
     console.log(mapItems)
     mapItems.forEach(item => {
             item.parentChain= JSON.stringify(this.getParentChain(items,item.parentId))
+// // populate row fields
+//           rows.push({
+//             id: item.id,
+//             temp: '',
+//             file: rootFile,
+//             fileid: `file_${rootFile}`,
+//             parentfolder: item.parentChain,
+//             element_type: item.value,
+//             element_name: item.label,
+//             description: '', // we don't capture description into tree label here; extend if needed
+//             ikon: item.icon || '',
+//             style: '',
+//             coordinates: coords,
+//             open: (item.checked ? 'true' : 'false'),
+//             user_created: 'webuser',
+//             user_updated: 'webuser',
+//             creation_date_time: new Date().toISOString().slice(0,19).replace('T',' '),
+//             updation_date_time: new Date().toISOString().slice(0,19).replace('T',' '),
+//             element_sl: index + 1
+//           });
+
         });
     
-   console.log(mapItems)     
+   console.log(mapItems) 
+   
+   
+
+
 
   },
 
@@ -669,6 +695,7 @@ const kmlIcon = "./img/kml1.png";
         if (overlays.length) {
           featureLayers[id] = overlays; // always array
           item.checked = true; // mark checked by default so checkbox matches visible overlays
+          item.overlay=overlays;
         }
       }
       return item;
@@ -1120,7 +1147,9 @@ function setActiveButton(buttonId) {
     }
 }     
 
-window.onload = initMap;
+// window.onload = initMap;
+
+export { initMap};
 
 
 
