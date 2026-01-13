@@ -12,7 +12,7 @@ d[q]=n;a.onerror=()=>o(Error(p+" could not load."));m.head.append(a)}));
 d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(n,...o)=>r.add(n)&&f().then(()=>d[l](n,...o))})
 ({key:"AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE", v:"weekly"});
 const minPixelDistance = 8; 
-let map, mode = null, statusEl, ctxMenu, selectedTarget,isMouseDown,isDragging=false,arrowMarker,isDrawing = false;
+let map, mode = null,oldMode=null, statusEl, ctxMenu, selectedTarget,isMouseDown,isDragging=false,arrowMarker,isDrawing = false;
 let polylineSelected=false,markerSelected=false;
 let selectedPolyline,selectedMarker;
 let curpolyline,curmarker,prpolyline,prmarker;
@@ -64,33 +64,97 @@ async function initMap() {
 
 
   $("#mode-ui").verticalToolbar({
-  tools: [
-    { id: "point", title: "Point", icon: "./img/point.svg" },
-    { id: "route", title: "Route", html: '<i class="fas fa-route"></i>' },
-    { id: "line", title: "Line", icon: "./img/polyline.svg" },
-    { id: "polygon", title: "Polygon", icon: "./img/polygon.png" },
-    { id: "scale", title: "Scale", html: '<i class="fas fa-ruler-horizontal"></i>' },
-    { id: "select", title: "Select", icon: "./img/select.svg" },
-    { id: "resize", title: "Resize", icon: "./img/resize.svg" },
-    { id: "delete", title: "Delete", icon: "./img/delete.svg" },
-    { id: "undo", title: "Undo", icon: "./img/undo.svg" },
-    { id: "redo", title: "Redo", icon: "./img/redo.svg" },
-    { id: "export", title: "Export", icon: "./img/download.svg" },
-    { id: "upload", title: "Upload", icon: "./img/upload.svg" }
-  ],
+    tools: [
+      { id: "point", title: "Point", icon: "./img/point.svg" },
+      { id: "route", title: "Route", html: '<i class="fas fa-route"></i>' },
+      { id: "line", title: "Line", icon: "./img/polyline.svg" },
+      { id: "polygon", title: "Polygon", icon: "./img/polygon.png" },
+      { id: "scale", title: "Scale", html: '<i class="fas fa-ruler-horizontal"></i>' },
+      { id: "select", title: "Select", icon: "./img/select.svg" },
+      { id: "resize", title: "Resize", icon: "./img/resize.svg" },
+      { id: "delete", title: "Delete", icon: "./img/delete.svg" },
+      { id: "undo", title: "Undo", icon: "./img/undo.svg" },
+      { id: "redo", title: "Redo", icon: "./img/redo.svg" },
+      { id: "export", title: "Export", icon: "./img/download.svg" },
+      { id: "upload", title: "Upload", icon: "./img/upload.svg" }
+    ],
 
-  onSelect: function (tool) {
-    console.log("Tool selected:", tool.id);
-  }
-});
+      onSelect: function ({ id }) {
+      if (toolActions[id]) {
+          oldMode=mode;
+          mode = id;
+          statusEl.textContent = `Mode: ${mode}`;
+          google.maps.event.clearInstanceListeners(map);
+          toolActions[id]();
+      } else {
+         console.warn("No action defined for:", id);
+      }
+    }
+  });
+
+  const toolActions = {
+    point() {
+      console.log("Point mode activated");
+      editMarker.setMarker()
+      // activatePointMode();
+    },
+
+    route() {
+      console.log("Route mode activated");
+      editPolyline.setRoute()
+    },
+
+    line() {
+      console.log("Line mode activated");
+    },
+
+    polygon() {
+      console.log("Polygon mode activated");
+    },
+
+    scale() {
+      console.log("Scale tool activated");
+    },
+
+    select() {
+      console.log("Select mode activated");
+      // clear previous mode
+       if(oldMode=="Route")  editPolyline.clearDrawing();
+
+        
+    },
+
+    resize() {
+      console.log("Resize tool activated");
+    },
+
+    delete() {
+      console.log("Delete all");
+    },
+
+    undo() {
+      console.log("Undo last action");
+    },
+
+    redo() {
+      console.log("Redo last action");
+    },
+
+    export() {
+      console.log("Export data");
+    },
+
+    upload() {
+      console.log("Upload data");
+    }
+  };
 
 
 
 
 
 
-
- bindToolButtons(Marker);
+  bindToolButtons(Marker);
 
 
 
