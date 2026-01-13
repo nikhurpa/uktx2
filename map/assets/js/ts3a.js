@@ -130,10 +130,13 @@ async function initMap() {
 
     delete() {
       console.log("Delete all");
+        if(mode=="point") editMarker.remove();
+        if(mode=="route") editPolyline.remove();
     },
 
     undo() {
       console.log("Undo last action");
+        if(mode=="route") editPolyline.undo();
     },
 
     redo() {
@@ -154,19 +157,22 @@ async function initMap() {
 
 
 
-  bindToolButtons(Marker);
+  // bindToolButtons(Marker);
 
 
 
 
-  document.getElementById("undo-button").addEventListener("click",()=>{
-    if(mode=="Route") editPolyline.undo();
-  })
+  // document.getElementById("undo-button").addEventListener("click",()=>{
+  //   if(mode=="Route") editPolyline.undo();
+  // })
 
-   document.getElementById("delete-button").addEventListener("click",()=>{
-    if(mode=="Marker") editMarker.remove();
-    if(mode=="Route") editPolyline.remove();
-  })
+  //  document.getElementById("delete-button").addEventListener("click",()=>{
+  //   if(mode=="Marker") editMarker.remove();
+  //   if(mode=="Route") editPolyline.remove();
+
+  // })
+
+
   document.getElementById("btn-hide").addEventListener("click",()=>{
 
     
@@ -203,43 +209,52 @@ async function initMap() {
   
 }
 
-function bindToolButtons(AdvancedMarkerElement) {
+// function bindToolButtons(AdvancedMarkerElement) {
   
-  document.getElementById("btnMarker").onclick = () => setMode("Marker");
-  document.getElementById("btnLine").onclick = () => setMode("Line");
-  document.getElementById("btnRoute").onclick = () => setMode("Route");
-  document.getElementById("btnClear").onclick = () => setMode("Clear");
+//   document.getElementById("btnMarker").onclick = () => setMode("Marker");
+//   document.getElementById("btnLine").onclick = () => setMode("Line");
+//   document.getElementById("btnRoute").onclick = () => setMode("Route");
+//   document.getElementById("btnClear").onclick = () => setMode("Clear");
   
-}
+// }
 
+/// new function addDiv({ id, className = "", parent = document.body, innerHTML = "" }) {
 function setMode(newMode) {
-  let oldMode=mode;
-  mode = newMode;
-  ["btnMarker","btnLine","btnRoute","btnClear"].forEach(id=>{
-    document.getElementById(id).classList.toggle("active", id==="btn"+newMode);
-  });
-  statusEl.textContent = `Mode: ${newMode}`;
-  google.maps.event.clearInstanceListeners(map);
+$("#" + newMode).trigger("click");
+}
 
-      if(mode=="Clear") {
-        if(oldMode=="Route")  editPolyline.clearDrawing();
 
-        }
+///
+
+
+// function setMode(newMode) {
+//   let oldMode=mode;
+//   mode = newMode;
+//   ["btnMarker","btnLine","btnRoute","btnClear"].forEach(id=>{
+//     document.getElementById(id).classList.toggle("active", id==="btn"+newMode);
+//   });
+//   statusEl.textContent = `Mode: ${newMode}`;
+//   google.maps.event.clearInstanceListeners(map);
+
+//       if(mode=="Clear") {
+//         if(oldMode=="Route")  editPolyline.clearDrawing();
+
+//         }
 
   
-      if(mode=="Route") {
-          // document.getElementById("undo-button").addEventListener("click",editPolyline.undo())
-          editPolyline.setRoute()
+//       if(mode=="Route") {
+//           // document.getElementById("undo-button").addEventListener("click",editPolyline.undo())
+//           editPolyline.setRoute()
          
-        }
+//         }
 
-      if(mode=="Marker") {
-          editMarker.setMarker()
+//       if(mode=="Marker") {
+//           editMarker.setMarker()
  
-        }
+//         }
 
 
-}
+// }
 
 let editPolyline ={
 
