@@ -11,6 +11,7 @@ e.set("callback",c+".maps."+q);a.src=`https://maps.googleapis.com/maps/api/js?`+
 d[q]=n;a.onerror=()=>o(Error(p+" could not load."));m.head.append(a)}));
 d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(n,...o)=>r.add(n)&&f().then(()=>d[l](n,...o))})
 ({key:"AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE", v:"weekly"});
+// ------------------- End Asynch Loader-------------------
 const minPixelDistance = 8; 
 let map, mode = null,oldMode=null, statusEl, ctxMenu, selectedTarget,isMouseDown,isDragging=false,arrowMarker,isDrawing = false;
 let polylineSelected=false,markerSelected=false;
@@ -152,15 +153,7 @@ async function initMap() {
     }
   };
 
-
-
-
-
-
   // bindToolButtons(Marker);
-
-
-
 
   // document.getElementById("undo-button").addEventListener("click",()=>{
   //   if(mode=="Route") editPolyline.undo();
@@ -218,7 +211,7 @@ async function initMap() {
   
 // }
 
-/// new function addDiv({ id, className = "", parent = document.body, innerHTML = "" }) {
+/// new function 
 function setMode(newMode) {
 $("#" + newMode).trigger("click");
 }
