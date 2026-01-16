@@ -449,8 +449,7 @@ let editMarker = {
 ////////////////////////////////////////////////////////////////////////////////////
 
 let panel = {
-
-   loadKml:function() {
+  loadKml:function() {
 
     $("#kmlFile").on("change", async (e) => {
           const file = e.target.files[0];
@@ -534,8 +533,7 @@ let panel = {
     
     
     
-    },
-
+  },
   uploadKml:function(id){
     let items = $('#jqxTree').jqxTree('getItems');
     const fileToMatch = ["blocks.kml"];
@@ -545,7 +543,6 @@ let panel = {
     console.log(fileNode);
 
   }   ,
-
   getDescendants: function (items, parentId) {
     const descendants = [];
 
@@ -617,9 +614,6 @@ let panel = {
 
 
   },
-
-
-
 
 }
 

@@ -32,10 +32,16 @@ window.onload = async function () {
       innerHTML: ` <div id="menuView">View details</div>
         <div id="menuEdit">Edit details</div>`});
 
-    addDiv({ id: "myplacesidebar", className: "myplacesidebar", parent: document.body,
-      innerHTML: `
-        <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 0; margin: 0; min-width: auto;">
-        <i id="ikonhide" class="fa fa-minus-square px-10"></i>
+    addDiv({ id: "contextMenu1", className: "context-menu", parent: document.body,
+              innerHTML: `<div class="context-item" id="ctxEdit">Edit</div>
+              <div class="context-item" id="ctxDelete">Delete</div>
+              <div class="context-item" id="ctxSave">Save to My Places</div>
+            `});
+
+    addDiv({ id: "right-panel", parent: document.body,
+        innerHTML: `    
+        <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
+       
         </button>  
         <div class="controls">
           <button id="saveSelected" class="btn small">Save Selected</button>
@@ -46,20 +52,7 @@ window.onload = async function () {
           <input id="kmlFile" type="file" accept=".kml" />
           <div style="height:10px"></div>
           <div id="jqxTree" class="card-body"></div>
-        </div>
-               `});
-       
-   
-
-    addDiv({ id: "contextMenu1", className: "context-menu", parent: document.body,
-              innerHTML: `<div class="context-item" id="ctxEdit">Edit</div>
-              <div class="context-item" id="ctxDelete">Delete</div>
-              <div class="context-item" id="ctxSave">Save to My Places</div>
-            `});
-
-    addDiv({ id: "right-panel", parent: document.body,
-        innerHTML: ` <h3>Right Panel</h3>
-        <p>This is a simple hideable panel.</p>`,
+        </div>`,
             });
 
 

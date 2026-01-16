@@ -1,3 +1,13 @@
+const KMLIcons = {
+  file: "./img/kml.jpg",
+  folder: "./img/folder.png",
+  document: "./img/document.jpg",
+  point: "./img/point_icon.png",
+  polyline: "./img/polyline.svg",
+  polygon: "./img/polygon.png",
+  default: "./img/placemark.png"
+};
+
 class PolylineManager {
   constructor(map,onVertexClick,index,setMode) {
 
@@ -606,7 +616,7 @@ class DraggableAdvancedMarker {
 
 
 
-class LayerManager {
+class LayerManager1 {
   constructor(map) {
     this.map = map;
     this.layers = {}; // tableName -> { type, manager }
@@ -709,4 +719,472 @@ class LayerManager {
   }
 }
 
-export { PolylineManager , AdvanceMarkerManager , DraggableAdvancedMarker , LayerManager };  
+
+// class KMLViewer {
+//   constructor({ map, treeSelector }) {
+//     this.map = map;
+//     this.bounds = new google.maps.LatLngBounds();
+//     this.infoWindow = new google.maps.InfoWindow();
+
+//     this.layerManager = new LayerManager(map, this.bounds, this.infoWindow);
+//     this.treeManager = new TreeManager(treeSelector, this.layerManager);
+//   }
+
+//   async loadFile(file) {
+//     const xml = await KMLParser.parseFile(file);
+//     const treeData = this.layerManager.buildFromKML(xml);
+//     this.treeManager.load(treeData);
+//     this.map.fitBounds(this.bounds);
+//   }
+// }
+
+class KMLParser {
+
+  static async parseFile(file) {
+    const name = file.name.toLowerCase();
+
+    if (name.endsWith(".kml")) {
+      const text = await file.text();
+      return new DOMParser().parseFromString(text, "text/xml");
+    }
+
+    if (name.endsWith(".kmz")) {
+      const buffer = await file.arrayBuffer();
+      const zip = await JSZip.loadAsync(buffer);
+      const kmlName = Object.keys(zip.files)
+        .find(n => n.toLowerCase().endsWith(".kml"));
+
+      if (!kmlName) {
+        throw new Error("No KML found inside KMZ");
+      }
+
+      const kmlText = await zip.files[kmlName].async("text");
+      return new DOMParser().parseFromString(kmlText, "text/xml");
+    }
+
+    throw new Error("Unsupported file type");
+  }
+}
+
+class KMLViewer {
+
+  constructor(map, treeSelector = "#jqxTree", fileInput = "#kmlFile") {
+    this.map = map;
+    this.treeSelector = treeSelector;
+    this.fileInput = fileInput;
+
+    this.featureLayers = {};
+    this.bounds = new google.maps.LatLngBounds();
+    this.idCounter = 0;
+    this.suppressCheckChange = false;
+
+    this.init();
+  }
+
+  init() {
+    this.bindFileInput();
+    this.bindTreeEvents();
+  }
+
+  bindFileInput() {
+    $(this.fileInput).on("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const xml = await KMLParser.parseFile(file);
+        this.loadKML(xml, file.name);
+      } catch (err) {
+        console.error(err);
+        alert(err.message);
+      }
+    });
+  }
+
+  loadKML(xmlDoc, fileName) {
+    const treeData = this.buildTreeData(xmlDoc);
+
+    const fileNodeId = "file" + (++this.idCounter);
+    const fileNode = {
+      id: fileNodeId,
+      label: fileName,
+      checked: true,
+      icon: KMLIcons.file,
+      value: "file_" + fileName,
+      items: treeData
+    };
+
+    const tempPlaces = $(this.treeSelector).find("#tempplaces")[0];
+    $(this.treeSelector).jqxTree("addTo", fileNode, tempPlaces);
+
+    if (!this.bounds.isEmpty()) {
+      this.map.fitBounds(this.bounds);
+    }
+  }
+
+  // ---------- TREE ----------
+  bindTreeEvents() {
+    const $tree = $(this.treeSelector);
+
+    $tree.on("checkChange", (e) => {
+      if (this.suppressCheckChange) return;
+      const id = e.args.element?.id;
+      if (!id) return;
+      this.setVisibility(id, e.args.checked);
+    });
+
+    $tree.on("itemClick", (e) => {
+      this.zoomToFeature(e.args.element?.id);
+    });
+  }
+
+  // ---------- VISIBILITY ----------
+  setVisibility(id, visible) {
+    const overlays = this.featureLayers[id];
+    if (!overlays) return;
+
+    overlays.forEach(ov => ov.setMap(visible ? this.map : null));
+  }
+
+  // ---------- MAP ----------
+  zoomToFeature(id) {
+    const overlays = this.featureLayers[id];
+    if (!overlays?.length) return;
+
+    const first = overlays[0];
+
+    if (first.getPosition) {
+      this.map.panTo(first.getPosition());
+      this.map.setZoom(10);
+      return;
+    }
+
+    const b = new google.maps.LatLngBounds();
+    if (first.getPath) first.getPath().forEach(p => b.extend(p));
+    if (first.getPaths) first.getPaths().forEach(path => path.forEach(p => b.extend(p)));
+    this.map.fitBounds(b);
+  }
+
+  // ---------- TREE BUILD ----------
+  buildTreeData(xmlDoc) {
+    const root =
+      xmlDoc.getElementsByTagName("Document")[0] ||
+      xmlDoc.getElementsByTagName("Folder")[0] ||
+      xmlDoc.documentElement;
+
+    return [this.buildTreeNode(root)];
+  }
+
+  buildTreeNodeold(node) {
+    const id = "item" + (++this.idCounter);
+    const item = {
+      id,
+      label: this.nodeLabel(node),
+      items: []
+    };
+
+    if (node.tagName === "Folder" || node.tagName === "Document") {
+      item.checked = true;
+
+      [...node.children].forEach(child => {
+        if (["Folder", "Document", "Placemark"].includes(child.tagName)) {
+          item.items.push(this.buildTreeNode(child));
+        }
+      });
+    }
+
+    if (node.tagName === "Placemark") {
+      const overlays = this.createOverlays(node);
+      if (overlays.length) {
+        this.featureLayers[id] = overlays;
+        item.checked = true;
+      }
+    }
+
+    return item;
+  }
+
+  buildTreeNode(node) {
+    const id = "item" + (++this.idCounter);
+
+    const item = {
+      id,
+      label: this.nodeLabel(node),
+      items: []
+    };
+
+    // Folder / Document
+    if (node.tagName === "Folder" || node.tagName === "Document") {
+      item.checked = true;
+      item.icon = node.tagName === "Folder"
+        ? KMLIcons.folder
+        : KMLIcons.document;
+
+      [...node.children].forEach(child => {
+        if (["Folder", "Document", "Placemark"].includes(child.tagName)) {
+          item.items.push(this.buildTreeNode(child));
+        }
+      });
+    }
+
+    // Placemark
+    if (node.tagName === "Placemark") {
+      const overlays = this.createOverlays(node);
+      if (overlays.length) {
+        this.featureLayers[id] = overlays;
+        item.checked = true;
+        item.icon = this.getPlacemarkIcon(node);
+      }
+    }
+
+    return item;
+  }
+
+getPlacemarkIcon(node) {
+  if (node.getElementsByTagName("Point").length) {
+    return KMLIcons.point;
+  }
+  if (node.getElementsByTagName("LineString").length) {
+    return KMLIcons.polyline;
+  }
+  if (node.getElementsByTagName("Polygon").length) {
+    return KMLIcons.polygon;
+  }
+  return KMLIcons.default;
+}
+
+  // ---------- OVERLAYS ----------
+  createOverlays(node) {
+    const overlays = [];
+    const coordsNode = node.getElementsByTagName("coordinates")[0];
+    if (!coordsNode) return overlays;
+
+    const coords = coordsNode.textContent.trim()
+      .split(/\s+/)
+      .map(c => {
+        const [lon, lat] = c.split(",").map(Number);
+        return { lat, lng: lon };
+      });
+
+    if (node.getElementsByTagName("Point").length) {
+      const marker = new google.maps.Marker({
+        position: coords[0],
+        map: this.map
+      });
+      overlays.push(marker);
+      this.bounds.extend(coords[0]);
+    }
+
+    if (node.getElementsByTagName("LineString").length) {
+      const line = new google.maps.Polyline({
+        path: coords,
+        map: this.map
+      });
+      overlays.push(line);
+      coords.forEach(c => this.bounds.extend(c));
+    }
+
+    if (node.getElementsByTagName("Polygon").length) {
+      const poly = new google.maps.Polygon({
+        paths: coords,
+        map: this.map
+      });
+      overlays.push(poly);
+      coords.forEach(c => this.bounds.extend(c));
+    }
+
+    return overlays;
+  }
+
+  nodeLabel(node) {
+    const name = node.getElementsByTagName("name")[0];
+    return name?.textContent || node.tagName;
+  }
+}
+
+
+class LayerManager {
+  constructor(map, bounds, infoWindow) {
+    this.map = map;
+    this.bounds = bounds;
+    this.infoWindow = infoWindow;
+    this.layers = {};
+    this.idCounter = 0;
+  }
+
+  buildFromKML(xml) {
+    const root =
+      xml.querySelector("Document") ||
+      xml.querySelector("Folder") ||
+      xml.documentElement;
+
+    return [this._buildNode(root)];
+  }
+
+  _buildNode(node) {
+    const id = "item" + (++this.idCounter);
+    const label = node.querySelector("name")?.textContent || node.tagName;
+
+    const item = { id, label, items: [] };
+    this.layers[id] = { id, overlays: [], children: [], visible: true };
+
+    if (node.tagName === "Folder" || node.tagName === "Document") {
+      item.checked = true;
+
+      [...node.children].forEach(child => {
+        if (["Folder", "Document", "Placemark"].includes(child.tagName)) {
+          const childItem = this._buildNode(child);
+          item.items.push(childItem);
+          this.layers[id].children.push(childItem.id);
+        }
+      });
+    }
+
+    if (node.tagName === "Placemark") {
+      const overlays = this._buildPlacemark(node);
+      this.layers[id].overlays = overlays;
+      item.checked = true;
+    }
+
+    return item;
+  }
+
+  _buildPlacemark(node) {
+    const overlays = [];
+    const desc = node.querySelector("description")?.textContent ?? "";
+
+    const parseCoords = text =>
+      text.trim().split(/\s+/).map(c => {
+        const [lon, lat] = c.split(",").map(Number);
+        return { lat, lng: lon };
+      });
+
+    // Point
+    const point = node.querySelector("Point coordinates");
+    if (point) {
+      const pos = parseCoords(point.textContent)[0];
+      overlays.push(this._createMarker(pos, node, desc));
+    }
+
+    // LineString
+    const line = node.querySelector("LineString coordinates");
+    if (line) {
+      overlays.push(this._createPolyline(parseCoords(line.textContent), desc));
+    }
+
+    // Polygon
+    const poly = node.querySelector("Polygon outerBoundaryIs coordinates");
+    if (poly) {
+      overlays.push(this._createPolygon(parseCoords(poly.textContent), desc));
+    }
+
+    return overlays;
+  }
+
+  _createMarker(position, node, desc) {
+    const icon = node.querySelector("Icon href")?.textContent || "./img/point_icon.png";
+    const img = document.createElement("img");
+    img.src = icon;
+    img.style.width = "20px";
+
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      position,
+      content: img,
+      map: this.map
+    });
+
+    if (desc) {
+      marker.addListener("click", () => {
+        this.infoWindow.setContent(desc);
+        this.infoWindow.open(this.map, marker);
+      });
+    }
+
+    this.bounds.extend(position);
+    return marker;
+  }
+
+  _createPolyline(path, desc) {
+    const poly = new google.maps.Polyline({
+      path,
+      strokeColor: "#0000FF",
+      strokeWeight: 3,
+      map: this.map
+    });
+
+    if (desc) {
+      poly.addListener("click", e => {
+        this.infoWindow.setContent(desc);
+        this.infoWindow.setPosition(e.latLng);
+        this.infoWindow.open(this.map);
+      });
+    }
+
+    path.forEach(p => this.bounds.extend(p));
+    return poly;
+  }
+
+  _createPolygon(path, desc) {
+    const poly = new google.maps.Polygon({
+      paths: path,
+      strokeColor: "#FF0000",
+      fillColor: "#FFCCCC",
+      map: this.map
+    });
+
+    if (desc) {
+      poly.addListener("click", e => {
+        this.infoWindow.setContent(desc);
+        this.infoWindow.setPosition(e.latLng);
+        this.infoWindow.open(this.map);
+      });
+    }
+
+    path.forEach(p => this.bounds.extend(p));
+    return poly;
+  }
+
+  setVisibility(id, visible) {
+    const layer = this.layers[id];
+    if (!layer) return;
+
+    layer.visible = visible;
+    layer.overlays.forEach(o => o.setMap(visible ? this.map : null));
+    layer.children.forEach(cid => this.setVisibility(cid, visible));
+  }
+}
+
+class TreeManager {
+  constructor(selector, layerManager) {
+    this.$tree = $(selector);
+    this.layerManager = layerManager;
+    this.suppress = false;
+
+    this.$tree.on("checkChange", e => {
+      if (this.suppress) return;
+      this.layerManager.setVisibility(
+        e.args.element.id,
+        e.args.checked
+      );
+    });
+  }
+
+  load(data) {
+    this.$tree.jqxTree({
+      source: data,
+      checkboxes: true
+    });
+  }
+
+  syncCheck(id, checked) {
+    this.suppress = true;
+    checked
+      ? this.$tree.jqxTree("checkItem", document.getElementById(id))
+      : this.$tree.jqxTree("uncheckItem", document.getElementById(id));
+    this.suppress = false;
+  }
+}
+
+
+
+export { PolylineManager , AdvanceMarkerManager , DraggableAdvancedMarker , LayerManager , KMLParser, KMLViewer, TreeManager, LayerManager1};  
