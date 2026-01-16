@@ -1,5 +1,5 @@
 import { loadJS, loadCSS, loadModule ,addDiv} from "./loader.js";
-import { initMap } from "./ts3a.js";
+import { initMap } from "./m1map.js";
 
 
 window.onload = async function () {
@@ -7,8 +7,8 @@ window.onload = async function () {
     console.log("Page loaded");
 
     // Load  CSS
-    await loadCSS("./assets/css/ts3a.css");
-    // await loadCSS("./assets/css/ts3a.css");
+    await loadCSS("./assets/css/m1map.css");
+    await loadCSS("./assets/css/jqrightpanel.css");
     await loadCSS("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css");
     await loadCSS("./plugins/jqwidgets/styles/jqx.base.css");
 
@@ -23,6 +23,7 @@ window.onload = async function () {
     await loadJS("./plugins/jqwidgets/jqxmenu.js");
     await loadJS("./plugins/jqwidgets/jqxdragdrop.js");
     await loadJS("./assets/js/jqverticaltoolbar.js");
+    await loadJS("./assets/js/jqrightpanel.js");
 
     addDiv({ id: "map" , parent: document.body});
     addDiv({ id: "status", className: "status", parent: document.body,text: "Select a mode…" });
@@ -50,11 +51,20 @@ window.onload = async function () {
        
    
 
-        addDiv({ id: "contextMenu1", className: "context-menu", parent: document.body,
+    addDiv({ id: "contextMenu1", className: "context-menu", parent: document.body,
               innerHTML: `<div class="context-item" id="ctxEdit">Edit</div>
               <div class="context-item" id="ctxDelete">Delete</div>
               <div class="context-item" id="ctxSave">Save to My Places</div>
             `});
+
+    addDiv({ id: "right-panel", parent: document.body,
+        innerHTML: ` <h3>Right Panel</h3>
+        <p>This is a simple hideable panel.</p>`,
+            });
+
+
+
+
 
 
 //  Top-right mode selection UI
@@ -77,7 +87,7 @@ window.onload = async function () {
 
 
 
-    await loadModule("./assets/js/ts3a.js");
+    await loadModule("./assets/js/m1map.js");
 
     console.log("All resources loaded");
     initMap();

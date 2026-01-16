@@ -1,0 +1,44 @@
+/* Panel */
+.rsp-panel {
+  position: fixed;
+  top: 50px;
+  right: -320px;
+  width: 320px;
+  height: calc(100% - 50px);
+  background: #fff;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+  transition: right 0.3s ease;
+  z-index: 1000;
+}
+
+/* Open state */
+.rsp-panel.open {
+  right: 0;
+}
+
+/* Pull handle */
+.rsp-handle {
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 60px;
+  background: #007bff;
+  border-radius: 6px 0 0 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rsp-handle::before {
+  content: "❮❮";
+  color: #fff;
+  font-size: 12px;
+}
+
+/* Flip arrow when open */
+.rsp-panel.open .rsp-handle::before {
+  content: "❯❯";
+}

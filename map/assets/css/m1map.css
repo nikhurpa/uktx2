@@ -184,26 +184,4 @@ body {
         width: 100%;
       }
       
-  #right-panel {
-  position: fixed;
-  top: 0;
-  right: -300px;            /* hidden */
-  width: 300px;
-  height: 100%;
-  background: #ffffff;
-  box-shadow: -2px 0 8px rgba(0,0,0,0.2);
-  transition: right 0.3s ease;
-  padding: 15px;
-  z-index: 1000;
-}
-
-#right-panel.open {
-  right: 0;
-}
-
-#toggle-panel {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1100;
-}  
+  

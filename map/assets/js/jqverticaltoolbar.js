@@ -62,3 +62,49 @@
   };
 
 })(jQuery);
+
+
+(function ($) {
+
+  $.fn.rightSlidePanel = function (options) {
+
+    const settings = $.extend({
+      topOffset: 48,
+      width: 320
+    }, options);
+
+    return this.each(function () {
+
+      const $panel = $(this)
+        .addClass("right-panel")
+        .css({
+          top: settings.topOffset,
+          width: settings.width,
+          right: -settings.width
+        });
+
+      // Create hamburger
+      const $toggle = $(`
+        <div class="rp-toggle">
+          <span></span><span></span><span></span>
+        </div>
+      `).appendTo("body");
+
+      function open() {
+        $panel.addClass("open").css("right", 0);
+      }
+
+      function close() {
+        $panel.removeClass("open").css("right", -settings.width);
+      }
+
+      $toggle.on("click", function () {
+        $panel.hasClass("open") ? close() : open();
+      });
+
+      // Expose API
+      $panel.data("rightSlidePanel", { open, close });
+    });
+  };
+
+})(jQuery);
