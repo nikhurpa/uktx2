@@ -1,4 +1,4 @@
-import { PolylineManager , AdvanceMarkerManager , DraggableAdvancedMarker , LayerManager } from "./mapClasses.js";
+import { PolylineManager , AdvanceMarkerManager , DraggableAdvancedMarker , LayerManager ,KMLViewer,KMLParser,  TreeManager, LayerManager1} from "./mapClasses.js";
 // import { kml } from "https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.0.1/dist/togeojson.esm.js"
  import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
@@ -25,6 +25,7 @@ let polylines=[],markers=[];
 let polylineindex=0;
 let nextmarkerindex,prmarkerindex,markerindex;
 let tempTree;
+
 
 
 
@@ -98,9 +99,9 @@ async function initMap() {
          console.warn("No action defined for:", id);
       }
     }
-  });
+   });
 
-  const toolActions = {
+   const toolActions = {
     point() {
       console.log("Point mode activated");
       editMarker.setMarker()
@@ -158,48 +159,27 @@ async function initMap() {
     upload() {
       console.log("Upload data");
     }
-  };
+   };
  
-  document.getElementById("clearTemp").addEventListener("click",()=>{
+   document.getElementById("clearTemp").addEventListener("click",()=>{
 
     var items = $('#jqxTree').jqxTree('getItems');
     console.log(items)
-  })
+   })
 
-
-
-
-
-  document.getElementById("btn-hide").addEventListener("click",()=>{
-
-   
+  
   ctxMenu = document.getElementById("contextMenu");
   
-       
-    $('.myplacesidebar').toggleClass("is-active");
-      if ( $('#ikonhide').hasClass("fa fa-minus-square") ) {
-          $('#ikonhide').removeClass("fa fa-minus-square")
-          $('#ikonhide').addClass("fa fa-plus-square")
-        
-          $('#sidepanel' ).hide(1)
-        
-  
-      } else {
-          $('#ikonhide').removeClass("fa fa-plus-square")
-          $('#ikonhide').addClass("fa fa-minus-square")
 
-            $('#sidepanel' ).show(1);
-        
-
-      }
-
-  });
-
-  
-
-
-
+   
   panel.loadKml()
+
+//   const viewer = new KMLViewer(map);
+
+//   document.getElementById("kmlFile").addEventListener("change", e => {
+//   viewer.loadFile(e.target.files[0]);
+// });
+
   
 }
 
@@ -377,10 +357,10 @@ let editMarker = {
 
 let panel = {
 
-   loadKml:function() {
+  loadKml:function() {
 
         $("#kmlFile").on("change", async (e) => {
-              const file = e.target.files[0];
+            const file = e.target.files[0];
             if (!file) return;
 
             try {
@@ -454,14 +434,14 @@ let panel = {
         });
       
             
-        treeEdit()
+        // treeEdit()
         
       
 
         
         
         
-        },
+  },
 
   uploadKml:function(id){
     let items = $('#jqxTree').jqxTree('getItems');
@@ -469,9 +449,9 @@ let panel = {
 
     const fileNode = this.createSql(items,id)
 
-    console.log(fileNode);
+    console.log("f:" + fileNode);
 
-  }   ,
+  },
 
   getDescendants: function (items, parentId) {
     const descendants = [];
@@ -545,6 +525,13 @@ let panel = {
 
 
 }
+
+
+
+
+
+
+
 
 
 
