@@ -52,4 +52,29 @@ function addDiv({
   return div;
 }
 
-export { loadCSS, loadJS, loadModule, addDiv };
+
+const Router = {
+  routes: {},
+
+  add(path, handler) {
+    this.routes[path] = handler;
+  },
+
+  go(path) {
+    history.pushState({}, "", path);
+    this.resolve();
+  },
+
+  start() {
+    window.addEventListener("popstate", () => this.resolve());
+    this.resolve();
+  },
+
+  resolve() {
+    const path = location.pathname;
+    this.routes[path]?.();
+  }
+};
+
+
+export { loadCSS, loadJS, loadModule, addDiv, Router };

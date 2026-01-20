@@ -85,7 +85,9 @@ async function initMap() {
       { id: "undo", title: "Undo", icon: "./img/undo.svg" },
       { id: "redo", title: "Redo", icon: "./img/redo.svg" },
       { id: "export", title: "Export", icon: "./img/download.svg" },
-      { id: "upload", title: "Upload", icon: "./img/upload.svg" }
+      { id: "upload", title: "Upload", icon: "./img/upload.svg" },
+      { id: "maps", title: "Maps", html: '<i class="fas fa-globe"></i>', href:"#/map" },
+      { id: "kml", title: "KML", html: '<i class="fas fa-map"></i>', href:"#/kml" },
     ],
 
       onSelect: function ({ id }) {
