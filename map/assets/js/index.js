@@ -1,4 +1,5 @@
 import { loadJS, loadCSS, loadModule ,addDiv,Router} from "./loader.js";
+import { initMap } from "./m.js";
 
 // Router.add("/maps", () => initMap());
 Router.add("/", () => console.log("Home"));
@@ -62,11 +63,9 @@ window.onload = async function () {
 //  Top-right mode selection UI
     addDiv({ id: "mode-ui", parent: document.body, });
 
-
-    // await loadModule("./assets/js/m1map.js");
-
+    await loadModule("./assets/js/m.js");
    
-    // initMap();
+    initMap();
 
      console.log("All resources loaded");
   } catch (err) {
