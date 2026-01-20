@@ -3,7 +3,7 @@ import { initMap } from "./m.js";
 
 // Router.add("/maps", () => initMap());
 Router.add("/", () => console.log("Home"));
-Router.add("/route", () => console.log("Route page"));
+Router.add("/maps", () => console.log("maps page"));
 
 Router.add("/kml", () => {
 console.log("KML page");

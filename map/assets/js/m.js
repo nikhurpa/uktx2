@@ -2,6 +2,7 @@ import { PolylineManager , AdvanceMarkerManager , DraggableAdvancedMarker , Laye
 // import { kml } from "https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.0.1/dist/togeojson.esm.js"
  import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
+import { loadJS, loadCSS, loadModule ,addDiv,Router} from "./loader.js";
 
 // ------------------- Asynch Loader-------------------
 (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams;
@@ -54,7 +55,7 @@ async function initMap() {
 //   marker = new AdvanceMarkerManager(map);
 //   polyline = new PolylineManager(map,editPolyline.handleVertexClick,null,setMode)
 
-//   statusEl = document.getElementById("status");
+  statusEl = document.getElementById("status");
   
   $("#right-panel").rightPullPanel({
     width: 300,
@@ -160,7 +161,16 @@ async function initMap() {
 
     upload() {
       console.log("Upload data");
-    }
+    },
+    maps() {
+      console.log("maps");
+      Router.go("uktx/map/#/maps");
+    },
+    kml() {
+      console.log("Upload data");
+      Router.go("uktx/map/#/kml");
+    },
+   
    };
  
    document.getElementById("clearTemp").addEventListener("click",()=>{
