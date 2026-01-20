@@ -1,4 +1,4 @@
-import { PolylineManager , AdvanceMarkerManager , DraggableAdvancedMarker , LayerManager ,KMLViewer,KMLParser,  TreeManager, LayerManager1} from "./mapClasses.js";
+import { PolylineManager , PolylineEditor} from "./mapClasses2.js";
 // import { kml } from "https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.0.1/dist/togeojson.esm.js"
  import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
@@ -55,6 +55,8 @@ async function initMap() {
 //   marker = new AdvanceMarkerManager(map);
 //   polyline = new PolylineManager(map,editPolyline.handleVertexClick,null,setMode)
 
+  let manager = new PolylineManager(map);
+
   statusEl = document.getElementById("status");
   
   $("#right-panel").rightPullPanel({
@@ -69,7 +71,7 @@ async function initMap() {
 
   ];
 
-    $("#jqxTree").jqxTree({ source: treeSource, width: "100%", height: "300px", checkboxes: true ,allowDrag: true, allowDrop: true});
+  $("#jqxTree").jqxTree({ source: treeSource, width: "100%", height: "300px", checkboxes: true ,allowDrag: true, allowDrop: true});
 
 
 
@@ -97,6 +99,7 @@ async function initMap() {
           mode = id;
           statusEl.textContent = `Mode: ${mode}`;
           google.maps.event.clearInstanceListeners(map);
+          manager.disable();
           toolActions[id]();
       } else {
          console.warn("No action defined for:", id);
@@ -113,7 +116,8 @@ async function initMap() {
 
     route() {
       console.log("Route mode activated");
-      editPolyline.setRoute()
+      manager.enable();
+      // editPolyline.setRoute()
     },
 
     line() {

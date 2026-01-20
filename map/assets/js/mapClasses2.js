@@ -3,6 +3,36 @@ class PolylineManager {
     this.map = map;
     this.editors = [];
     this.activeEditor = null;
+    this.enabled = true;  
+  }
+
+  enable() {
+      this.enabled = true;  
+      let mapoptions_startroute={draggableCursor: "crosshair",draggingCursor: "crosshair" };  
+
+      this.map.setOptions(mapoptions_startroute);
+      if(!this.activeEditor) this.createEditor();
+
+      // this.map.addListener("mousedown", (e) => {this.mouseDownLines(e)});
+        
+      // // mouse move → only log if dragging
+      // this.map.addListener("mousemove", (e) => {this.mouseMovePath(e)} );
+
+      // // mouse up → stop drag mode
+      // document.getElementById("map").addEventListener("mouseup", this.mouseUpRoute);
+
+      // // right click on map to show context menu  
+      // this.map.addListener("rightclick", (e) => {
+      //   //showContextMenu(e.domEvent, mode);
+      // });  
+  }
+
+  disable() {
+  
+      this.enabled = false;
+      this.selectedPolyline = null;
+      this.polylineSelected=false
+
   }
 
   createEditor() {
@@ -275,3 +305,6 @@ disable() {
     this.polyline.setMap(null);
   }
 }
+
+
+export { PolylineManager , PolylineEditor} 
