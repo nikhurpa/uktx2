@@ -71,9 +71,9 @@ const Router = {
   },
 
   resolve() {
-    const path = location.pathname;
+    const path = location.hash.replace("#", "") || "/";
     this.routes[path]?.();
-  }
+  },
 };
 
 
