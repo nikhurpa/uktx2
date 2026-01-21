@@ -3,7 +3,7 @@ import { PolylineManager , PolylineEditor} from "./mapClasses2.js";
  import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 import { loadJS, loadCSS, loadModule ,addDiv,Router} from "./loader.js";
-
+import  { ribbon,initializeRibbon } from "./jqxRibbon.js";
 // ------------------- Asynch Loader-------------------
 (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams;
 const f=()=>h||(h=new Promise(async(n,o)=>{await (a=m.createElement("script"));
@@ -63,6 +63,35 @@ async function initMap() {
     width: 300,
     topOffset: 60
   });
+
+
+initializeRibbon();
+//    let tabTree = `    
+//         <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
+       
+//         </button>  
+//         <div class="controls">
+//           <button id="saveSelected" class="btn small">Save Selected</button>
+//           <button id="saveAll" class="btn primary small">Save All</button>
+//           <button id="clearTemp" class="btn small">Clear Temp</button>
+//         </div>
+//         <div id="sidepanel" class="card"><h2>Places</h2> 
+//           <input id="kmlFile" type="file" accept=".kml" />
+//           <div style="height:10px"></div>
+//           <div id="jqxTree" class="card-body"></div>
+//         </div>`;
+
+// const tabs = [
+//   { id: "jqxTree", title: "Load KML", content: tabTree },
+//   { id: "EditMaps", title: "Users", url: "/users.html" },     // Ajax load
+//   { id: "Settings", title: "Settings", content: "<p>Settings</p>" }
+// ];
+
+// const tabManager = $("#appTabs").advancedTabs({
+//   data: tabs,
+//   activeIndex: 0,
+//   animation: true
+// });
 
 
    let treeSource= [

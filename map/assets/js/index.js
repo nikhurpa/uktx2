@@ -1,4 +1,5 @@
 import { loadJS, loadCSS, loadModule ,addDiv,Router} from "./loader.js";
+import  { ribbon,initializeRibbon } from "./jqxRibbon.js";
 import { initMap } from "./m.js";
 
 // Router.add("/maps", () => initMap());
@@ -14,6 +15,7 @@ window.onload = async function () {
     // Load  CSS
     await loadCSS("./assets/css/m1map.css");
     await loadCSS("./assets/css/jqrightpanel.css");
+    await loadCSS("./assets/css/jqadvanceTabs.css");
     await loadCSS("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css");
     await loadCSS("./plugins/jqwidgets/styles/jqx.base.css");
 
@@ -26,9 +28,12 @@ window.onload = async function () {
     await loadJS("./plugins/jqwidgets/jqxpanel.js");
     await loadJS("./plugins/jqwidgets/jqxtree.js");
     await loadJS("./plugins/jqwidgets/jqxmenu.js");
+    await loadJS("./plugins/jqwidgets/jqxribbon.js");
+    await loadJS("./plugins/jqwidgets/jqxradiobutton.js");
     await loadJS("./plugins/jqwidgets/jqxdragdrop.js");
     await loadJS("./assets/js/jqverticaltoolbar.js");
     await loadJS("./assets/js/jqrightpanel.js");
+    await loadJS("./assets/js/jqadvanceTabs.js");
 
     addDiv({ id: "map" , parent: document.body});
     addDiv({ id: "status", className: "status", parent: document.body,text: "Select a mode…" });
@@ -43,22 +48,26 @@ window.onload = async function () {
               <div class="context-item" id="ctxSave">Save to My Places</div>
             `});
 
-    addDiv({ id: "right-panel", parent: document.body,
-        innerHTML: `    
-        <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
+    addDiv({ id: "right-panel", parent: document.body,innerHTML: ribbon });
+
+      //  innerHTML: `
+        //  <div id="appTabs" class="card"></div>`,
+
+        // innerHTML: `    
+        // <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
        
-        </button>  
-        <div class="controls">
-          <button id="saveSelected" class="btn small">Save Selected</button>
-          <button id="saveAll" class="btn primary small">Save All</button>
-          <button id="clearTemp" class="btn small">Clear Temp</button>
-        </div>
-        <div id="sidepanel" class="card"><h2>Places</h2> 
-          <input id="kmlFile" type="file" accept=".kml" />
-          <div style="height:10px"></div>
-          <div id="jqxTree" class="card-body"></div>
-        </div>`,
-            });
+        // </button>  
+        // <div class="controls">
+        //   <button id="saveSelected" class="btn small">Save Selected</button>
+        //   <button id="saveAll" class="btn primary small">Save All</button>
+        //   <button id="clearTemp" class="btn small">Clear Temp</button>
+        // </div>
+        // <div id="sidepanel" class="card"><h2>Places</h2> 
+        //   <input id="kmlFile" type="file" accept=".kml" />
+        //   <div style="height:10px"></div>
+        //   <div id="jqxTree" class="card-body"></div>
+        // </div>`,
+            // });
 
 //  Top-right mode selection UI
     addDiv({ id: "mode-ui", parent: document.body, });

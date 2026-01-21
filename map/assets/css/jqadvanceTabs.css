@@ -1,0 +1,26 @@
+.adv-nav {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  border-bottom: 2px solid #ccc;
+}
+.adv-nav li {
+  padding: 10px 15px;
+  cursor: pointer;
+  background: #eee;
+  margin-right: 4px;
+}
+.adv-nav li.active { background: #fff; font-weight: bold; }
+.adv-nav li.disabled { opacity: 0.5; cursor: not-allowed; }
+
+.adv-panel {
+  display: none;
+  padding: 15px;
+  border: 1px solid #ccc;
+}
+
+        .contentSection
+        {
+            padding: 5px;
+            text-align: justify;
+        }
