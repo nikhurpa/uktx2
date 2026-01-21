@@ -258,30 +258,7 @@ let editPolyline ={
                 let metadata ={id:id,index:id-1,visible:true}
                 polyline.create(pathCoords,metadata,id-1);
                 console.log("Created Polylines:" ,id )
-                // // polyline.polylines.push(polyline)
-                // // polyline.curpolyline=id-1;
-                // nextmarkerindex=0;
-
-                // let p= polylines[curpolyline].polyline
-
-                // ///  click event on ployline
-                // google.maps.event.addListener(p, "click", (e) => {
-                // isDrawing=false;
-                // polylineSelected=true;
-                
-                // markerindex=p.parent.curmarker;
-                // nextmarkerindex=markerindex+1
-                // curpolyline=p.metadata.index;
-                // console.log("click:"+p.metadata.index)
-                // polylines.forEach( p2 => {p2.setMarkersVisibility(false)})
-                // p.parent.select();
-                
-                // console.log(markerindex)
-                // setMode("Route")
-
-                // });
-
-
+               
   },
   remove:function(){
   },
