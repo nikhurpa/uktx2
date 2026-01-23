@@ -4,6 +4,8 @@ import { PolylineManager , PolylineEditor} from "./mapClasses2.js";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 import { loadJS, loadCSS, loadModule ,addDiv,Router} from "./loader.js";
 import  { ribbon,initializeRibbon } from "./jqxRibbon.js";
+import { initializeTabs } from "./jqxTab.js";
+
 // ------------------- Asynch Loader-------------------
 (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams;
 const f=()=>h||(h=new Promise(async(n,o)=>{await (a=m.createElement("script"));
@@ -65,7 +67,8 @@ async function initMap() {
   });
 
 
-initializeRibbon();
+// initializeRibbon();
+// initializeTabs();
 //    let tabTree = `    
 //         <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
        

@@ -1,6 +1,8 @@
 class PolylineManager {
   constructor(map) {
     this.map = map;
+    this.polylines=[];
+    this.activePolylines=null;
     this.editors = [];
     this.activeEditor = null;
     this.enabled = true;  
@@ -11,7 +13,7 @@ class PolylineManager {
       let mapoptions_startroute={draggableCursor: "crosshair",draggingCursor: "crosshair" };  
 
       this.map.setOptions(mapoptions_startroute);
-      if(!this.activeEditor) this.createEditor();
+      // if(!this.activeEditor) this.createEditor();
 
       // this.map.addListener("mousedown", (e) => {this.mouseDownLines(e)});
         
@@ -32,6 +34,12 @@ class PolylineManager {
       this.enabled = false;
       this.selectedPolyline = null;
       this.polylineSelected=false
+
+  }
+
+  createPolyline() {
+    const polyline = new google.maps.Polyline({
+      map: this.map,  });
 
   }
 

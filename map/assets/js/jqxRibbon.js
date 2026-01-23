@@ -126,7 +126,7 @@ let ribbon = `<div id="jqxRibbon" style='float: left;'>
 
 function initializeRibbon() {   
 
-
+           
             $("#jqxRibbon").jqxRibbon({ width: 450, position: "top", selectionMode: "click", animationType: "fade" });
             // $('#farButton').jqxRadioButton({ height: 25, width: 100 });
             // $('#nearButton').jqxRadioButton({ height: 25, width: 100 });
