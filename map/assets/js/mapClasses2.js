@@ -1,19 +1,210 @@
 class PolylineManager {
-  constructor(map) {
+    constructor(map){
+        // this.map = new google.maps.Map(document.getElementById(mapElementId), {
+        //     center: { lat: 0, lng: 0 },
+        //     zoom: 3,
+        //     mapTypeId: 'satellite'
+        // });
+        this.map=map;
+        this.polylines = new Map(); // id => polyline
+        this.activePolyline = null;
+
+        this.isDrawing = false;
+        this.drawPath = [];
+        this.tempPolyline = null;
+
+        this.undoStack = [];
+        this.redoStack = [];
+
+        this._bindMapEvents();
+    }
+
+    /* ================= CREATE ================= */
+    startCreate() {
+        this.clearSelection();
+        this.isDrawing = true;
+        this.drawPath = [];
+
+        this.tempPolyline = new google.maps.Polyline({
+            map: this.map,
+            path: [],
+            strokeColor: '#00ffff',
+            strokeWeight: 2
+        });
+    }
+
+    finishCreate() {
+        if (this.drawPath.length < 2) return;
+
+        this.tempPolyline.setMap(null);
+
+        const polyline = this._createPolyline(this.drawPath);
+        this.select(polyline);
+
+        this.isDrawing = false;
+        this.drawPath = [];
+    }
+
+    /* ================= SELECT ================= */
+    select(polyline) {
+        this.clearSelection();
+        this.activePolyline = polyline;
+        polyline.setEditable(true);
+        polyline.setOptions({ strokeColor: '#00ff00' });
+        this._snapshot();
+    }
+
+    clearSelection() {
+        if (this.activePolyline) {
+            this.activePolyline.setEditable(false);
+            this.activePolyline.setOptions({ strokeColor: '#ff0000' });
+        }
+        this.activePolyline = null;
+    }
+
+    /* ================= DELETE ================= */
+    delete(polyline) {
+        polyline.setMap(null);
+        this.polylines.delete(polyline.__id);
+        if (this.activePolyline === polyline) this.activePolyline = null;
+    }
+
+    /* ================= UNDO / REDO ================= */
+    undo() {
+        if (!this.activePolyline || this.undoStack.length === 0) return;
+        this.redoStack.push(this._getPath());
+        this._setPath(this.undoStack.pop());
+    }
+
+    redo() {
+        if (!this.activePolyline || this.redoStack.length === 0) return;
+        this.undoStack.push(this._getPath());
+        this._setPath(this.redoStack.pop());
+    }
+
+    _snapshot() {
+        this.undoStack.push(this._getPath());
+        this.redoStack = [];
+    }
+
+    _getPath() {
+        return this.activePolyline.getPath().getArray().map(p => ({
+            lat: p.lat(),
+            lng: p.lng()
+        }));
+    }
+
+    _setPath(path) {
+        this.activePolyline.setPath(path);
+    }
+
+    /* ================= SAVE (INSERT / UPDATE) ================= */
+    async save(polyline, name = '') {
+        const payload = {
+            id: polyline.__id || null,
+            name,
+            path: polyline.getPath().getArray().map(p => ({
+                lat: p.lat(),
+                lng: p.lng()
+            }))
+        };
+
+        const res = await fetch('save_polyline.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        polyline.__id = data.id;
+        this.polylines.set(data.id, polyline);
+    }
+
+    /* ================= LOAD ================= */
+    async loadAll() {
+        const res = await fetch('load_polylines.php');
+        const data = await res.json();
+
+        data.forEach(row => {
+            const polyline = this._createPolyline(row.path, row.id);
+            this.polylines.set(row.id, polyline);
+        });
+    }
+
+    /* ================= INTERNAL ================= */
+    _createPolyline(path, id = null) {
+        const polyline = new google.maps.Polyline({
+            map: this.map,
+            path,
+            editable: false,
+            draggable: true,
+            strokeColor: '#ff0000',
+            strokeWeight: 2
+        });
+
+        polyline.__id = id;
+        this._attachPolylineEvents(polyline);
+        return polyline;
+    }
+
+    _bindMapEvents() {
+        this.map.addListener('click', e => {
+            if (this.isDrawing) {
+                this.drawPath.push(e.latLng);
+                this.tempPolyline.getPath().push(e.latLng);
+            } else {
+                this.clearSelection();
+            }
+        });
+
+        this.map.addListener('dblclick', e => {
+            if (this.isDrawing) {
+                e.stop();
+                this.finishCreate();
+            }
+        });
+    }
+
+    _attachPolylineEvents(polyline) {
+        polyline.addListener('click', e => {
+            e.stop();
+            this.select(polyline);
+        });
+
+        polyline.getPath().addListener('insert_at', () => this._snapshot());
+        polyline.getPath().addListener('set_at', () => this._snapshot());
+        polyline.getPath().addListener('remove_at', () => this._snapshot());
+        
+
+        polyline.addListener('rightclick', e => {
+            if (e.vertex !== undefined) {
+                polyline.getPath().removeAt(e.vertex);
+            } else if (confirm('Delete this polyline?')) {
+                this.delete(polyline);
+            }
+        });
+    }
+}
+
+
+
+
+class PolylineManager2 {
+  constructor(map,activePolyline) {
     this.map = map;
     this.polylines=[];
-    this.activePolylines=null;
+    this.activePolyline=activePolyline;
     this.editors = [];
     this.activeEditor = null;
-    this.enabled = true;  
+    this.enabled = false;  
   }
 
   enable() {
       this.enabled = true;  
       let mapoptions_startroute={draggableCursor: "crosshair",draggingCursor: "crosshair" };  
-
       this.map.setOptions(mapoptions_startroute);
       // if(!this.activeEditor) this.createEditor();
+      if(!this.activePolyline) this.createPolyline();
 
       // this.map.addListener("mousedown", (e) => {this.mouseDownLines(e)});
         
@@ -37,11 +228,41 @@ class PolylineManager {
 
   }
 
-  createPolyline() {
-    const polyline = new google.maps.Polyline({
-      map: this.map,  });
+  createPolyline(path = [],metadata = {}) {
+   
+    // if (this.polyline) this.remove();
+     let id = this.polylines.length+1
+     metadata ={id:id,index:id-1,visible:true}
+     let polyline = new google.maps.Polyline({
+      map: this.map,
+      path,
+      strokeColor: "yellow",
+      strokeWeight: 2,
+      geodesic: true,
+      metadata:metadata,
+      vertexMarkers:[],
+      undoMarkers:[],
+      markerindex:0,  
+      prmarkerindex:null,
+      nextmarkerindex:null,
+      curmarker:null, 
+      parent:this 
+    });
+
+    //  this._attachPolylineEvents(polyline,this.setMode);
+    //  this._addVertexMarkers(polyline);
+     this.activePolyline=polyline;
+     this.polylines.push(polyline)
 
   }
+
+    removePolyline() {
+      if (this.polyline) this.polyline.setMap(null);
+      this.vertexMarkers.forEach(m => m.setMap(null));
+     
+      this.activePolyline = null;
+    }
+
 
   createEditor() {
     const editor = new PolylineEditor(this.map);

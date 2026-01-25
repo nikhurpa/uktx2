@@ -54,7 +54,7 @@ window.onload = async function () {
 
     addDiv({ id: "right-panel", parent: document.body ,
 
-       innerHTML: `
+      //  innerHTML: `
         //  <div id="appTabs" class="card"></div>`,
 
         innerHTML: `    

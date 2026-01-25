@@ -254,7 +254,6 @@ let editPolyline ={
   create: function(){
                 
                 let id = polyline.polylines.length+1
-             
                 let metadata ={id:id,index:id-1,visible:true}
                 polyline.create(pathCoords,metadata,id-1);
                 console.log("Created Polylines:" ,id )

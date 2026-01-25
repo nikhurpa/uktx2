@@ -1,4 +1,4 @@
-import { PolylineManager , PolylineEditor} from "./mapClasses2.js";
+import { PolylineManager } from "./mapClasses3.js";
 // import { kml } from "https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.0.1/dist/togeojson.esm.js"
  import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
@@ -57,7 +57,7 @@ async function initMap() {
 //   marker = new AdvanceMarkerManager(map);
 //   polyline = new PolylineManager(map,editPolyline.handleVertexClick,null,setMode)
 
-  let manager = new PolylineManager(map);
+  let  polyManager = new PolylineManager(map);
 
   statusEl = document.getElementById("status");
   
@@ -131,7 +131,7 @@ async function initMap() {
           mode = id;
           statusEl.textContent = `Mode: ${mode}`;
           google.maps.event.clearInstanceListeners(map);
-          manager.disable();
+          // manager.disable();
           toolActions[id]();
       } else {
          console.warn("No action defined for:", id);
@@ -148,7 +148,8 @@ async function initMap() {
 
     route() {
       console.log("Route mode activated");
-      manager.enable();
+      polyManager.enableDraw()
+      // manager.enable();
       // editPolyline.setRoute()
     },
 
@@ -179,24 +180,33 @@ async function initMap() {
     delete() {
       console.log("Delete all");
         if(mode=="point") editMarker.remove();
-        if(mode=="route") editPolyline.remove();
+        if(mode=="route") polyManager.delete(1);
     },
 
     undo() {
       console.log("Undo last action");
-        if(mode=="route") editPolyline.undo();
+        if(mode=="route") polyManager.undo();
     },
 
     redo() {
       console.log("Redo last action");
+       if(mode=="route") polyManager.redo();
     },
 
     export() {
       console.log("Export data");
     },
-
+    save() {
+      console.log("Save data");
+     if(mode=="route")  polyManager.save("Route 1")
+    },
+    load() {
+      console.log("Load data");
+     if(mode=="route")  polyManager.load(1)
+    },
     upload() {
       console.log("Upload data");
+     if(mode=="route")  polyManager.save("Route 1")
     },
     maps() {
       console.log("maps");
@@ -224,6 +234,17 @@ async function initMap() {
 //   document.getElementById("kmlFile").addEventListener("change", e => {
 //   viewer.loadFile(e.target.files[0]);
 // });
+
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'n') manager.startCreate();
+    if (e.ctrlKey && e.key === 'z') manager.undo();
+    if (e.ctrlKey && e.key === 'y') manager.redo();
+    if (e.key === 'Delete' && manager.activePolyline)
+        manager.delete(manager.activePolyline);
+    if (e.key === 's' && manager.activePolyline)
+        manager.save(manager.activePolyline, 'Polyline');
+});
 
   
 }

@@ -184,4 +184,6 @@ body {
         width: 100%;
       }
       
-  
+  .map-crosshair {
+  cursor: url(crosshair.png) 8 8, crosshair;
+}
