@@ -15,41 +15,8 @@ class PolylineManager {
     this.drawing = false;
     this.undoStack = [];
     this.redoStack = [];
-    
-   this.overlay = new google.maps.OverlayView();
+    this.minDrawDistance = 3; // meters
 
-this.overlay.onAdd = () => {
-  console.log("Overlay onAdd fired");
-
-  this.overlayDiv = document.createElement("div");
-
-  Object.assign(this.overlayDiv.style, {
-    position: "absolute",
-    top: "0",
-    left: "0",
-    right: "0",
-    bottom: "0",
-    background: "transparent",
-    pointerEvents: "auto",
-    cursor: "crosshair",
-    zIndex: "9999"
-  });
-this.overlayDiv.style.outline = "2px solid red";
-  // 🔴 MUST be overlayMouseTarget
-  this.overlay.getPanes().overlayMouseTarget.appendChild(this.overlayDiv);
-
-  this._bindOverlayEvents();
-};
-
-this.overlay.draw = () => {
-  this.projectionReady = true;
-};
-
-this.overlay.onRemove = () => {
-  this.overlayDiv?.remove();
-};
-
-this.overlay.setMap(this.map);
 
 
 
@@ -77,6 +44,7 @@ enableDraw() {
     gestureHandling: "none",
     draggableCursor: "crosshair"
   });
+  this._bindEvents(); 
 
 }
 
@@ -91,23 +59,20 @@ disableDraw() {
   });
 }
 
-
-
-
-  _bindOverlayEvents() {
+  _bindEvents() {
     console.log("Binding overlay events");
 
-    this.overlayDiv.addEventListener("mousedown", e => {
+    this.map.addListener("mousedown", e => {
       console.log("mousedown fired"); // 🔥 MUST PRINT
       this._onMouseDown(e);
     });
 
-    this.overlayDiv.addEventListener("mousemove", e => {
+    this.map.addListener("mousemove", e => {
       console.log("mousemove fired"); // 🔥 MUST PRINT
       this._onMouseMove(e);
     });
 
-    this.overlayDiv.addEventListener("mouseup", e => {
+    this.map.addListener("mouseup", e => {
       console.log("mouseup fired");
       this._onMouseUp(e);
     });
@@ -116,21 +81,22 @@ disableDraw() {
 
 _onMouseDown(e) {
 
-  if (!this.drawing || !this.projectionReady || e.button !== 0) return;
+  if (!this.drawing ) return;
   console.log("on mousedown fired"); // 🔥 MUST PRINT
-  e.preventDefault();
+  
   this.isMouseDown = true;
   this._saveState();
 
-  const latLng = this._pixelToLatLng(e);
+  const latLng = e.latLng;
   if (latLng) this._addVertex(latLng);
 }
 
 
 _onMouseMove(e) {
+  
   if (!this.drawing || !this.isMouseDown) return;
-
-  const latLng = this._pixelToLatLng(e);
+ console.log("on mousemove fired"); // 🔥 MUST PRINT
+  const latLng = e.latLng;
   this._addVertex(latLng);
 }
 

@@ -1,4 +1,4 @@
-import { PolylineManager } from "./mapClasses3.js";
+import { PolylineManager } from "./PolylineManager.js";
 // import { kml } from "https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.0.1/dist/togeojson.esm.js"
  import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
