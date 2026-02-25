@@ -1,4 +1,7 @@
 import { PolylineManager } from "./PolylineManager.js";
+import { MultiPolylineManager } from "./MultiPolylineManager.js";
+import { UltraPolylineManager } from "./UltraPolylineManager.js"; 
+
 // import { kml } from "https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.0.1/dist/togeojson.esm.js"
  import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
@@ -58,6 +61,9 @@ async function initMap() {
 //   polyline = new PolylineManager(map,editPolyline.handleVertexClick,null,setMode)
 
   let  polyManager = new PolylineManager(map);
+  let  multiPolyManager = new MultiPolylineManager(map);
+  let  ultraPolyManager = new UltraPolylineManager(map);  
+
 
   statusEl = document.getElementById("status");
   
@@ -148,7 +154,9 @@ async function initMap() {
 
     route() {
       console.log("Route mode activated");
-      polyManager.enableDraw()
+      // polyManager.enableDraw()
+      ultraPolyManager.enableDraw();  
+
       // manager.enable();
       // editPolyline.setRoute()
     },
@@ -168,7 +176,7 @@ async function initMap() {
     select() {
       console.log("Select mode activated");
       // clear previous mode
-       if(oldMode=="Route")  editPolyline.clearDrawing();
+       if(oldMode=="Route")  ultraPolyManager.clearDrawing();
 
         
     },
@@ -180,17 +188,17 @@ async function initMap() {
     delete() {
       console.log("Delete all");
         if(mode=="point") editMarker.remove();
-        if(mode=="route") polyManager.delete(1);
+        if(mode=="route") ultraPolyManager.delete(1);
     },
 
     undo() {
       console.log("Undo last action");
-        if(mode=="route") polyManager.undo();
+        if(mode=="route") ultraPolyManager.undo();
     },
 
     redo() {
       console.log("Redo last action");
-       if(mode=="route") polyManager.redo();
+       if(mode=="route") ultraPolyManager.redo();
     },
 
     export() {
@@ -198,15 +206,15 @@ async function initMap() {
     },
     save() {
       console.log("Save data");
-     if(mode=="route")  polyManager.save("Route 1")
+     if(mode=="route")  ultraPolyManager.save("Route 1")
     },
     load() {
       console.log("Load data");
-     if(mode=="route")  polyManager.load(1)
+     if(mode=="route") ultraPolyManager.load(1)
     },
     upload() {
       console.log("Upload data");
-     if(mode=="route")  polyManager.save("Route 1")
+     if(mode=="route")  ultraPolyManager.save("Route 1")
     },
     maps() {
       console.log("maps");
@@ -237,13 +245,13 @@ async function initMap() {
 
 
 document.addEventListener('keydown', e => {
-    if (e.key === 'n') manager.startCreate();
-    if (e.ctrlKey && e.key === 'z') manager.undo();
-    if (e.ctrlKey && e.key === 'y') manager.redo();
-    if (e.key === 'Delete' && manager.activePolyline)
-        manager.delete(manager.activePolyline);
-    if (e.key === 's' && manager.activePolyline)
-        manager.save(manager.activePolyline, 'Polyline');
+    if (e.key === 'n') ultraPolyManager.startCreate();
+    if (e.ctrlKey && e.key === 'z') ultraPolyManager.undo();
+    if (e.ctrlKey && e.key === 'y') ultraPolyManager.redo();
+    if (e.key === 'Delete' && ultraPolyManager.activePolyline)
+        ultraPolyManager.delete(ultraPolyManager.activePolyline);
+    if (e.key === 's' && ultraPolyManager.activePolyline)
+        ultraPolyManager.save(ultraPolyManager.activePolyline, 'Polyline');
 });
 
   
