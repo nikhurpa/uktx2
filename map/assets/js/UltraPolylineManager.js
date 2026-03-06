@@ -30,7 +30,7 @@ class UltraPolylineManager {
   ================================= */
 
   createPolyline(id) {
-    if (this.polylines.has(id)) return;
+    if (this.polylines.has(id) || id !== "TEMP" ) return;
 
     const polyline = new google.maps.Polyline({
       map: this.map,
@@ -46,6 +46,7 @@ class UltraPolylineManager {
       midMarkers: [],
       undoStack: [],
       redoStack: [],
+
       visible: true,
       markerindex:0,
       prmarkerindex:null,
@@ -56,12 +57,13 @@ class UltraPolylineManager {
     });
 
     this.setActive(id);
+    console.log("Polyline created with ID:", this.activeId);  
   }
 
   setActive(id) {
-    if (!this.polylines.has(id)) return;
+     if (!this.polylines.has(id)) return;
     this.activeId = id;
-    this._refreshMidpoints();
+    // this._refreshMidpoints();
   }
 
   getActive() {
@@ -142,11 +144,11 @@ class UltraPolylineManager {
   }
 
 
-    _bindEvents() {
+  _bindEvents() {
       // MOUSE DOWN → start drawing
       this.map.addListener('mousedown', (e) => {
         if (!this.active) return;
-
+        // console.log("Mouse down at:", e.latLng);
         this.isDragging = true;
 
         // 🔴 stop map from moving while drawing
@@ -159,7 +161,9 @@ class UltraPolylineManager {
 
       // MOUSE MOVE → continue drawing
       this.map.addListener('mousemove', (e) => {
+     
         if (!this.active || !this.isDragging) return;
+        // console.log("Mouse move at:", e.latLng);
         this.isDrawing = true;
         this._addVertex(e.latLng);
       });
@@ -167,7 +171,7 @@ class UltraPolylineManager {
       // MOUSE UP → stop drawing
       this.map.addListener('mouseup', () => {
         if (!this.active) return;
-
+        // console.log("Mouse up ");
         this.isDrawing = false;
         this.isDragging = false;
 
@@ -238,27 +242,35 @@ _bindVertexEvents(marker) {
      VERTEX SYSTEM
   ================================= */
 
-  _addVertex(latLng) {
-     const a = this.getActive(); 
+_addVertex(latLng) {
+   
+    const a = this.getActive(); 
+   console.log("activeId:", this.activeId,",Adding vertex at:", latLng.toString());
     if (!a) return;
     let d=this.opts.minDistance;
+ 
     // distance throttle
     if (a.vertices.length) {
       const last = a.vertices[a.vertices.length - 1];
       d = google.maps.geometry.spherical.computeDistanceBetween(last, latLng);
     }
-    
+    console.log("Distance to last vertex:", d);
+
     if (d < this.opts.minDistance) return;
     
-    idx = a.idx ? a.idx :   a.vertices.length;
-    a.vertices.insertAt(idx,latLng);
+    let idx = a.markerindex ? a.markerindex:   a.vertices.length;
+    // a.vertices.insertAt(idx,latLng);
+    a.vertices.splice(idx,0,latLng);
+
     a.polyline.setPath(a.vertices);
 
     const marker = this._createVertexMarker(a,latLng,idx);
-    a.markers.insertAt(idx,marker);
+    // a.markers.insertAt(idx,marker);
+    a.markers.splice(idx,0,marker);
 
+    console.log("Vertex added at:", latLng.toString(), "Total vertices:", a.vertices.length);
     // this._refreshMidpoints();
-  }
+}
 
   _createVertexMarker(p,latLng,idx) {
 
@@ -283,7 +295,7 @@ _bindVertexEvents(marker) {
             m.element.addEventListener("click", (e) => {
                 console.log("Marker clicked at:", m.position.toJSON());
                 e.stopPropagation();  // 👈 prevent bubbling to map
-                const indx = p.vertexMarkers.findIndex(vm => vm === m);
+                const indx = p.markers.findIndex(vm => vm === m);
 
                 if(p.prmarkerindex) _unselectMarker(p,p.prmarkerindex)
                 p.markerindex=indx;
@@ -299,7 +311,7 @@ _bindVertexEvents(marker) {
 
             m.element.addEventListener("mouseenter", (e) => {
              if (e.buttons != 1) {
-             const indx = p.vertexMarkers.findIndex(vm => vm === m);
+             const indx = p.markers.findIndex(vm => vm === m);
               
               console.log("mouse over", indx, "pr col/",p.prmarkercolor);
               p.prmarkercolor=m.content.style.backgroundColor;
@@ -313,7 +325,7 @@ _bindVertexEvents(marker) {
 
             m.element.addEventListener("mouseout", (e) => {
                if (e.buttons != 1) {
-               const indx = p.vertexMarkers.findIndex(vm => vm === m);
+               const indx = p.markers.findIndex(vm => vm === m);
               console.log("mouse out", indx, "pr col/",p.prmarkercolor);
               m.content.style.backgroundColor = p.prmarkercolor;
               let mapoptions_startroute={draggableCursor: "crosshair",draggingCursor: "crosshair" 
@@ -333,24 +345,24 @@ _bindVertexEvents(marker) {
               this.markerDragging=true
                 // console.log("Dragging:", m.position);
                 const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
-                const indx = this.curpolyline.vertexMarkers.findIndex(vm => vm === m);
-                this.curpolyline.getPath().setAt(indx,newPoint)
+                const indx = p.markers.findIndex(vm => vm === m);
+                p.polyline.getPath().setAt(indx,newPoint)
             });
 
             m.addListener("dragend", () => {
                 
                 const newPoint = new google.maps.LatLng({lat:m.position.lat,lng:m.position.lng});
-                const indx = this.curpolyline.vertexMarkers.findIndex(vm => vm === m);
-                this.curpolyline.getPath().setAt(indx,newPoint)
+                const indx = p.markers.findIndex(vm => vm === m);
+                p.polyline.getPath().setAt(indx,newPoint)
                 console.log("marker drag end Final position:", indx);
                
-                this.curpolyline.undoMarkers.push({marker:m,type:"drag",index: indx, oldposition:this.markerOldPosition});
+                p.polyline.undoStack.push({marker:m,type:"drag",index: indx, oldposition:this.markerOldPosition});
                 this.markerDragging=false
             });
 
      
-            p.vertexMarkers.splice(idx,0,m);
-            p.undoMarkers.push({marker:m,type:"add",index: idx, position:null});
+            p.markers.splice(idx,0,m);
+            p.undoStack.push({marker:m,type:"add",index: idx, position:null});
 
    
     // hover highlight
