@@ -297,12 +297,12 @@ _addVertex(latLng) {
                 e.stopPropagation();  // 👈 prevent bubbling to map
                 const indx = p.markers.findIndex(vm => vm === m);
 
-                if(p.prmarkerindex) _unselectMarker(p,p.prmarkerindex)
+                if(p.prmarkerindex) this._unselectMarker(p,p.prmarkerindex)
                 p.markerindex=indx;
                 p.nextmarkerindex=p.markerindex+1;
                 this.isDragging = true;
                
-                _selectMarker(p,indx)
+                this._selectMarker(p,indx)
                 p.prmarkerindex=indx
                 p.curmarker=m; 
               
@@ -377,18 +377,18 @@ _addVertex(latLng) {
 
   _selectMarker(p,idx) {
 
-    p.vertexMarkers[idx].content.style.backgroundColor = "blue";
-    p.curmarker=idx
-    p.vertexMarkers[idx].gmpDraggable=true;
+    p.markers[idx].content.style.backgroundColor = "blue";
+    p.markerindex=idx
+    p.markers[idx].gmpDraggable=true;
 
    
    }
 
   _unselectMarker(p,idx) {
       console.log("Uncelect:", idx)
-      p.vertexMarkers[idx].gmpDraggable=false
+      p.markers[idx].gmpDraggable=false
      
-      p.vertexMarkers[idx].content.style.backgroundColor = "red";
+      p.markers[idx].content.style.backgroundColor = "red";
     
   }
 
