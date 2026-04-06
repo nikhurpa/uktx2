@@ -31,13 +31,29 @@ window.onload = async function () {
     await loadJS("./plugins/jqwidgets/jqxmenu.js");
     await loadJS("./plugins/jqwidgets/jqxribbon.js");
     await loadJS("./plugins/jqwidgets/jqxTabs.js");
-    // await loadJS("./plugins/scripts/demos.js");
+    await loadJS("./plugins/jqwidgets/scripts/demos.js");
 
     await loadJS("./plugins/jqwidgets/jqxradiobutton.js");
     await loadJS("./plugins/jqwidgets/jqxdragdrop.js");
+
+
     await loadJS("./assets/js/jqverticaltoolbar.js");
     await loadJS("./assets/js/jqrightpanel.js");
     await loadJS("./assets/js/jqadvanceTabs.js");
+
+  await loadJS("./plugins/jqwidgets/jqxinput.js");
+  await loadJS("./plugins/jqwidgets/jqxlistbox.js");
+  await loadJS("./plugins/jqwidgets/jqxdropdownlist.js");
+  await loadJS("./plugins/jqwidgets/jqxradiobutton.js");
+  await loadJS("./plugins/jqwidgets/jqxpasswordinput.js");
+  await loadJS("./plugins/jqwidgets/jqxnumberinput.js");
+  await loadJS("./plugins/jqwidgets/jqxcalendar.js");
+  await loadJS("./plugins/jqwidgets/jqxdatetimeinput.js");
+  await loadJS("./plugins/jqwidgets/globalization/globalize.js");
+  await loadJS("./plugins/jqwidgets/jqxform.js");
+
+
+
 
     addDiv({ id: "map" , parent: document.body});
     addDiv({ id: "status", className: "status", parent: document.body,text: "Select a mode…" });
@@ -58,18 +74,31 @@ window.onload = async function () {
         //  <div id="appTabs" class="card"></div>`,
 
         innerHTML: `    
-        <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
+ 
+        <div id='jqxtabs'>
+                <ul style='margin-left: 20px;'>
+                  <li>Map</li>
+                    <li>Information</li>
+                </ul>
+
+          <div id="sidepanel" class="card"><h2>Places</h2>
+                 <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
        
         </button>  
         <div class="controls">
           <button id="saveSelected" class="btn small">Save Selected</button>
           <button id="saveAll" class="btn primary small">Save All</button>
           <button id="clearTemp" class="btn small">Clear Temp</button>
-        </div>
-        <div id="sidepanel" class="card"><h2>Places</h2> 
-          <input id="kmlFile" type="file" accept=".kml" />
-          <div style="height:10px"></div>
-          <div id="jqxTree" class="card-body"></div>
+        </div> 
+            <input id="kmlFile" type="file" accept=".kml" />
+            <div style="height:10px"></div>
+            <div id="jqxTree" class="card-body"></div>
+          </div>
+          
+          <div id='sampleForm' style="width: 280px; height: auto;"></div>   
+          
+
+
         </div>`,
             });
 
