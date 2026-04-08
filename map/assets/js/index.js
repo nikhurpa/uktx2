@@ -51,6 +51,7 @@ window.onload = async function () {
   await loadJS("./plugins/jqwidgets/jqxdatetimeinput.js");
   await loadJS("./plugins/jqwidgets/globalization/globalize.js");
   await loadJS("./plugins/jqwidgets/jqxform.js");
+  await loadJS("./plugins/jqwidgets/jqxpopover.js");
 
 
 
@@ -104,6 +105,10 @@ window.onload = async function () {
 
 //  Top-right mode selection UI
     addDiv({ id: "mode-ui", parent: document.body, });
+    addDiv({ id: "popover", parent: document.body,innerHTML: `  <div id="popup"></div>  ` });
+
+
+
 
     await loadModule("./assets/js/m.js");
    
