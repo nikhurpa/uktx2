@@ -17,11 +17,6 @@ class PolylineManager {
     this.redoStack = [];
     this.minDrawDistance = 3; // meters
 
-
-
-
-
-
  
   }
 
