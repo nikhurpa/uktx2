@@ -105,9 +105,15 @@ window.onload = async function () {
 
 //  Top-right mode selection UI
     addDiv({ id: "mode-ui", parent: document.body, });
-    addDiv({ id: "popover", parent: document.body,innerHTML: `  <div id="popup"></div>  ` });
-
-
+    addDiv({ id: "popover1", parent: document.body,innerHTML: `  <div id="popup1"></div>  ` });
+    addDiv({ id: "popover2", parent: document.body,innerHTML: `  <div id="popup2"></div>  ` });
+    addDiv({ id: "popover3", parent: document.body,innerHTML: `  <div id="popup3"></div>  ` });
+    addDiv({ id: "popover4", parent: document.body,innerHTML: `  <div id="popup4"></div>  ` });
+    addDiv({ id: "popover5", parent: document.body,innerHTML: `  <div id="popup5"></div>  ` });
+    addDiv({ id: "popover6", parent: document.body,innerHTML: `  <div id="popup6"></div>  ` });
+    addDiv({ id: "popover7", parent: document.body,innerHTML: `  <div id="popup7"></div>  ` });
+    addDiv({ id: "popover8", parent: document.body,innerHTML: `  <div id="popup8"></div>  ` });
+    addDiv({ id: "popover9", parent: document.body,innerHTML: `  <div id="popup9"></div>  ` });
 
 
     await loadModule("./assets/js/m.js");

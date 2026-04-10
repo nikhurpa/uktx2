@@ -177,6 +177,7 @@ async function initMap() {
                     bind: 'dropdownBlock',
                     type: 'option',
                     label: 'Block',
+                    checkboxes: true,
                     labelPosition: 'left',
                     labelWidth: '30%',
                     align: 'left',
@@ -401,10 +402,22 @@ async function initMap() {
                 template: formTamplate,
                 // value: sampleValue,
                 padding: { left: 10, top: 10, right: 10, bottom: 10 }
-            });      
+            });
+            
+            
 
-  $("#popover").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_1") });
+            $("#popover1").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_1") });
+            $("#popover2").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_3") });
+            $("#popover3").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_5") });
+            $("#popover4").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_1") });
+            $("#popover5").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_3") });
+            $("#popover6").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_5") });
+            $("#popover7").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_1") });
+            $("#popover8").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_3") });
+            $("#popover9").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_5") });
 
+            $("#el_sampleForm4").jqxDropDownList({checkboxes:true}); 
+            $("#el_sampleForm5").jqxDropDownList({checkboxes:true}); 
 
 
 
@@ -610,6 +623,8 @@ document.addEventListener('keydown', e => {
 function setMode(newMode) {
 $("#" + newMode).trigger("click");
 }
+
+
 
 
 export { initMap};
