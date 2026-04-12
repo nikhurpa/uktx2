@@ -70,319 +70,319 @@ async function initMap() {
   });
 
 
-            $('#jqxtabs').jqxTabs({ width:  295, height: '100%',
-                initTabContent: function (tab) {
-                //     if (tab === 0) {
-                //         google.maps.event.addDomListener(window, 'load', initialize);
-                //     }
-                }
-            });
+    $('#jqxtabs').jqxTabs({ width:  295, height: '100%',
+        // initTabContent: function (tab) {
+        // //     if (tab === 0) {
+        // //         google.maps.event.addDomListener(window, 'load', initialize);
+        // //     }
+        // }
+    });
 
-   
-  var formTamplate = [
+   ///////////////////////////////////////////////////////////////////////////////////////////////
+            var formTamplate = [
 
-     {
+                {
                     type: 'label',
                     bind: 'radiobuttonValue_out',
                     label: 'Select OA :',
                     rowHeight: '40px',
-      },
-    
-       {
-                    columns: [
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxValueDDN',
-                            type: 'boolean',
-                            label: 'DDN',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxvalueHWR',
-                            type: 'boolean',
-                            label: 'HWR',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxValueNTL',
-                            type: 'boolean',
-                            label: 'NTL',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        }
-                    ]
-      },
-    {
-                    columns: [
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxValueNWT',
-                            type: 'boolean',
-                            label: 'NWT',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxValueSGR',
-                            type: 'boolean',
-                            label: 'SGR',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxValueALM',
-                            type: 'boolean',
-                            label: 'ALM',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        }
-                    ]
-      },
-    {
-                    type: 'label',
-                    bind: 'Select_District_Block',
-                    label: 'Select District and Block :',
-                    rowHeight: '40px',
-    } ,
-    {
-                    bind: 'dropdownDistrict',
-                    type: 'option',
-                    label: 'District',
-                    labelPosition: 'left',
-                    labelWidth: '30%',
-                    align: 'left',
-                    width: '150px',
-                    // required: true,
-                    component: 'jqxDropDownList',
-                    options: [
-                        { label: 'Option 1', value: 'value1' },
-                        { label: 'Option 2', value: 'value2' },
-                        { label: 'Option 3', value: 'value3' }
-                    ]
+                },
+                
+                {
+                        columns: [
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxValueDDN',
+                                type: 'boolean',
+                                label: 'DDN',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxvalueHWR',
+                                type: 'boolean',
+                                label: 'HWR',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxValueNTL',
+                                type: 'boolean',
+                                label: 'NTL',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            }
+                        ]
+                },
+                {
+                        columns: [
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxValueNWT',
+                                type: 'boolean',
+                                label: 'NWT',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxValueSGR',
+                                type: 'boolean',
+                                label: 'SGR',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxValueALM',
+                                type: 'boolean',
+                                label: 'ALM',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            }
+                        ]
+                },
+                {
+                        type: 'label',
+                        bind: 'Select_District_Block',
+                        label: 'Select District and Block :',
+                        rowHeight: '40px',
+                } ,
+                {
+                        bind: 'dropdownDistrict',
+                        type: 'option',
+                        label: 'District',
+                        labelPosition: 'left',
+                        labelWidth: '30%',
+                        align: 'left',
+                        width: '150px',
+                        // required: true,
+                        component: 'jqxDropDownList',
+                        options: [
+                            { label: 'Option 1', value: 'value1' },
+                            { label: 'Option 2', value: 'value2' },
+                            { label: 'Option 3', value: 'value3' }
+                        ]
                 },
 
-    {
-                    bind: 'dropdownBlock',
-                    type: 'option',
-                    label: 'Block',
-                    checkboxes: true,
-                    labelPosition: 'left',
-                    labelWidth: '30%',
-                    align: 'left',
-                    width: '150px',
-                    // required: true,
-                    component: 'jqxDropDownList',
-                    options: [
-                        { label: 'Option 1', value: 'value1' },
-                        { label: 'Option 2', value: 'value2' },
-                        { label: 'Option 3', value: 'value3' }
-                    ]
+                {
+                        bind: 'dropdownBlock',
+                        type: 'option',
+                        label: 'Block',
+                        checkboxes: true,
+                        labelPosition: 'left',
+                        labelWidth: '30%',
+                        align: 'left',
+                        width: '150px',
+                        // required: true,
+                        component: 'jqxDropDownList',
+                        options: [
+                            { label: 'Option 1', value: 'value1' },
+                            { label: 'Option 2', value: 'value2' },
+                            { label: 'Option 3', value: 'value3' }
+                        ]
                 },
-    {
-                    type: 'label',
-                    bind: 'select_options',
-                    label: 'Select Elements :',
-                    rowHeight: '40px',
-      },
-    
-       {
-                    columns: [
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxGP',
-                            type: 'boolean',
-                            // label: 'GP',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            type: 'button',
-                            bind: 'buttonGP',
-                            text: 'GP',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                        
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxVillage',
-                            type: 'boolean',
-                            // label: 'Village',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            type: 'button',
-                            bind: 'buttonVIL',
-                            text: 'VIL',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxBHQ',
-                            type: 'boolean',
-                            // label: 'BHQ',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            type: 'button',
-                            bind: 'buttonBHQ',
-                            text: 'BHQ',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                    ]
-      },
-    {
-                    columns: [
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxOFC',
-                            type: 'boolean',
-                            // label: 'Route',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            type: 'button',
-                            bind: 'buttonOFC',
-                            text: 'OFC',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxBTS',
-                            type: 'boolean',
-                            // label: 'BTS',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            type: 'button',
-                            bind: 'buttonBTS',
-                            text: 'BTS',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxOLT',
-                            type: 'boolean',
-                            // label: 'OLT',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            type: 'button',
-                            bind: 'buttonOLT',
-                            text: 'OLT',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                    ]
-      },                        
-    {
-                    columns: [
-                        {
-                            columnWidth: '10px',
-                            bind: 'checkboxSAS',
-                            type: 'boolean',
-                            labelWidth: '10px',
-                            label: '',
-                            // labelPosition: 'right',
-                            // align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                        {
-                            type: 'button',
-                            bind: 'buttonSAS',
-                            text: 'SAS',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxSchools',
-                            type: 'boolean',
-                            // label: 'Schools',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                         {
-                            type: 'button',
-                            bind: 'buttonSCH',
-                            text: 'SCH',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                        {
-                            columnWidth: '150px',
-                            bind: 'checkboxPHC',
-                            type: 'boolean',
-                            // label: 'PHC',
-                            labelPosition: 'right',
-                            align: 'left',
-                            labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                        },
-                         {
-                            type: 'button',
-                            bind: 'buttonPHC',
-                            text: 'PHC',
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            // columnWidth: '50%',
-                            align: 'left',
-                        },
-                    ]
-      },  
-    ];
+                {
+                        type: 'label',
+                        bind: 'select_options',
+                        label: 'Select Elements :',
+                        rowHeight: '40px',
+                },
+                
+                {
+                        columns: [
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxGP',
+                                type: 'boolean',
+                                // label: 'GP',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                type: 'button',
+                                bind: 'buttonGP',
+                                text: 'GP',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                            
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxVillage',
+                                type: 'boolean',
+                                // label: 'Village',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                type: 'button',
+                                bind: 'buttonVIL',
+                                text: 'VIL',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxBHQ',
+                                type: 'boolean',
+                                // label: 'BHQ',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                type: 'button',
+                                bind: 'buttonBHQ',
+                                text: 'BHQ',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                        ]
+                },
+                {
+                        columns: [
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxOFC',
+                                type: 'boolean',
+                                // label: 'Route',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                type: 'button',
+                                bind: 'buttonOFC',
+                                text: 'OFC',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxBTS',
+                                type: 'boolean',
+                                // label: 'BTS',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                type: 'button',
+                                bind: 'buttonBTS',
+                                text: 'BTS',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxOLT',
+                                type: 'boolean',
+                                // label: 'OLT',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                type: 'button',
+                                bind: 'buttonOLT',
+                                text: 'OLT',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                        ]
+                },                        
+                {
+                        columns: [
+                            {
+                                columnWidth: '10px',
+                                bind: 'checkboxSAS',
+                                type: 'boolean',
+                                labelWidth: '10px',
+                                label: '',
+                                // labelPosition: 'right',
+                                // align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                            {
+                                type: 'button',
+                                bind: 'buttonSAS',
+                                text: 'SAS',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxSchools',
+                                type: 'boolean',
+                                // label: 'Schools',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                                {
+                                type: 'button',
+                                bind: 'buttonSCH',
+                                text: 'SCH',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                            {
+                                columnWidth: '150px',
+                                bind: 'checkboxPHC',
+                                type: 'boolean',
+                                // label: 'PHC',
+                                labelPosition: 'right',
+                                align: 'left',
+                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+                            },
+                                {
+                                type: 'button',
+                                bind: 'buttonPHC',
+                                text: 'PHC',
+                                width: '40px',
+                                height: '30px',
+                                rowHeight: '30px',
+                                // columnWidth: '50%',
+                                align: 'left',
+                            },
+                        ]
+                },  
+                ];
 
    
             var sampleValue = {
@@ -398,30 +398,106 @@ async function initMap() {
                 'checkboxValue2': false,
                 'checkboxValue3': true,
             };
-            $('#sampleForm').jqxForm({
+            $('#elementForm').jqxForm({
                 template: formTamplate,
                 // value: sampleValue,
-                padding: { left: 10, top: 10, right: 10, bottom: 10 }
+                padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
+            $("#el_elementForm4").jqxDropDownList({checkboxes:true}); 
+            $("#el_elementForm5").jqxDropDownList({checkboxes:true}); 
             
-            
+            // var subFormTemplate = {GP:[ ],VIL:[ ],BHQ:[ ],OFC:[ ],BTS:[ ],OLT:[ ],SAS:[ ],SCH:[ ],PHC:[ ]};
+            var subFormTemplate = {gpOptions :[ ],vilOptions:[ ],bhqOptions:[ ],ofcOptions:[ ],btsOptions:[ ],oltOptions:[ ],sasOptions:[ ],schOptions:[ ],phcOptions:[ ]};     
+            let gpOptions= ['UP','DN','M90'];
+            let vilOptions= ['COV','NCO'];
+            let bhqOptions= ['PH1' ,'ABP'];
+            let ofcOptions= ['BN','CIR','CNTX'];
+            let btsOptions= ['2G','3G','4G'];
+            let oltOptions= ['TIP','BNU','BAF'];
+            let sasOptions= ['UP','DN','M90'];
+            let schOptions= ['WK','NWK','FES'];
+            let phcOptions= ['WK','NWK','FES'];
+           
+         //   [...gpOptions,...vilOptions,...bhqOptions,...ofcOptions,...btsOptions,...oltOptions,...sasOptions,...schOptions,...phcOptions].forEach(opt=>{   
+            //   [gpOptions,vilOptions,bhqOptions,ofcOptions,btsOptions,oltOptions,sasOptions,schOptions,phcOptions].forEach(opt=>{   
+         
+            //     opt.forEach(val=>{
+            //     subFormTemplate[opt].push({
+            //         bind: `checkbox${opt}_${val}`,
+            //         type: 'boolean',
+            //         label: val,
+            //         labelPosition: 'right',
+            //         align: 'left',
+            //         labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
+            //     })
+            // })});
 
-            $("#popover1").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_1") });
-            $("#popover2").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_3") });
-            $("#popover3").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_5") });
-            $("#popover4").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_1") });
-            $("#popover5").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_3") });
-            $("#popover6").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_5") });
-            $("#popover7").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_1") });
-            $("#popover8").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_3") });
-            $("#popover9").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_5") });
+       [
+        ['gpOptions', gpOptions],
+        ['vilOptions', vilOptions],
+        ['bhqOptions', bhqOptions],
+        ['ofcOptions', ofcOptions],
+        ['btsOptions', btsOptions],
+        ['oltOptions', oltOptions],
+        ['sasOptions', sasOptions],
+        ['schOptions', schOptions],
+        ['phcOptions', phcOptions]
+        ].forEach(([key, opt]) => {
 
-            $("#el_sampleForm4").jqxDropDownList({checkboxes:true}); 
-            $("#el_sampleForm5").jqxDropDownList({checkboxes:true}); 
+        subFormTemplate[key].push({
+            columns: opt.map(val => ({
+            bind: `checkbox_${key}_${val}`,
+            type: 'boolean',
+            label: val,
+            labelPosition: 'right',
+            align: 'left',
+            labelPadding: { left: 0, top: 5, right: 0, bottom: 5 }
+            }))
+        });
+
+        });
+           
+            $("#el_elementForm7_1").on("click", () => createSubForm("gpOptions"));
+            $("#el_elementForm7_3").on("click", () => createSubForm("vilOptions"));
+            $("#el_elementForm7_5").on("click", () => createSubForm("bhqOptions")); 
+            $("#el_elementForm8_1").on("click", () => createSubForm("ofcOptions")); 
+            $("#el_elementForm8_3").on("click", () => createSubForm("btsOptions"));
+            $("#el_elementForm8_5").on("click", () => createSubForm("oltOptions"));
+            $("#el_elementForm9_1").on("click", () => createSubForm("sasOptions"));
+            $("#el_elementForm9_3").on("click", () => createSubForm("schOptions"));
+            $("#el_elementForm9_5").on("click", () => createSubForm("phcOptions")); 
+
+            function createSubForm(type){
+                console.log(subFormTemplate[type]);
+                let tmpl = [{
+                    type: 'label',
+                    bind: type,
+                    label: type.replace("Options","").toUpperCase() + ' Options :',
+                    rowHeight: '40px',
+                },...subFormTemplate[type]];
+                $('#elementSubForm').jqxForm({
+                    template: tmpl,
+                    padding: { left: 2, top: 2, right: 2, bottom: 2 }
+                });
+                
+                $('#elementSubForm').jqxForm('refresh');
+            }
+
+            // $("#popover1").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_1") });
+            // $("#popover2").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_3") });
+            // $("#popover3").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_5") });
+            // $("#popover4").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_1") });
+            // $("#popover5").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_3") });
+            // $("#popover6").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_5") });
+            // $("#popover7").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_1") });
+            // $("#popover8").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_3") });
+            // $("#popover9").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_5") });
 
 
 
+/////////////////////////////////////////////////////////////////////////////////
 
+           
 
 
 

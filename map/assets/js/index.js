@@ -95,10 +95,10 @@ window.onload = async function () {
             <div style="height:10px"></div>
             <div id="jqxTree" class="card-body"></div>
           </div>
-          
-          <div id='sampleForm' style="width: 280px; height: auto;"></div>   
-          
-
+          <div id="infoPanel">
+          <div id='elementForm' style="width: 280px; height: auto;"></div>   
+          <div id='elementSubForm' style="width: 280px; height: auto;"></div>   
+          </div>
 
         </div>`,
             });
