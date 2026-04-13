@@ -79,6 +79,116 @@ async function initMap() {
     });
 
    ///////////////////////////////////////////////////////////////////////////////////////////////
+        var template = [ {
+        type: 'label',
+        bind: 'radiobuttonValue_out',
+        label: 'Select OA :',
+        rowHeight: '40px',
+    }];     
+   
+          var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
+
+
+            for (let i = 0; i < OA.length; i += 3) {
+                let row = { columns: [] };
+
+                for (let j = i; j < i + 3 && j < OA.length; j++) {
+                    row.columns.push({
+                        bind: 'chk' + OA[j],
+                        type: 'boolean',
+                        label: OA[j]
+                    });
+                }
+
+                template.push(row);
+            }  
+
+               template= template.concat([
+                {
+                        type: 'label',
+                        bind: 'Select_District_Block',
+                        label: 'Select District and Block :',
+                        rowHeight: '40px',
+                } ,
+                {
+                        bind: 'dropdownDistrict',
+                        type: 'option',
+                        label: 'District',
+                        labelPosition: 'left',
+                        labelWidth: '30%',
+                        align: 'left',
+                        width: '150px',
+                        // required: true,
+                        component: 'jqxDropDownList',
+                        options: [
+                            { label: 'Option 1', value: 'value1' },
+                            { label: 'Option 2', value: 'value2' },
+                            { label: 'Option 3', value: 'value3' }
+                        ]
+                },
+
+                {
+                        bind: 'dropdownBlock',
+                        type: 'option',
+                        label: 'Block',
+                        checkboxes: true,
+                        labelPosition: 'left',
+                        labelWidth: '30%',
+                        align: 'left',
+                        width: '150px',
+                        // required: true,
+                        component: 'jqxDropDownList',
+                        options: [
+                            { label: 'Option 1', value: 'value1' },
+                            { label: 'Option 2', value: 'value2' },
+                            { label: 'Option 3', value: 'value3' }
+                        ]
+                },
+                {
+                        type: 'label',
+                        bind: 'select_options',
+                        label: 'Select Elements :',
+                        rowHeight: '40px',
+                }]
+
+
+               );
+                
+            var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"  ];
+            var btns=[]   
+
+            for (let i = 0; i < btnElements.length; i += 3) {
+                let row = { columns: [] };
+
+                for (let j = i; j < i + 3 && j < btnElements.length; j++) {
+                    row.columns.push({
+                        bind: 'chk' + btnElements[j],
+                        type: 'boolean',
+                        
+                    });
+                    row.columns.push({  
+
+                            type: 'button',
+                            bind: 'button'+btnElements[j],
+                            text: btnElements[j],
+                            width: '40px',
+                            height: '30px',
+                            rowHeight: '30px',
+                            align: 'left',
+                        });
+
+
+
+                }
+
+                btns.push(row);
+            }      
+                
+           template= template.concat(btns);
+
+
+
+
             var formTamplate = [
 
                 {
@@ -398,16 +508,58 @@ async function initMap() {
                 'checkboxValue2': false,
                 'checkboxValue3': true,
             };
+            
             $('#elementForm').jqxForm({
-                template: formTamplate,
+                template: template,
+
                 // value: sampleValue,
                 padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
+
+            console.log("Form initialized with template:", template);
+
             $("#el_elementForm4").jqxDropDownList({checkboxes:true}); 
             $("#el_elementForm5").jqxDropDownList({checkboxes:true}); 
             
             // var subFormTemplate = {GP:[ ],VIL:[ ],BHQ:[ ],OFC:[ ],BTS:[ ],OLT:[ ],SAS:[ ],SCH:[ ],PHC:[ ]};
-            var subFormTemplate = {gpOptions :[ ],vilOptions:[ ],bhqOptions:[ ],ofcOptions:[ ],btsOptions:[ ],oltOptions:[ ],sasOptions:[ ],schOptions:[ ],phcOptions:[ ]};     
+ 
+            var subFormTemplate = {gpOptions :[ ],vilOptions:[ ],bhqOptions:[ ],ofcOptions:[ ],btsOptions:[ ],oltOptions:[ ],sasOptions:[ ],schOptions:[ ],phcOptions:[ ]};
+ 
+ 
+ 
+ 
+ 
+            var subFormElements = {
+                gpOptions :['UP','DN','M90','L90'],
+                vilOptions:['COV','NCO'],
+                bhqOptions:['PH1','ABP'],
+                ofcOptions:['BN','CIR','CNTX'],
+                btsOptions:['2G','3G','4G','UP','DN','ML','OFC',"SAT"],
+                oltOptions:['TIP','BNU','BAF'],
+                sasOptions:['UP','DN','M90'],
+                schOptions:['WK','NWK','FES'],
+                phcOptions:['WK','NWK','FES']
+            };     
+            
+            Object.entries(subFormElements).forEach(([key, value]) => {
+                for (let i = 0; i < value.length; i += 3) {
+                let row = { columns: [] };
+
+                for (let j = i; j < i + 3 && j < value.length; j++) {
+                    row.columns.push({
+                        bind: 'chk' + value[j],
+                        type: 'boolean',
+                        label: value[j]
+                    });
+                }
+
+                subFormTemplate[key].push(row);
+            } 
+               
+            });
+
+
+
             let gpOptions= ['UP','DN','M90'];
             let vilOptions= ['COV','NCO'];
             let bhqOptions= ['PH1' ,'ABP'];
@@ -418,44 +570,31 @@ async function initMap() {
             let schOptions= ['WK','NWK','FES'];
             let phcOptions= ['WK','NWK','FES'];
            
-         //   [...gpOptions,...vilOptions,...bhqOptions,...ofcOptions,...btsOptions,...oltOptions,...sasOptions,...schOptions,...phcOptions].forEach(opt=>{   
-            //   [gpOptions,vilOptions,bhqOptions,ofcOptions,btsOptions,oltOptions,sasOptions,schOptions,phcOptions].forEach(opt=>{   
-         
-            //     opt.forEach(val=>{
-            //     subFormTemplate[opt].push({
-            //         bind: `checkbox${opt}_${val}`,
-            //         type: 'boolean',
-            //         label: val,
-            //         labelPosition: 'right',
-            //         align: 'left',
-            //         labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-            //     })
-            // })});
+  
+    //    [
+    //     ['gpOptions', gpOptions],
+    //     ['vilOptions', vilOptions],
+    //     ['bhqOptions', bhqOptions],
+    //     ['ofcOptions', ofcOptions],
+    //     ['btsOptions', btsOptions],
+    //     ['oltOptions', oltOptions],
+    //     ['sasOptions', sasOptions],
+    //     ['schOptions', schOptions],
+    //     ['phcOptions', phcOptions]
+    //     ].forEach(([key, opt]) => {
 
-       [
-        ['gpOptions', gpOptions],
-        ['vilOptions', vilOptions],
-        ['bhqOptions', bhqOptions],
-        ['ofcOptions', ofcOptions],
-        ['btsOptions', btsOptions],
-        ['oltOptions', oltOptions],
-        ['sasOptions', sasOptions],
-        ['schOptions', schOptions],
-        ['phcOptions', phcOptions]
-        ].forEach(([key, opt]) => {
+    //     subFormTemplate[key].push({
+    //         columns: opt.map(val => ({
+    //         bind: `checkbox_${key}_${val}`,
+    //         type: 'boolean',
+    //         label: val,
+    //         labelPosition: 'right',
+    //         align: 'left',
+    //         labelPadding: { left: 0, top: 5, right: 0, bottom: 5 }
+    //         }))
+    //     });
 
-        subFormTemplate[key].push({
-            columns: opt.map(val => ({
-            bind: `checkbox_${key}_${val}`,
-            type: 'boolean',
-            label: val,
-            labelPosition: 'right',
-            align: 'left',
-            labelPadding: { left: 0, top: 5, right: 0, bottom: 5 }
-            }))
-        });
-
-        });
+    //     });
            
             $("#el_elementForm7_1").on("click", () => createSubForm("gpOptions"));
             $("#el_elementForm7_3").on("click", () => createSubForm("vilOptions"));
@@ -477,24 +616,13 @@ async function initMap() {
                 },...subFormTemplate[type]];
                 $('#elementSubForm').jqxForm({
                     template: tmpl,
-                    padding: { left: 2, top: 2, right: 2, bottom: 2 }
+                    padding: { left: 2, top: 5, right: 2, bottom: 2 }
                 });
                 
                 $('#elementSubForm').jqxForm('refresh');
             }
 
-            // $("#popover1").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_1") });
-            // $("#popover2").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_3") });
-            // $("#popover3").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm7_5") });
-            // $("#popover4").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_1") });
-            // $("#popover5").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_3") });
-            // $("#popover6").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm8_5") });
-            // $("#popover7").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_1") });
-            // $("#popover8").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_3") });
-            // $("#popover9").jqxPopover({offset: {left: -50, top:0}, arrowOffsetValue: 50, title: "Select Options", showCloseButton: true, selector: $("#el_sampleForm9_5") });
-
-
-
+         
 /////////////////////////////////////////////////////////////////////////////////
 
            
