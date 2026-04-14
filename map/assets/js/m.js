@@ -42,11 +42,12 @@ let mapoptions_startroute={draggableCursor: "crosshair",draggingCursor: "crossha
                             ,scrollwheel: true, gestureHandling: "greedy"}
 let mapoptions_startmarker={draggableCursor: "crosshair",draggingCursor: "crosshair" 
                             ,scrollwheel: true, gestureHandling: "greedy"}                            
+const { Map } = await google.maps.importLibrary("maps");
+const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+const { Marker } = await google.maps.importLibrary("marker");
 
 async function initMap() {
-  const { Map } = await google.maps.importLibrary("maps");
-  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-  const { Marker } = await google.maps.importLibrary("marker");
+
 
   map = new Map(document.getElementById("map"), {
     center: { lat: 28.6139, lng: 77.2090 },
@@ -64,19 +65,8 @@ async function initMap() {
   let  multiPolyManager = new MultiPolylineManager(map);
   let  ultraPolyManager = new UltraPolylineManager(map);  
 
-  $("#right-panel").rightPullPanel({
-    width: 300,
-    topOffset: 60
-  });
-
-
-    $('#jqxtabs').jqxTabs({ width:  295, height: '100%',
-        // initTabContent: function (tab) {
-        // //     if (tab === 0) {
-        // //         google.maps.event.addDomListener(window, 'load', initialize);
-        // //     }
-        // }
-    });
+    $("#right-panel").rightPullPanel({ width: 300,topOffset: 60 });
+    $('#jqxtabs').jqxTabs({ width:  295, height: '100%'});
 
    ///////////////////////////////////////////////////////////////////////////////////////////////
         var template = [ {
@@ -223,350 +213,25 @@ async function initMap() {
             }      
                 
            template= template.concat(btns);
-
-
-
-
-            var formTamplate = [
-
-                {
-                    type: 'label',
-                    bind: 'radiobuttonValue_out',
-                    label: 'Select OA :',
-                    rowHeight: '40px',
-                },
-                
-                {
-                        columns: [
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxValueDDN',
-                                type: 'boolean',
-                                label: 'DDN',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxvalueHWR',
-                                type: 'boolean',
-                                label: 'HWR',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxValueNTL',
-                                type: 'boolean',
-                                label: 'NTL',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            }
-                        ]
-                },
-                {
-                        columns: [
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxValueNWT',
-                                type: 'boolean',
-                                label: 'NWT',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxValueSGR',
-                                type: 'boolean',
-                                label: 'SGR',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxValueALM',
-                                type: 'boolean',
-                                label: 'ALM',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            }
-                        ]
-                },
-                {
-                        type: 'label',
-                        bind: 'Select_District_Block',
-                        label: 'Select District and Block :',
-                        rowHeight: '40px',
-                } ,
-                {
-                        bind: 'dropdownDistrict',
-                        type: 'option',
-                        label: 'District',
-                        labelPosition: 'left',
-                        labelWidth: '30%',
-                        align: 'left',
-                        width: '150px',
-                        // required: true,
-                        component: 'jqxDropDownList',
-                        options: [
-                            { label: 'Option 1', value: 'value1' },
-                            { label: 'Option 2', value: 'value2' },
-                            { label: 'Option 3', value: 'value3' }
-                        ]
-                },
-
-                {
-                        bind: 'dropdownBlock',
-                        type: 'option',
-                        label: 'Block',
-                        checkboxes: true,
-                        labelPosition: 'left',
-                        labelWidth: '30%',
-                        align: 'left',
-                        width: '150px',
-                        // required: true,
-                        component: 'jqxDropDownList',
-                        options: [
-                            { label: 'Option 1', value: 'value1' },
-                            { label: 'Option 2', value: 'value2' },
-                            { label: 'Option 3', value: 'value3' }
-                        ]
-                },
-                {
-                        type: 'label',
-                        bind: 'select_options',
-                        label: 'Select Elements :',
-                        rowHeight: '40px',
-                },
-                
-                {
-                        columns: [
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxGP',
-                                type: 'boolean',
-                                // label: 'GP',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                type: 'button',
-                                bind: 'buttonGP',
-                                text: 'GP',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                            
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxVillage',
-                                type: 'boolean',
-                                // label: 'Village',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                type: 'button',
-                                bind: 'buttonVIL',
-                                text: 'VIL',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxBHQ',
-                                type: 'boolean',
-                                // label: 'BHQ',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                type: 'button',
-                                bind: 'buttonBHQ',
-                                text: 'BHQ',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                        ]
-                },
-                {
-                        columns: [
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxOFC',
-                                type: 'boolean',
-                                // label: 'Route',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                type: 'button',
-                                bind: 'buttonOFC',
-                                text: 'OFC',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxBTS',
-                                type: 'boolean',
-                                // label: 'BTS',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                type: 'button',
-                                bind: 'buttonBTS',
-                                text: 'BTS',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxOLT',
-                                type: 'boolean',
-                                // label: 'OLT',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                type: 'button',
-                                bind: 'buttonOLT',
-                                text: 'OLT',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                        ]
-                },                        
-                {
-                        columns: [
-                            {
-                                columnWidth: '10px',
-                                bind: 'checkboxSAS',
-                                type: 'boolean',
-                                labelWidth: '10px',
-                                label: '',
-                                // labelPosition: 'right',
-                                // align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                            {
-                                type: 'button',
-                                bind: 'buttonSAS',
-                                text: 'SAS',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxSchools',
-                                type: 'boolean',
-                                // label: 'Schools',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                                {
-                                type: 'button',
-                                bind: 'buttonSCH',
-                                text: 'SCH',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                            {
-                                columnWidth: '150px',
-                                bind: 'checkboxPHC',
-                                type: 'boolean',
-                                // label: 'PHC',
-                                labelPosition: 'right',
-                                align: 'left',
-                                labelPadding: {left: 0, top: 5, right: 0, bottom: 5}
-                            },
-                                {
-                                type: 'button',
-                                bind: 'buttonPHC',
-                                text: 'PHC',
-                                width: '40px',
-                                height: '30px',
-                                rowHeight: '30px',
-                                // columnWidth: '50%',
-                                align: 'left',
-                            },
-                        ]
-                },  
-                ];
-
-   
-            var sampleValue = {
-                'textBoxValue': 'text box value',
-                'passwordBoxValue': 'password box',
-                'nubmberBoxValue': 67.44,
-                'datetimeBoxValue': '2018-06-01 14:05:23',
-                'timeBoxValue': '2018-07-01 11:05:23',
-                'dateBoxValue': '2018-07-04 15:05:23',
-                'dropdownValue': 'value3',
-                'radiobuttonValue': 'value2',
-                'checkboxValue1': false,
-                'checkboxValue2': false,
-                'checkboxValue3': true,
-            };
-
-            
+  
             $('#elementForm').jqxForm({
                 template: template,
-                value: {...oaValueObj,...dropDownValues,...btnValueObj      },
+                value: {...oaValueObj,...btnValueObj      },
                 padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
 
            
             $("#el_elementForm4").jqxDropDownList({checkboxes:true}); 
-            districtValues.forEach(val => {
+                 districtValues.forEach(val => {
                 $("#el_elementForm4").jqxDropDownList('checkItem', val);
             });
 
             $("#el_elementForm5").jqxDropDownList({checkboxes:true}); 
-            blockValues.forEach(val => {
+                 blockValues.forEach(val => {
                 $("#el_elementForm5").jqxDropDownList('checkItem', val);
             });
             
-            // var subFormTemplate = {GP:[ ],VIL:[ ],BHQ:[ ],OFC:[ ],BTS:[ ],OLT:[ ],SAS:[ ],SCH:[ ],PHC:[ ]};
- 
+         
             var subFormTemplate = {GP :[ ],VIL :[ ],BHQ :[ ],OFC :[ ],BTS :[ ],OLT :[ ],SAS :[ ],SCH :[ ],PHC :[ ]};
  
             var subFormElements = {
@@ -660,6 +325,16 @@ async function initMap() {
                 
                 $('#elementSubForm').jqxForm('refresh');
             }
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
 
          
 /////////////////////////////////////////////////////////////////////////////////
@@ -867,7 +542,114 @@ function setMode(newMode) {
 $("#" + newMode).trigger("click");
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+function parseLatLng(str) {
+  const [lat, lng] = str.split(',').map(Number);
+  return { lat, lng };
+}
+
+async function loadMapData(type) {
+  try {
+    const res = await fetch('assets/php/data.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({type:type})
+    });
+
+    const data = await res.json();
+    data.forEach(item => {
+         createMarker(item);
+   });
+  
+   map.fitBounds(bounds);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+let itemMarkers=[];
 
 
+function createMarker(item) {
+    const pos = parseLatLng(item.present_lat_long);
+    const itemmarker = new AdvancedMarkerElement({
+    position: pos,
+    map,
+    title: item.GP_NAME
+  });
+//   itemMarkers.push(itemmarker);
+  bounds.extend(pos);
+  itemmarker.addListener("gmp-click", () => {
+    infoWindow.setContent(createInfoTable(item));
 
-export { initMap};
+    infoWindow.open(map, itemmarker);
+  });
+}
+
+
+function createInfoTable(item) {
+  return `
+    <div style="
+      font-family: Arial;
+      width: 260px;
+    ">
+
+      <!-- HEADER -->
+      <div style="
+        background: #007bff;
+        color: white;
+        padding: 8px;
+        font-size: 15px;
+        font-weight: bold;
+        border-radius: 6px 6px 0 0;
+      ">
+        ${item.GP_NAME || 'Details'}
+      </div>
+
+      <!-- TABLE -->
+      <table border="1" style="
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 13px;
+        border-top: none;
+      ">
+        <tr style="background-color: #f2f2f2;">
+          <th style="padding: 5px;">Field</th>
+          <th style="padding: 5px;">Value</th>
+        </tr>
+
+        <tr>
+          <td style="padding: 5px;"><b>DISTRICT</b></td>
+          <td style="padding: 5px;">${item.DISTRICT || '-'}</td>
+        </tr>
+
+        <tr>
+          <td style="padding: 5px;"><b>BLOCK</b></td>
+          <td style="padding: 5px;">${item.BLOCK || '-'}</td>
+        </tr>
+
+        <tr>
+          <td style="padding: 5px;"><b>STATUS</b></td>
+          <td style="padding: 5px;">
+            <span style="
+              color:${item.GP_STATUS === 'UP' ? 'green' : 'red'};
+              font-weight:bold;
+            ">
+              ${item.GP_STATUS || '-'}
+            </span>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 5px;"><b>LAT-LONG</b></td>
+          <td style="padding: 5px;">${item.present_lat_long || '-'}</td>
+        </tr>
+      </table>
+
+    </div>
+  `;
+}
+
+export { initMap, loadMapData, itemMarkers};

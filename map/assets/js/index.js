@@ -1,7 +1,8 @@
 import { loadJS, loadCSS, loadModule ,addDiv,Router} from "./loader.js";
 import  { ribbon,initializeRibbon } from "./jqxRibbon.js";
 import  { tab, initializeTabs } from "./jqxTab.js"  ;
-import { initMap } from "./m.js";
+import { initMap ,loadMapData} from "./m.js";
+
 
 // Router.add("/maps", () => initMap());
 Router.add("/", () => console.log("Home"));
@@ -117,8 +118,9 @@ window.onload = async function () {
 
 
     await loadModule("./assets/js/m.js");
-   
+    await loadModule("./assets/js/m_mapelements.js");
     initMap();
+    loadMapData("GP");
 
      console.log("All resources loaded");
   } catch (err) {
