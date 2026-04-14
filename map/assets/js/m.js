@@ -84,9 +84,15 @@ async function initMap() {
         bind: 'radiobuttonValue_out',
         label: 'Select OA :',
         rowHeight: '40px',
-    }];     
+         }];     
    
           var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
+          var OAvalues= [false, false, true, false, true, false];
+
+        let oaValueObj = OA.reduce((acc, key, index) => {
+            acc[key] = OAvalues[index];
+            return acc;
+        }, {});
 
 
             for (let i = 0; i < OA.length; i += 3) {
@@ -94,7 +100,7 @@ async function initMap() {
 
                 for (let j = i; j < i + 3 && j < OA.length; j++) {
                     row.columns.push({
-                        bind: 'chk' + OA[j],
+                        bind: OA[j],
                         type: 'boolean',
                         label: OA[j]
                     });
@@ -115,34 +121,50 @@ async function initMap() {
                         type: 'option',
                         label: 'District',
                         labelPosition: 'left',
+                        // checkboxes: true,
                         labelWidth: '30%',
                         align: 'left',
                         width: '150px',
                         // required: true,
                         component: 'jqxDropDownList',
                         options: [
-                            { label: 'Option 1', value: 'value1' },
-                            { label: 'Option 2', value: 'value2' },
-                            { label: 'Option 3', value: 'value3' }
-                        ]
+                            { label: 'Dehradun', value: 'Dehradun' },
+                            { label: 'Almora', value: 'Almora' },
+                            { label: 'Nainital', value: 'Nainital' },
+                            { label: 'Haridwar', value: 'Haridwar' }
+                        ],
+                        // init: function (component) {
+                        // component.jqxDropDownList({
+                        //     checkboxes: true,
+                        //     displayMember: 'label',
+                        //     valueMember: 'value'
+                        // }); }   
                 },
 
                 {
                         bind: 'dropdownBlock',
                         type: 'option',
                         label: 'Block',
-                        checkboxes: true,
+                        // checkboxes: true,
                         labelPosition: 'left',
                         labelWidth: '30%',
                         align: 'left',
                         width: '150px',
                         // required: true,
                         component: 'jqxDropDownList',
-                        options: [
-                            { label: 'Option 1', value: 'value1' },
-                            { label: 'Option 2', value: 'value2' },
-                            { label: 'Option 3', value: 'value3' }
-                        ]
+                         options: [
+                            { label: 'Raipur', value: 'Raipur' },
+                            { label: 'Haldwani', value: 'Haldwani' },
+                            { label: 'Hawalbag', value: 'Hawalbag' },
+                            { label: 'Laksar', value: 'Laksar' }
+                        ],
+ 
+                        // init: function (component) {
+                        // component.jqxDropDownList({
+                        //     checkboxes: true,
+                        //     displayMember: 'label',
+                        //     valueMember: 'value'
+                        // });} 
                 },
                 {
                         type: 'label',
@@ -153,8 +175,24 @@ async function initMap() {
 
 
                );
-                
+            
+            
+            var districtValues= ['Dehradun', 'Almora'];
+            var blockValues= ['Raipur', 'Haldwani'];
+
+            var dropDownValues   = {    
+                dropdownDistrict: districtValues,
+                dropdownBlock: blockValues
+            }
             var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"  ];
+            var btnValues = [false, false, true, false, true, false, true, false, true];
+
+
+            let btnValueObj = btnElements.reduce((acc, key, index) => {
+                acc[key] = btnValues[index];
+                return acc;
+            }, {});
+
             var btns=[]   
 
             for (let i = 0; i < btnElements.length; i += 3) {
@@ -162,14 +200,14 @@ async function initMap() {
 
                 for (let j = i; j < i + 3 && j < btnElements.length; j++) {
                     row.columns.push({
-                        bind: 'chk' + btnElements[j],
+                        bind: btnElements[j],
                         type: 'boolean',
                         
                     });
                     row.columns.push({  
 
                             type: 'button',
-                            bind: 'button'+btnElements[j],
+                            bind: 'btn' + btnElements[j],
                             text: btnElements[j],
                             width: '40px',
                             height: '30px',
@@ -508,46 +546,79 @@ async function initMap() {
                 'checkboxValue2': false,
                 'checkboxValue3': true,
             };
+
             
             $('#elementForm').jqxForm({
                 template: template,
-
-                // value: sampleValue,
+                value: {...oaValueObj,...dropDownValues,...btnValueObj      },
                 padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
 
-            console.log("Form initialized with template:", template);
-
+           
             $("#el_elementForm4").jqxDropDownList({checkboxes:true}); 
+            districtValues.forEach(val => {
+                $("#el_elementForm4").jqxDropDownList('checkItem', val);
+            });
+
             $("#el_elementForm5").jqxDropDownList({checkboxes:true}); 
+            blockValues.forEach(val => {
+                $("#el_elementForm5").jqxDropDownList('checkItem', val);
+            });
             
             // var subFormTemplate = {GP:[ ],VIL:[ ],BHQ:[ ],OFC:[ ],BTS:[ ],OLT:[ ],SAS:[ ],SCH:[ ],PHC:[ ]};
  
-            var subFormTemplate = {gpOptions :[ ],vilOptions:[ ],bhqOptions:[ ],ofcOptions:[ ],btsOptions:[ ],oltOptions:[ ],sasOptions:[ ],schOptions:[ ],phcOptions:[ ]};
- 
- 
- 
- 
+            var subFormTemplate = {GP :[ ],VIL :[ ],BHQ :[ ],OFC :[ ],BTS :[ ],OLT :[ ],SAS :[ ],SCH :[ ],PHC :[ ]};
  
             var subFormElements = {
-                gpOptions :['UP','DN','M90','L90'],
-                vilOptions:['COV','NCO'],
-                bhqOptions:['PH1','ABP'],
-                ofcOptions:['BN','CIR','CNTX'],
-                btsOptions:['2G','3G','4G','UP','DN','ML','OFC',"SAT"],
-                oltOptions:['TIP','BNU','BAF'],
-                sasOptions:['UP','DN','M90'],
-                schOptions:['WK','NWK','FES'],
-                phcOptions:['WK','NWK','FES']
+                GP :['UP','DN','M90','L90'],
+                VIL :['COV','NCO'],
+                BHQ :['PH1','ABP'],
+                OFC :['BN','CIR','CNTX'],
+                BTS :['2G','3G','4G','UP','DN','ML','OFC',"SAT"],
+                OLT :['TIP','BNU','BAF'],
+                SAS :['UP','DN','M90'],
+                SCH:['WK','NWK','FES'],
+                PHC:['WK','NWK','FES']
             };     
             
+
+
+            var subFormElementsValue = {
+                GP :[true, false, true, false],
+                VIL :[true, false],
+                BHQ :[true, false],
+                OFC :[true, false, false],
+                BTS :[true, false, false, true, false, false, false, true],
+                OLT :[true, false, false],
+                SAS :[true,false, false],
+                SCH :[true,false, false],
+                PHC :[true,false, false]
+            };   
+
+            let initialElementValue = {};
+
+            Object.keys(subFormElementsValue).forEach(group => {
+                let values = subFormElementsValue[group];
+                let keys = subFormElements[group];
+
+                let groupName = group.replace("Options", "").toUpperCase();
+
+                initialElementValue[groupName] = {};
+
+                values.forEach((val, index) => {
+                    initialElementValue[groupName]['chk'+ groupName+ keys[index]] = val;
+                });
+            });
+
+
+
             Object.entries(subFormElements).forEach(([key, value]) => {
                 for (let i = 0; i < value.length; i += 3) {
                 let row = { columns: [] };
 
                 for (let j = i; j < i + 3 && j < value.length; j++) {
                     row.columns.push({
-                        bind: 'chk' + value[j],
+                        bind: 'chk' + key+ value[j],
                         type: 'boolean',
                         label: value[j]
                     });
@@ -560,63 +631,31 @@ async function initMap() {
 
 
 
-            let gpOptions= ['UP','DN','M90'];
-            let vilOptions= ['COV','NCO'];
-            let bhqOptions= ['PH1' ,'ABP'];
-            let ofcOptions= ['BN','CIR','CNTX'];
-            let btsOptions= ['2G','3G','4G'];
-            let oltOptions= ['TIP','BNU','BAF'];
-            let sasOptions= ['UP','DN','M90'];
-            let schOptions= ['WK','NWK','FES'];
-            let phcOptions= ['WK','NWK','FES'];
-           
-  
-    //    [
-    //     ['gpOptions', gpOptions],
-    //     ['vilOptions', vilOptions],
-    //     ['bhqOptions', bhqOptions],
-    //     ['ofcOptions', ofcOptions],
-    //     ['btsOptions', btsOptions],
-    //     ['oltOptions', oltOptions],
-    //     ['sasOptions', sasOptions],
-    //     ['schOptions', schOptions],
-    //     ['phcOptions', phcOptions]
-    //     ].forEach(([key, opt]) => {
 
-    //     subFormTemplate[key].push({
-    //         columns: opt.map(val => ({
-    //         bind: `checkbox_${key}_${val}`,
-    //         type: 'boolean',
-    //         label: val,
-    //         labelPosition: 'right',
-    //         align: 'left',
-    //         labelPadding: { left: 0, top: 5, right: 0, bottom: 5 }
-    //         }))
-    //     });
+            $('#elementForm').on('buttonClick', function (event) {
+            var args = event.args;
+            var text = args.text // clicked button's text.;
+            var name = args.name // clicked button's name.;
+            createSubForm(text);
 
-    //     });
-           
-            $("#el_elementForm7_1").on("click", () => createSubForm("gpOptions"));
-            $("#el_elementForm7_3").on("click", () => createSubForm("vilOptions"));
-            $("#el_elementForm7_5").on("click", () => createSubForm("bhqOptions")); 
-            $("#el_elementForm8_1").on("click", () => createSubForm("ofcOptions")); 
-            $("#el_elementForm8_3").on("click", () => createSubForm("btsOptions"));
-            $("#el_elementForm8_5").on("click", () => createSubForm("oltOptions"));
-            $("#el_elementForm9_1").on("click", () => createSubForm("sasOptions"));
-            $("#el_elementForm9_3").on("click", () => createSubForm("schOptions"));
-            $("#el_elementForm9_5").on("click", () => createSubForm("phcOptions")); 
+             });
+                
+    
 
             function createSubForm(type){
                 console.log(subFormTemplate[type]);
+                console.log(initialElementValue[type]);
                 let tmpl = [{
                     type: 'label',
                     bind: type,
                     label: type.replace("Options","").toUpperCase() + ' Options :',
                     rowHeight: '40px',
                 },...subFormTemplate[type]];
+
                 $('#elementSubForm').jqxForm({
                     template: tmpl,
-                    padding: { left: 2, top: 5, right: 2, bottom: 2 }
+                    padding: { left: 2, top: 2, right: 2, bottom: 2 },
+                    value: initialElementValue[type] || {}
                 });
                 
                 $('#elementSubForm').jqxForm('refresh');
