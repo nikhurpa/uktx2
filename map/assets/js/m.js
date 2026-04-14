@@ -58,6 +58,8 @@ async function initMap() {
     bounds = new google.maps.LatLngBounds();
     infoWindow = new google.maps.InfoWindow();
 
+    
+
 //   marker = new AdvanceMarkerManager(map);
 //   polyline = new PolylineManager(map,editPolyline.handleVertexClick,null,setMode)
 
@@ -559,7 +561,7 @@ async function loadMapData(type) {
 
     const data = await res.json();
     data.forEach(item => {
-         createMarker(item);
+         createMarker(item,type);
    });
   
    map.fitBounds(bounds);
@@ -570,20 +572,46 @@ async function loadMapData(type) {
 }
 
 let itemMarkers=[];
+let labeledMarkers = []; 
 
-
-function createMarker(item) {
+function createMarker(item,type) {
     const pos = parseLatLng(item.present_lat_long);
+    const color = getStatusColor(item.GP_STATUS);
+
+    const { wrapper, text } = getSvgElement(
+    type,
+    color,
+    item.GP_NAME
+  );
+
     const itemmarker = new AdvancedMarkerElement({
     position: pos,
     map,
-    title: item.GP_NAME
+    title: item.GP_NAME,
+    content: wrapper
   });
 //   itemMarkers.push(itemmarker);
+
+ // store for zoom control
+  labeledMarkers.push({ marker, text });
+
+  itemMarkers.push(marker);
+
+    map.addListener("zoom_changed", () => {
+    const zoom = map.getZoom();
+
+    labeledMarkers.forEach(obj => {
+        if (zoom >= 13) {
+        obj.text.style.display = "block"; // show name
+        } else {
+        obj.text.style.display = "none";  // hide name
+        }
+    });
+    });
+
   bounds.extend(pos);
   itemmarker.addListener("gmp-click", () => {
     infoWindow.setContent(createInfoTable(item));
-
     infoWindow.open(map, itemmarker);
   });
 }
@@ -652,4 +680,134 @@ function createInfoTable(item) {
   `;
 }
 
+function getSvgElement(type, color, label = "") {
+        const wrapper = document.createElement("div");
+        // wrapper.style.display = "flex";
+        // wrapper.style.alignItems = "center";
+        // wrapper.style.justifyContent = "center";
+        wrapper.style.display = "flex";
+        wrapper.style.alignItems = "center";
+        wrapper.style.gap = "4px";
+
+        // ICON CONTAINER (🔥 border applied here)
+        const iconDiv = document.createElement("div");
+
+        iconDiv.style.display = "flex";
+        iconDiv.style.alignItems = "center";
+        iconDiv.style.justifyContent = "center";
+
+        // 🔥 VERY LIGHT BORDER EFFECT
+        iconDiv.style.background = "rgba(255,255,255,0.5)"; // ✅ 50% transparent
+        iconDiv.style.borderRadius = "50%";
+        iconDiv.style.padding = "1px";
+
+        // subtle shadow (like Google Maps)
+        iconDiv.style.boxShadow = "0 0 2px rgba(0,0,0,0.2)";
+
+    
+        iconDiv.innerHTML = getSvgByType(type, color);
+
+  // TEXT (right side)
+    const text = document.createElement("div");
+    text.innerText = label;
+
+    text.style.fontSize = "11px";
+    text.style.fontWeight = "bold";
+    text.style.color = "black";
+
+    // 🔥 WHITE BORDER (HALO EFFECT like Google Maps)
+    text.style.textShadow = `
+        -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px  1px 0 #fff,
+        1px  1px 0 #fff
+    `;
+
+    text.style.whiteSpace = "nowrap";
+    text.style.display = "none"; // hidden initially
+
+  wrapper.appendChild(iconDiv);
+  wrapper.appendChild(text);
+
+  return { wrapper, text }; // 🔥 return both
+}
+
+
+function getStatusColor(status) {
+  switch(status) {
+    case 'UP': return '#28a745';   // green
+    case 'OK': return '#28a745';   // green
+    case 'DN': return '#dc3545';   // red
+    case 'M90': return '#ffc107';  // yellow
+    case null: return '#6c757d';    // gray
+    default: return '#6c757d';     // gray
+  }
+}
+
+function getSvgByType(type, color) {
+  switch(type) {
+
+    // 🏠 Gram Panchayat
+    case 'GP':
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <path d="M12 3l9 8h-3v9h-4v-6H10v6H6v-9H3z"/>
+      </svg>`;
+
+    // 🏡 Village
+    case 'VIL':
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <path d="M4 10l8-6 8 6v10H4z"/>
+      </svg>`;
+
+    // 📡 Mobile BTS (tower)
+    case 'BTS':
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <path d="M12 2l4 20h-2l-1-5h-2l-1 5H8l4-20z"/>
+      </svg>`;
+
+    // 🔌 OLT / OFC (network)
+    case 'OLT':
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <path d="M3 6h18v4H3zM3 14h18v4H3z"/>
+      </svg>`;
+
+    // 🏫 School
+    case 'SCH':
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <path d="M12 3l10 6-10 6L2 9l10-6zm0 13l6-3v5H6v-5l6 3z"/>
+      </svg>`;
+
+    // 🏥 PHC (health center)
+    case 'PHC':
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <path d="M10 2h4v6h6v4h-6v6h-4v-6H4V8h6z"/>
+      </svg>`;
+
+    // 🏢 Government Office
+    case 'GOV':
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <path d="M3 21h18V3H3v18zm4-14h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-8h2v10h-2V7z"/>
+      </svg>`;
+
+    // 🏢 Block HQ (bigger admin building)
+    case 'BHQ':
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <path d="M12 2l9 4v14H3V6l9-4zm-3 6h2v2H9V8zm0 4h2v2H9v-2zm4-4h2v2h-2V8zm0 4h2v2h-2v-2z"/>
+      </svg>`;
+
+    default:
+      return `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="${color}">
+        <circle cx="12" cy="12" r="8"/>
+      </svg>`;
+  }
+}
 export { initMap, loadMapData, itemMarkers};
