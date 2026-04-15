@@ -310,23 +310,92 @@ async function initMap() {
     
 
             function createSubForm(type){
-                console.log(subFormTemplate[type]);
-                console.log(initialElementValue[type]);
+                // console.log(subFormTemplate[type]);
+                // console.log(initialElementValue[type]);
                 let tmpl = [{
                     type: 'label',
                     bind: type,
                     label: type.replace("Options","").toUpperCase() + ' Options :',
                     rowHeight: '40px',
                 },...subFormTemplate[type]];
-
+              
+                if ($("#elementSubForm").data('jqxForm')) {
+                    $("#elementSubForm").jqxForm('destroy');
+                    $("#elementSubForm").remove();
+                    $("#infoPanel").append('<div id="elementSubForm" style="width: 280px; height: auto;"></div>   ');
+                }
                 $('#elementSubForm').jqxForm({
                     template: tmpl,
                     padding: { left: 2, top: 2, right: 2, bottom: 2 },
                     value: initialElementValue[type] || {}
                 });
                 
+             
+                $('#elementSubForm').on('formDataChange', function (event) {
+                  var args = event.args;
+                  console.log(args)
+                  var newValue = args.value;
+                  var previousValue = args.previousValue;
+
+                  var formattedChanges = getFormattedChanges(args);
+                  applyFilters(formattedChanges);
+
+                  // for (var i in newValue) {
+                  //   // var newInputValue = newValue[i]; // current input's value.
+                  //   // var previousInputValue = previousValue[i]; // previous input's value.
+                  // }
+                });
                 $('#elementSubForm').jqxForm('refresh');
+
+
             }
+
+          function getFormattedChanges(obj) {
+              let { value, previousValue } = obj;
+
+              // ✅ Get type (key without 'chk')
+              let typeKey = Object.keys(value).find(k => !k.startsWith('chk'));
+              let type = typeKey;
+
+              let changes = [];
+
+              Object.keys(value).forEach(key => {
+                  if (key.startsWith('chk')) {
+                      let oldVal = previousValue[key];
+                      let newVal = value[key];
+
+                      if (oldVal !== newVal) {
+                          // Extract suffix (remove 'chk' + type)
+                          let suffix = key.replace('chk' + type, '');
+
+                          changes.push(`${suffix}=${newVal.toString().toUpperCase()}`);
+                      }
+                  }
+              });
+
+              return {
+                  type: type,
+                  changes: `(${changes.join(', ')})`
+              };
+          }
+
+          function applyFilters(formattedChanges) {
+
+            switch (value) {
+              case 'A':
+                // code
+                break;
+
+              case 'B':
+                // code
+                break;
+
+              default:
+                // fallback
+            }
+
+
+          }            
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -590,7 +659,17 @@ function createMarker(item,type) {
     title: item.GP_NAME,
     content: wrapper
   });
-//   itemMarkers.push(itemmarker);
+
+  itemMarkers.meta = {
+    type: type,                 // GP, BTS, etc
+    oa: item.OA,
+    district: item.DISTRICT,
+    block: item.BLOCK,
+    status: item.GP_STATUS,     // UP / DN / M90
+    options: item.OPTIONS || [] // ['UP','DN'] etc if multiple
+  };
+
+  itemMarkers.push(itemmarker);
 
  // store for zoom control
   labeledMarkers.push({ marker, text });
