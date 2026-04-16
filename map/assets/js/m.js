@@ -45,9 +45,22 @@ let mapoptions_startmarker={draggableCursor: "crosshair",draggingCursor: "crossh
 const { Map } = await google.maps.importLibrary("maps");
 const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 const { Marker } = await google.maps.importLibrary("marker");
+let hierarchy = {};
+
+async function loadHierarchy() {
+  try {
+    const res = await fetch('hierarchy.json'); // path to your file
+    hierarchy = await res.json();
+
+    console.log("Hierarchy loaded:", hierarchy);
+
+  } catch (err) {
+    console.error("Error loading hierarchy:", err);
+  }
+}
+
 
 async function initMap() {
-
 
   map = new Map(document.getElementById("map"), {
     center: { lat: 28.6139, lng: 77.2090 },
@@ -172,6 +185,8 @@ async function initMap() {
             var districtValues= ['Dehradun', 'Almora'];
             var blockValues= ['Raipur', 'Haldwani'];
 
+
+
             var dropDownValues   = {    
                 dropdownDistrict: districtValues,
                 dropdownBlock: blockValues
@@ -221,17 +236,25 @@ async function initMap() {
                 value: {...oaValueObj,...btnValueObj      },
                 padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
+            
+              const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
+              const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
+              const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
 
-           
-            $("#el_elementForm4").jqxDropDownList({checkboxes:true}); 
-                 districtValues.forEach(val => {
-                $("#el_elementForm4").jqxDropDownList('checkItem', val);
-            });
+            $("#el_elementForm4").jqxDropDownList("clear");
+            $("#el_elementForm4").jqxDropDownList({checkboxes:true,source: districts  }); 
+
+            // districtValues.forEach(val => {
+            //     $("#el_elementForm4").jqxDropDownList('checkItem', val);
+            // });
 
             $("#el_elementForm5").jqxDropDownList({checkboxes:true}); 
-                 blockValues.forEach(val => {
-                $("#el_elementForm5").jqxDropDownList('checkItem', val);
-            });
+            $("#el_elementForm5").jqxDropDownList("clear");
+            $("#el_elementForm5").jqxDropDownList({checkboxes:true,source: blocks  }); 
+            
+            // blockValues.forEach(val => {
+            //     $("#el_elementForm5").jqxDropDownList('checkItem', val);
+            // });
             
          
             var subFormTemplate = {GP :[ ],VIL :[ ],BHQ :[ ],OFC :[ ],BTS :[ ],OLT :[ ],SAS :[ ],SCH :[ ],PHC :[ ]};
@@ -380,6 +403,10 @@ async function initMap() {
           }
 
           function applyFilters(formattedChanges) {
+
+            
+
+
 
             switch (value) {
               case 'A':
@@ -620,7 +647,19 @@ function parseLatLng(str) {
   return { lat, lng };
 }
 
+function getDistricts(oa) {
+  return Object.keys(hierarchy[oa] || {});
+}
+
 async function loadMapData(type) {
+
+  // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
+  // const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
+  // const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
+  // console.log(districts);
+  // const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
+  // console.log(blocks);
+ 
   try {
     const res = await fetch('assets/php/data.php', {
       method: 'POST',
@@ -889,4 +928,4 @@ function getSvgByType(type, color) {
       </svg>`;
   }
 }
-export { initMap, loadMapData, itemMarkers};
+export { initMap, loadMapData, itemMarkers,loadHierarchy};
