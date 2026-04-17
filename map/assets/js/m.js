@@ -92,10 +92,11 @@ async function initMap() {
          }];     
    
           var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
-          var OAvalues= [false, false, true, false, true, false];
+          var OAvalues= [false, false, true, false, false, false];
+          var OAelementId= {DDN:'el_elementForm1_0',HWR:'el_elementForm1_1',NTL:'el_elementForm1_2',NWT:'el_elementForm2_0',SGR:'el_elementForm2_1',ALM:'el_elementForm2_2'};
 
         let oaValueObj = OA.reduce((acc, key, index) => {
-            acc[key] = OAvalues[index];
+            acc["chk" + key] = OAvalues[index];
             return acc;
         }, {});
 
@@ -105,7 +106,7 @@ async function initMap() {
 
                 for (let j = i; j < i + 3 && j < OA.length; j++) {
                     row.columns.push({
-                        bind: OA[j],
+                        bind: "chk"+ OA[j],
                         type: 'boolean',
                         label: OA[j]
                     });
@@ -196,7 +197,7 @@ async function initMap() {
 
 
             let btnValueObj = btnElements.reduce((acc, key, index) => {
-                acc[key] = btnValues[index];
+                acc["chk"+ key] = btnValues[index];
                 return acc;
             }, {});
 
@@ -207,7 +208,7 @@ async function initMap() {
 
                 for (let j = i; j < i + 3 && j < btnElements.length; j++) {
                     row.columns.push({
-                        bind: btnElements[j],
+                        bind: "chk"+ btnElements[j],
                         type: 'boolean',
                         
                     });
@@ -237,9 +238,9 @@ async function initMap() {
                 padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
             
-              const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
-              const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
-              const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
+            const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
+            const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
+            const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
 
             $("#el_elementForm4").jqxDropDownList("clear");
             $("#el_elementForm4").jqxDropDownList({checkboxes:true,source: districts  }); 
@@ -255,8 +256,52 @@ async function initMap() {
             // blockValues.forEach(val => {
             //     $("#el_elementForm5").jqxDropDownList('checkItem', val);
             // });
+
+           
             
-         
+            $("#elementForm").on('formDataChange', function (event) {
+
+                let prev = event.args.previousValue;
+                let curr = event.args.value;
+                let changedField = Object.keys(curr).find(k => prev[k] !== curr[k]);
+
+                let chel = changedField?.replace('chk', '');
+                if (OA.includes(chel)) {
+                        
+                        let isChecked = curr[changedField];
+                        console.log("✅ OA checkbox changed:", chel , ",Checked:", isChecked);
+                         // 🔥 Step 2: count checked OA checkboxes
+                        let checkedOAs = OA.filter(chel => curr["chk" + chel] === true);
+                        console.log("Checked OAs:", checkedOAs);
+                        // 🔥 Step 3: apply rule
+                        if (checkedOAs.length >= 2) {
+
+                            OA.forEach(item => {
+                                if (!checkedOAs.includes(item)) {
+                                  // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
+                                  $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
+                                }
+                            });
+
+                        } else {
+                            // enable all
+                            OA.forEach(item => {
+                                // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
+                                $("#" + OAelementId[item]).jqxCheckBox({ disabled: false });
+                            });
+                        }
+                }
+                
+                if (btnElements.includes(chel)) {
+                        
+                        let isChecked = curr[changedField];
+                        console.log("✅ Element checkbox changed:", chel , ",Checked:", isChecked);
+                }
+               
+    
+            });
+
+                                
             var subFormTemplate = {GP :[ ],VIL :[ ],BHQ :[ ],OFC :[ ],BTS :[ ],OLT :[ ],SAS :[ ],SCH :[ ],PHC :[ ]};
  
             var subFormElements = {
