@@ -280,6 +280,7 @@ async function initMap() {
                                 if (!checkedOAs.includes(item)) {
                                   // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
                                   $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
+                                   $("#label_" + OAelementId[item]).css("pointer-events", "none");
                                 }
                             });
 
@@ -288,6 +289,7 @@ async function initMap() {
                             OA.forEach(item => {
                                 // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
                                 $("#" + OAelementId[item]).jqxCheckBox({ disabled: false });
+                                 $("#label_" + OAelementId[item]).css("pointer-events", "auto");
                             });
                         }
                 }
