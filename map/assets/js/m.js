@@ -54,6 +54,7 @@ async function loadHierarchy() {
     const res = await fetch('hierarchy.json'); // path to your file
     hierarchy = await res.json();
 
+
     console.log("Hierarchy loaded:", hierarchy);
 
   } catch (err) {
@@ -419,6 +420,9 @@ async function initMap() {
     
             });
 
+
+            // let blockValue= {Raipur:{District:"Dehradun",OA:"DN",GP:{UP:true,DN:false,M90:true,L90:false },VIL:{COV:true,NCO:false},
+            // BHQ:{PH1:true,ABP:false},OFC:{BN:true,CIR:false,CNTX:false},BTS:{"2G":true,"3G":false,"4G":false,UP:true,DN:},OLT:{},SAS:{},SCH:{},PHC:{}}};
            // SUB FORM CREATION for every element button                     
             var subFormTemplate = {GP :[ ],VIL :[ ],BHQ :[ ],OFC :[ ],BTS :[ ],OLT :[ ],SAS :[ ],SCH :[ ],PHC :[ ]};
  
@@ -434,8 +438,54 @@ async function initMap() {
                 PHC:['WK','NWK','FES']
             };     
             
+            // make object for storing subform values for each block
+            let blockElementsValue= createBlockValueData()
+            console.log(blockElementsValue);
+
+            function createBlockValueData() {
+
+                // list all blocks from hierarchy
+                let allBlocks = [...new Set(
+                      Object.values(hierarchy)
+                        .flatMap(d => Object.values(d))
+                        .flat()
+                    )];
+
+                // get district and block from hierarchy
+                let elements={}    
+                let districtOa={};
+                let results = {};
+
+                allBlocks.forEach(blockName => {
+
+                results[blockName] = {};
+
+                let districtOa = Object.entries(hierarchy).flatMap(([oa, districts]) =>
+                  Object.entries(districts).flatMap(([district, blocks]) =>
+                    blocks.includes(blockName) ? [{ oa, district }] : []
+                  )
+                )[0]; 
+
+              
+
+                Object.entries(subFormElements).forEach(([key, values]) => {
+                  elements[key] = {};
+
+                  values.forEach(v => {
+                  elements[key][v] = false;
+                  });
+                });
 
 
+              results[blockName] = {...districtOa, ...elements};
+                  
+                });    
+
+            
+                return results;
+            }
+            
+          
             var subFormElementsValue = {
                 GP :[true, false, true, false],
                 VIL :[true, false],
