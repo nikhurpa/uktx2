@@ -191,13 +191,16 @@ async function initMap() {
             
 
             var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"  ];
+            var btnElementId= {GP:'el_elementForm7_1',VIL:'el_elementForm7_3',BHQ:'el_elementForm7_5',OFC:'el_elementForm8_1',BTS:'el_elementForm8_3',OLT:'el_elementForm8_5',SAS:'el_elementForm9_1',SCH:'el_elementForm9_3',PHC:'el_elementForm9_5'}; 
             var btnValues = [false, false, true, false, true, false, true, false, true];
+            var btnValueObj ={GP:false, VIL:false, BHQ:true, OFC:false, BTS:true, OLT:false, SAS:true, SCH:false, PHC:true};
 
 
-            let btnValueObj = btnElements.reduce((acc, key, index) => {
-                acc["chk"+ key] = btnValues[index];
-                return acc;
-            }, {});
+
+            // let btnValueObj = btnElements.reduce((acc, key, index) => {
+            //     acc["chk"+ key] = btnValueObj[key];
+            //     return acc;
+            // }, {});
 
             var btns=[]   
 
@@ -236,6 +239,8 @@ async function initMap() {
                 padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
             
+            btnElements.forEach(item => {("#" + btnElementId[item]).jqxButton({ disabled: !btnValueObj[item] })});
+
             const selectedOAs= ["Almora"]; // Example: Getting districts for a specific OA
             //et district and block from hierarchy
             const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
@@ -321,7 +326,7 @@ async function initMap() {
                        
                 }
 
-                // Disabling other districts if 2 are already selected
+                // Disabling other blocks if 2 are already selected
                 if (!event.args) return;
 
                 var dropdown = $("#el_elementForm5");
@@ -353,9 +358,7 @@ async function initMap() {
 
                 });
 
-
-
-           
+         
             
             $("#elementForm").on('formDataChange', function (event) {
 
@@ -405,6 +408,8 @@ async function initMap() {
                         
                         let isChecked = curr[changedField];
                         console.log("✅ Element checkbox changed:", chel , ",Checked:", isChecked);
+                     
+                        isChecked ? $('#' + btnElementId[chel] ).jqxButton({ disabled: false }) : $('#' + btnElementId[chel] ).jqxButton({ disabled: true });
                 }
 
               
