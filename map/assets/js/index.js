@@ -122,7 +122,7 @@ window.onload = async function () {
     
     await loadHierarchy();
     await initMap();
-    loadMapData("GP");
+    //loadMapData("GP","Hawalbag","Almora");
 
      console.log("All resources loaded");
   } catch (err) {

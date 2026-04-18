@@ -864,7 +864,7 @@ function getDistricts(oa) {
   return Object.keys(hierarchy[oa] || {});
 }
 
-async function loadMapData(type) {
+async function loadMapData(type,block,oa) {
 
   // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
   // const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
@@ -877,7 +877,7 @@ async function loadMapData(type) {
     const res = await fetch('assets/php/data.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({type:type})
+      body: JSON.stringify({type:type, block:block, oa:oa})
     });
 
     const data = await res.json();
