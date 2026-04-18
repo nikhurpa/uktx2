@@ -45,6 +45,8 @@ let mapoptions_startmarker={draggableCursor: "crosshair",draggingCursor: "crossh
 const { Map } = await google.maps.importLibrary("maps");
 const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 const { Marker } = await google.maps.importLibrary("marker");
+
+//load block json file
 let hierarchy = {};
 
 async function loadHierarchy() {
@@ -84,6 +86,7 @@ async function initMap() {
     $('#jqxtabs').jqxTabs({ width:  295, height: '100%'});
 
    ///////////////////////////////////////////////////////////////////////////////////////////////
+   // FORM CREATION 
         var template = [ {
         type: 'label',
         bind: 'radiobuttonValue_out',
@@ -94,6 +97,7 @@ async function initMap() {
           var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
           var OAvalues= [false, false, true, false, false, false];
           var OAelementId= {DDN:'el_elementForm1_0',HWR:'el_elementForm1_1',NTL:'el_elementForm1_2',NWT:'el_elementForm2_0',SGR:'el_elementForm2_1',ALM:'el_elementForm2_2'};
+
 
         let oaValueObj = OA.reduce((acc, key, index) => {
             acc["chk" + key] = OAvalues[index];
@@ -192,6 +196,7 @@ async function initMap() {
                 dropdownDistrict: districtValues,
                 dropdownBlock: blockValues
             }
+
             var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"  ];
             var btnValues = [false, false, true, false, true, false, true, false, true];
 
@@ -239,6 +244,7 @@ async function initMap() {
             });
             
             const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
+            //et district and block from hierarchy
             const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
             const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
 
@@ -266,6 +272,7 @@ async function initMap() {
                 let changedField = Object.keys(curr).find(k => prev[k] !== curr[k]);
 
                 let chel = changedField?.replace('chk', '');
+                // Check if Checkbox field is changed and belongs to OA or Element
                 if (OA.includes(chel)) {
                         
                         let isChecked = curr[changedField];
@@ -273,14 +280,14 @@ async function initMap() {
                          // 🔥 Step 2: count checked OA checkboxes
                         let checkedOAs = OA.filter(chel => curr["chk" + chel] === true);
                         console.log("Checked OAs:", checkedOAs);
-                        // 🔥 Step 3: apply rule
+                        // 🔥 Step 3: apply rule that if >2 OA is selected then disable others
                         if (checkedOAs.length >= 2) {
 
                             OA.forEach(item => {
                                 if (!checkedOAs.includes(item)) {
                                   // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
                                   $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
-                                   $("#label_" + OAelementId[item]).css("pointer-events", "none");
+                                   $("#label_" + OAelementId[item]).css("pointer-events", "none");  // Disable click on label
                                 }
                             });
 
@@ -288,12 +295,17 @@ async function initMap() {
                             // enable all
                             OA.forEach(item => {
                                 // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
-                                $("#" + OAelementId[item]).jqxCheckBox({ disabled: false });
-                                 $("#label_" + OAelementId[item]).css("pointer-events", "auto");
+                                $("#" + OAelementId[item]).jqxCheckBox({ disabled: false }); // Enable Checkbokes
+                                 $("#label_" + OAelementId[item]).css("pointer-events", "auto"); // Enablee click on label
                             });
                         }
+                        
+                         isChecked ? $("#el_elementForm4").jqxDropDownList('addItem',chel) : $("#el_elementForm4").jqxDropDownList('removeItem',chel); 
+                        
+
                 }
-                
+
+                // Check if changed field is element button
                 if (btnElements.includes(chel)) {
                         
                         let isChecked = curr[changedField];
@@ -303,7 +315,7 @@ async function initMap() {
     
             });
 
-                                
+           // SUB FORM CREATION for every element button                     
             var subFormTemplate = {GP :[ ],VIL :[ ],BHQ :[ ],OFC :[ ],BTS :[ ],OLT :[ ],SAS :[ ],SCH :[ ],PHC :[ ]};
  
             var subFormElements = {
