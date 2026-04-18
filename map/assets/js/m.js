@@ -197,10 +197,10 @@ async function initMap() {
 
 
 
-            // let btnValueObj = btnElements.reduce((acc, key, index) => {
-            //     acc["chk"+ key] = btnValueObj[key];
-            //     return acc;
-            // }, {});
+            let btnInitialValue = btnElements.reduce((acc, key, index) => {
+                acc["chk"+ key] = btnValueObj[key];
+                return acc;
+            }, {});
 
             var btns=[]   
 
@@ -235,11 +235,14 @@ async function initMap() {
   
             $('#elementForm').jqxForm({
                 template: template,
-                value: {...oaValueObj,...btnValueObj      },
+                value: {...oaValueObj,...btnInitialValue      },
                 padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
-            
-            btnElements.forEach(item => {("#" + btnElementId[item]).jqxButton({ disabled: !btnValueObj[item] })});
+          
+
+          
+            btnElements.forEach(item => {$("#" + btnElementId[item]).jqxButton({ disabled: !btnValueObj[item] })});
+       
 
             const selectedOAs= ["Almora"]; // Example: Getting districts for a specific OA
             //et district and block from hierarchy
