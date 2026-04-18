@@ -95,12 +95,14 @@ async function initMap() {
          }];     
    
           var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
-          var OAvalues= [false, false, true, false, false, false];
+          var OAValues= {DDN:false, HWR:false, NTL:false, NWT:false, SGR:false, ALM:true};
+          var OANames= {DDN:'Dehradun',HWR:'Haridwar',NTL:'Nainital',NWT:'New Tehri',SGR:'Srinagar',ALM:'Almora'};
+          var OAvalues1= [false, false, false, true, false, true];
           var OAelementId= {DDN:'el_elementForm1_0',HWR:'el_elementForm1_1',NTL:'el_elementForm1_2',NWT:'el_elementForm2_0',SGR:'el_elementForm2_1',ALM:'el_elementForm2_2'};
-
+          var districtValues= {Almora:true, Dehradun:false, Haridwar:false, Nainital:false, "U S Nagar":false, Srinagar:false,Pauri:false, Pithoragarh:false, Champawat:false, Rudraprayag:false, "New Tehri":false, Uttarkashi:false};
 
         let oaValueObj = OA.reduce((acc, key, index) => {
-            acc["chk" + key] = OAvalues[index];
+            acc["chk" + key] = OAValues[key];
             return acc;
         }, {});
 
@@ -187,15 +189,6 @@ async function initMap() {
                );
             
             
-            var districtValues= ['Dehradun', 'Almora'];
-            var blockValues= ['Raipur', 'Haldwani'];
-
-
-
-            var dropDownValues   = {    
-                dropdownDistrict: districtValues,
-                dropdownBlock: blockValues
-            }
 
             var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"  ];
             var btnValues = [false, false, true, false, true, false, true, false, true];
@@ -243,13 +236,67 @@ async function initMap() {
                 padding: { left: 2, top: 2, right: 2, bottom: 2 }
             });
             
-            const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
+            const selectedOAs= ["Almora"]; // Example: Getting districts for a specific OA
             //et district and block from hierarchy
             const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
-            const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
+            let selectedDistricts = Object.keys(districtValues).filter(key => districtValues[key] === true);
+
+            const blocks = [...new Set(selectedDistricts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
 
             $("#el_elementForm4").jqxDropDownList("clear");
             $("#el_elementForm4").jqxDropDownList({checkboxes:true,source: districts  }); 
+           //check selected districts
+           
+            selectedDistricts.forEach(item => { $("#el_elementForm4").jqxDropDownList('checkItem', item );}); 
+
+            // District Dropdown change event
+            $("#el_elementForm4").on('checkChange', function (event)
+                {
+                    if (event.args) {
+                    var item = event.args.item;
+                    var value = item.value;
+                    var label = item.label;
+                    var checked = item.checked;
+                    var checkedItems = $("#el_elementForm4").jqxDropDownList('getCheckedItems');
+                    // Addig removing blocks based on district selection
+                    const blocks = Object.values(hierarchy).flatMap(oa => oa[label] || []);
+                    checked ? blocks.forEach(block=> $("#el_elementForm5").jqxDropDownList('addItem',block )) : blocks.forEach(block=> $("#el_elementForm5").jqxDropDownList('removeItem',block)); 
+                        
+                }
+
+                // Disabling other districts if 2 are already selected
+                if (!event.args) return;
+
+                var dropdown = $("#el_elementForm4");
+
+                var checkedItems = dropdown.jqxDropDownList('getCheckedItems');
+
+                // 🔥 Step 1: count checked
+                if (checkedItems.length >= 2) {
+
+                    // disable all unchecked items
+                    var allItems = dropdown.jqxDropDownList('getItems');
+
+                    allItems.forEach(item => {
+                        if (!item.checked) {
+                            dropdown.jqxDropDownList('disableItem', item);
+                        }
+                    });
+
+                } else {
+                    // 🔥 enable all again
+                    var allItems = dropdown.jqxDropDownList('getItems');
+
+                    allItems.forEach(item => {
+                        dropdown.jqxDropDownList('enableItem', item);
+                    });
+                }
+
+
+
+                });
+
+
 
             // districtValues.forEach(val => {
             //     $("#el_elementForm4").jqxDropDownList('checkItem', val);
@@ -263,6 +310,51 @@ async function initMap() {
             //     $("#el_elementForm5").jqxDropDownList('checkItem', val);
             // });
 
+            $("#el_elementForm5").on('checkChange', function (event)
+                {
+                    if (event.args) {
+                    var item = event.args.item;
+                    var value = item.value;
+                    var label = item.label;
+                    var checked = item.checked;
+                    var checkedItems = $("#el_elementForm4").jqxDropDownList('getCheckedItems');
+                       
+                }
+
+                // Disabling other districts if 2 are already selected
+                if (!event.args) return;
+
+                var dropdown = $("#el_elementForm5");
+
+                var checkedItems = dropdown.jqxDropDownList('getCheckedItems');
+
+                // 🔥 Step 1: count checked
+                if (checkedItems.length >= 2) {
+
+                    // disable all unchecked items
+                    var allItems = dropdown.jqxDropDownList('getItems');
+
+                    allItems.forEach(item => {
+                        if (!item.checked) {
+                            dropdown.jqxDropDownList('disableItem', item);
+                        }
+                    });
+
+                } else {
+                    // 🔥 enable all again
+                    var allItems = dropdown.jqxDropDownList('getItems');
+
+                    allItems.forEach(item => {
+                        dropdown.jqxDropDownList('enableItem', item);
+                    });
+                }
+
+
+
+                });
+
+
+
            
             
             $("#elementForm").on('formDataChange', function (event) {
@@ -270,7 +362,7 @@ async function initMap() {
                 let prev = event.args.previousValue;
                 let curr = event.args.value;
                 let changedField = Object.keys(curr).find(k => prev[k] !== curr[k]);
-
+               
                 let chel = changedField?.replace('chk', '');
                 // Check if Checkbox field is changed and belongs to OA or Element
                 if (OA.includes(chel)) {
@@ -299,8 +391,11 @@ async function initMap() {
                                  $("#label_" + OAelementId[item]).css("pointer-events", "auto"); // Enablee click on label
                             });
                         }
-                        
-                         isChecked ? $("#el_elementForm4").jqxDropDownList('addItem',chel) : $("#el_elementForm4").jqxDropDownList('removeItem',chel); 
+
+                        // load distrct based on OA selection
+                        const districts = Object.keys(hierarchy[OANames[chel]] || {}).sort();
+                        //console.log("Districts for selected OAs:", districts);
+                        isChecked ? districts.forEach(district=> $("#el_elementForm4").jqxDropDownList('addItem',district )) : districts.forEach(district=> $("#el_elementForm4").jqxDropDownList('removeItem',district)); 
                         
 
                 }
@@ -311,7 +406,8 @@ async function initMap() {
                         let isChecked = curr[changedField];
                         console.log("✅ Element checkbox changed:", chel , ",Checked:", isChecked);
                 }
-               
+
+              
     
             });
 
