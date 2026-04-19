@@ -1,7 +1,7 @@
 import { loadJS, loadCSS, loadModule ,addDiv,Router} from "./loader.js";
 import  { ribbon,initializeRibbon } from "./jqxRibbon.js";
 import  { tab, initializeTabs } from "./jqxTab.js"  ;
-import { initMap ,loadMapData,loadHierarchy} from "./m.js";
+import { initMap ,loadMapData,loadHierarchy, loadTypeMap} from "./m.js";
 
 
 // Router.add("/maps", () => initMap());
@@ -121,8 +121,10 @@ window.onload = async function () {
     await loadModule("./assets/js/m_mapelements.js");
     
     await loadHierarchy();
+    await loadTypeMap();
     await initMap();
-    //loadMapData("GP","Hawalbag","Almora");
+    // loadMapData("GP","Hawalbag","Almora");
+    loadMapData("OFC","","Almora");
 
      console.log("All resources loaded");
   } catch (err) {

@@ -31,7 +31,10 @@ let polylines=[],markers=[];
 let polylineindex=0;
 let nextmarkerindex,prmarkerindex,markerindex;
 let tempTree;
-
+// let oaTypeList=["OFC", "BTS", "OLT"];
+// let blockTypeList=["GP", "VIL", "BHQ","SAS","SCH","PHC"];
+let oaTypeList=["BTS", "OLT"];
+let blockTypeList=["GP", "BHQ"];
 
 
 
@@ -45,8 +48,11 @@ let mapoptions_startmarker={draggableCursor: "crosshair",draggingCursor: "crossh
 const { Map } = await google.maps.importLibrary("maps");
 const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 const { Marker } = await google.maps.importLibrary("marker");
+const { encoding } = await google.maps.importLibrary("geometry");
 
 //load block json file
+
+
 let hierarchy = {};
 
 async function loadHierarchy() {
@@ -59,6 +65,20 @@ async function loadHierarchy() {
 
   } catch (err) {
     console.error("Error loading hierarchy:", err);
+  }
+}
+
+let typeMap = {};
+
+async function loadTypeMap() {
+  try {
+    const res = await fetch('type.json'); // path to your file
+    typeMap = await res.json();
+
+    console.log("Type map loaded:", typeMap);
+
+  } catch (err) {
+    console.error("Error loading type map:", err);
   }
 }
 
@@ -856,8 +876,31 @@ $("#" + newMode).trigger("click");
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 function parseLatLng(str) {
-  const [lat, lng] = str.split(',').map(Number);
+  if (!str) return null;
+
+  const parts = str.split(',');
+
+  if (parts.length !== 2) return null;
+
+  const lat = parseFloat(parts[0]);
+  const lng = parseFloat(parts[1]);
+
   return { lat, lng };
+}
+
+function isValidLatLng(pos) {
+  if (!pos) return false;
+
+  const { lat, lng } = pos;
+
+  return (
+    typeof lat === "number" &&
+    typeof lng === "number" &&
+    !isNaN(lat) &&
+    !isNaN(lng) &&
+    lat >= -90 && lat <= 90 &&
+    lng >= -180 && lng <= 180
+  );
 }
 
 function getDistricts(oa) {
@@ -866,23 +909,27 @@ function getDistricts(oa) {
 
 async function loadMapData(type,block,oa) {
 
-  // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
+    // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
   // const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
   // const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
   // console.log(districts);
   // const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
   // console.log(blocks);
- 
+//  console.log(typeMap);
+
   try {
     const res = await fetch('assets/php/data.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({type:type, block:block, oa:oa})
     });
-
+    console.log(typeMap[type].latLongField);
     const data = await res.json();
     data.forEach(item => {
-         createMarker(item,type);
+
+      typeMap[type].latLongField != "" ?     createMarker(item,type) : null;
+      typeMap[type].encodedPathField != "" ? createPath(item,type) : null;
+
    });
   
    map.fitBounds(bounds);
@@ -896,29 +943,36 @@ let itemMarkers=[];
 let labeledMarkers = []; 
 
 function createMarker(item,type) {
-    const pos = parseLatLng(item.present_lat_long);
-    const color = getStatusColor(item.GP_STATUS);
+    const pos = parseLatLng(item[typeMap[type].latLongField]);
+    // 🔥 VALIDATION CHECK
+    if (!isValidLatLng(pos)) {
+      console.log("❌ Invalid LatLng:", item.present_lat_long, item);
+      return; // ⛔ skip marker
+    }
+
+
+    const color = getStatusColor(item[typeMap[type].statusField]);
 
     const { wrapper, text } = getSvgElement(
     type,
     color,
-    item.GP_NAME
+    item[typeMap[type].nameField]
   );
 
     const itemmarker = new AdvancedMarkerElement({
     position: pos,
     map,
-    title: item.GP_NAME,
+    title: item[typeMap[type].nameField],
     content: wrapper
   });
 
   itemMarkers.meta = {
     type: type,                 // GP, BTS, etc
-    oa: item.OA,
-    district: item.DISTRICT,
-    block: item.BLOCK,
-    status: item.GP_STATUS,     // UP / DN / M90
-    options: item.OPTIONS || [] // ['UP','DN'] etc if multiple
+    oa: item[typeMap[type].oaField],
+    district: item[typeMap[type].districtField],
+    block: item[typeMap[type].blockField],
+    status: item[typeMap[type].statusField],     // UP / DN / M90
+    // options: item.OPTIONS || [] // ['UP','DN'] etc if multiple
   };
 
   itemMarkers.push(itemmarker);
@@ -942,13 +996,12 @@ function createMarker(item,type) {
 
   bounds.extend(pos);
   itemmarker.addListener("gmp-click", () => {
-    infoWindow.setContent(createInfoTable(item));
+    infoWindow.setContent(createInfoTable(item,type));
     infoWindow.open(map, itemmarker);
   });
 }
 
-
-function createInfoTable(item) {
+function createInfoTable(item,type) {
   return `
     <div style="
       font-family: Arial;
@@ -964,7 +1017,7 @@ function createInfoTable(item) {
         font-weight: bold;
         border-radius: 6px 6px 0 0;
       ">
-        ${item.GP_NAME || 'Details'}
+        ${item[typeMap[type].nameField] || 'Details'}
       </div>
 
       <!-- TABLE -->
@@ -979,31 +1032,33 @@ function createInfoTable(item) {
           <th style="padding: 5px;">Value</th>
         </tr>
 
+       
+
         <tr>
           <td style="padding: 5px;"><b>DISTRICT</b></td>
-          <td style="padding: 5px;">${item.DISTRICT || '-'}</td>
+          <td style="padding: 5px;">${item[typeMap[type].districtField] || '-'}</td>
         </tr>
 
         <tr>
           <td style="padding: 5px;"><b>BLOCK</b></td>
-          <td style="padding: 5px;">${item.BLOCK || '-'}</td>
+          <td style="padding: 5px;">${item[typeMap[type].blockField] || '-'}</td>
         </tr>
 
         <tr>
           <td style="padding: 5px;"><b>STATUS</b></td>
           <td style="padding: 5px;">
             <span style="
-              color:${item.GP_STATUS === 'UP' ? 'green' : 'red'};
+              color:${item[typeMap[type].statusField] === 'UP' ? 'green' : 'red'};
               font-weight:bold;
             ">
-              ${item.GP_STATUS || '-'}
+              ${item[typeMap[type].statusField] || '-'}
             </span>
           </td>
         </tr>
 
         <tr>
           <td style="padding: 5px;"><b>LAT-LONG</b></td>
-          <td style="padding: 5px;">${item.present_lat_long || '-'}</td>
+          <td style="padding: 5px;">${item[typeMap[type].latLongField] || '-'}</td>
         </tr>
       </table>
 
@@ -1141,4 +1196,62 @@ function getSvgByType(type, color) {
       </svg>`;
   }
 }
-export { initMap, loadMapData, itemMarkers,loadHierarchy};
+
+function decodePath(encoded) {
+  
+  try {
+    // console.log("Decoding path:", encoded);
+    return encoding.decodePath(encoded);
+  } catch (e) {
+    console.log("❌ Invalid encoded polyline:", encoded);
+    return [];
+  }
+}
+let allPaths = [];
+
+function createPath(item, type) {
+ 
+  const path = decodePath(item[typeMap[type].encodedPathField]);
+
+  // 🔥 VALIDATION
+  if (!path || path.length < 2) {
+    console.log("❌ Invalid Path:", item[typeMap[type].encodedPathField], item);
+    return;
+  }
+
+  const polyline = new google.maps.Polyline({
+    path: path,
+    map: map,
+    strokeColor: getStatusColor(item[typeMap[type].statusField]),
+    strokeOpacity: 0.9,
+    strokeWeight: 3
+  });
+
+  // 🔥 metadata
+  polyline.meta = {
+    oa: item[typeMap[type].oaField],
+    district: item[typeMap[type].districtField],
+    block: item[typeMap[type].blockField],
+    status: item[typeMap[type].statusField],
+    type: type
+  };
+  path.forEach(p => bounds.extend(p));
+  allPaths.push(polyline);
+
+  // click event
+  polyline.addListener("click", (e) => {
+    infoWindow.setContent(`
+      <div>
+        <b>${type}</b><br>
+        District: ${item[typeMap[type].districtField]}<br>
+        Block: ${item[typeMap[type].blockField]}<br>
+        Status: ${item[typeMap[type].statusField]}
+      </div>
+    `);
+
+    infoWindow.setPosition(e.latLng);
+    infoWindow.open(map);
+  });
+}
+
+export { initMap, loadMapData, itemMarkers,loadHierarchy,loadTypeMap};
