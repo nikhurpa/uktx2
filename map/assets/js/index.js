@@ -128,11 +128,11 @@ window.onload = async function () {
     await loadHierarchy();
     await loadTypeMap();
     await initMap();
-    loadMapData("GP","Hawalbag","Almora");
-    loadMapData("OLT","Hawalbag","Almora");
-    loadMapData("BTS","Hawalbag","Almora");
-    
-    loadMapData("OFC","","Almora");
+
+    // loadMapData("GP","Hawalbag","Almora");
+    // loadMapData("OLT","Hawalbag","Almora");
+    // loadMapData("BTS","Hawalbag","Almora");
+    // loadMapData("OFC","","Almora");
 
      console.log("All resources loaded");
   } catch (err) {

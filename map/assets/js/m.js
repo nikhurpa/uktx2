@@ -31,10 +31,10 @@ let polylines=[],markers=[];
 let polylineindex=0;
 let nextmarkerindex,prmarkerindex,markerindex;
 let tempTree;
-// let oaTypeList=["OFC", "BTS", "OLT"];
+let oaTypeList=["OFC", "BTS", "OLT"];
 // let blockTypeList=["GP", "VIL", "BHQ","SAS","SCH","PHC"];
-let oaTypeList=["BTS", "OLT"];
-let blockTypeList=["GP", "BHQ"];
+// let oaTypeList=["OLT"];
+let blockTypeList=["GP"];
 
 
 
@@ -57,7 +57,7 @@ let hierarchy = {};
 
 async function loadHierarchy() {
   try {
-    const res = await fetch('hierarchy.json'); // path to your file
+    const res = await fetch('hierarchy_updated.json?v=' + Date.now()); // path to your file
     hierarchy = await res.json();
 
 
@@ -72,7 +72,7 @@ let typeMap = {};
 
 async function loadTypeMap() {
   try {
-    const res = await fetch('type.json'); // path to your file
+    const res = await fetch('type.json?v=' + Date.now()); // path to your file
     typeMap = await res.json();
 
     console.log("Type map loaded:", typeMap);
@@ -117,10 +117,10 @@ async function initMap() {
    
           var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
           var OAValues= {DDN:false, HWR:false, NTL:false, NWT:false, SGR:false, ALM:true};
-          var OANames= {DDN:'Dehradun',HWR:'Haridwar',NTL:'Nainital',NWT:'New Tehri',SGR:'Srinagar',ALM:'Almora'};
+          var OANames= {DDN:'DEHRADUN',HWR:'HARIDWAR',NTL:'NAINITAL',NWT:'NEW TEHRI',SGR:'SRINAGAR',ALM:'ALMORA'};
           var OAvalues1= [false, false, false, true, false, true];
           var OAelementId= {DDN:'el_elementForm1_0',HWR:'el_elementForm1_1',NTL:'el_elementForm1_2',NWT:'el_elementForm2_0',SGR:'el_elementForm2_1',ALM:'el_elementForm2_2'};
-          var districtValues= {Almora:true, Dehradun:false, Haridwar:false, Nainital:false, "U S Nagar":false, Srinagar:false,Pauri:false, Pithoragarh:false, Champawat:false, Rudraprayag:false, "New Tehri":false, Uttarkashi:false};
+          var districtValues= {ALMORA:true, DEHRADUN:false, HARIDWAR:false, NAINITAL:false, "U S NAGAR":false, SRINAGAR:false,"PAURI GARHWAL":false, PITHORAGARH:false, CHAMPAWAT:false, RUDRAPRAYAG:false, "NEW TEHRI":false, UTTARKASHI:false};
 
         let oaValueObj = OA.reduce((acc, key, index) => {
             acc["chk" + key] = OAValues[key];
@@ -162,9 +162,7 @@ async function initMap() {
                         component: 'jqxDropDownList',
                         options: [
                             { label: 'Dehradun', value: 'Dehradun' },
-                            { label: 'Almora', value: 'Almora' },
-                            { label: 'Nainital', value: 'Nainital' },
-                            { label: 'Haridwar', value: 'Haridwar' }
+                           
                         ],
                         // init: function (component) {
                         // component.jqxDropDownList({
@@ -265,7 +263,7 @@ async function initMap() {
             btnElements.forEach(item => {$("#" + btnElementId[item]).jqxButton({ disabled: !btnValueObj[item] })});
        
 
-            const selectedOAs= ["Almora"]; // Example: Getting districts for a specific OA
+            const selectedOAs= ["ALMORA"]; // Example: Getting districts for a specific OA
             //et district and block from hierarchy
             const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
             let selectedDistricts = Object.keys(districtValues).filter(key => districtValues[key] === true);
@@ -383,7 +381,7 @@ async function initMap() {
                 });
 
          
-            
+            /// main form rendered
             $("#elementForm").on('formDataChange', function (event) {
 
                 let prev = event.args.previousValue;
@@ -419,11 +417,35 @@ async function initMap() {
                             });
                         }
 
-                        // load distrct based on OA selection
+                        // load or unload distrct based on OA selection
                         const districts = Object.keys(hierarchy[OANames[chel]] || {}).sort();
-                        //console.log("Districts for selected OAs:", districts);
+                        console.log("Districts for selected OAs:", districts);
                         isChecked ? districts.forEach(district=> $("#el_elementForm4").jqxDropDownList('addItem',district )) : districts.forEach(district=> $("#el_elementForm4").jqxDropDownList('removeItem',district)); 
-                        
+                        if(isChecked){
+                          districts.forEach(district=> $("#el_elementForm4").jqxDropDownList('addItem',district ))
+                          oaTypeList.forEach(type => {loadMapData({ type:type, block: null,oa:OANames[chel]}  )});
+                        } 
+                        else {
+
+                         
+                          oaTypeList.forEach(type => {removeMapData({ type:type, block: null,oa:OANames[chel] }  )});
+
+
+                          districts.forEach (district=> {
+                              $("#el_elementForm4").jqxDropDownList('removeItem',district);
+                              const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []); 
+                              console.log("Blocks for selected Districts:", blocks);
+                              blocks.forEach(block=> {                                
+                                  $("#el_elementForm5").jqxDropDownList('removeItem',block);
+                              }); 
+                              
+                              blocks.forEach(block=> {                                 
+                                 
+                                  blockTypeList.forEach(type => {removeMapData({ type, block }  )});
+                              }); 
+                              
+                          }); 
+                        }
 
                 }
 
@@ -450,7 +472,7 @@ async function initMap() {
                 GP :['UP','DN','M90','L90'],
                 VIL :['COV','NCO'],
                 BHQ :['PH1','ABP'],
-                OFC :['BN','CIR','CNTX'],
+                OFC :['BN','CIR','CNTX','VTL'],
                 BTS :['2G','3G','4G','UP','DN','ML','OFC',"SAT"],
                 OLT :['TIP','BNU','BAF'],
                 SAS :['UP','DN','M90'],
@@ -510,7 +532,7 @@ async function initMap() {
                 GP :[true, false, true, false],
                 VIL :[true, false],
                 BHQ :[true, false],
-                OFC :[true, false, false],
+                OFC :[true, false, false,false],
                 BTS :[true, false, false, true, false, false, false, true],
                 OLT :[true, false, false],
                 SAS :[true,false, false],
@@ -873,7 +895,12 @@ function setMode(newMode) {
 $("#" + newMode).trigger("click");
 }
 
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////
+let itemMarkers=[];
+let labeledMarkers = []; 
+let allPaths = [];
 
 function parseLatLng(str) {
   if (!str) return null;
@@ -907,7 +934,7 @@ function getDistricts(oa) {
   return Object.keys(hierarchy[oa] || {});
 }
 
-async function loadMapData(type,block,oa) {
+async function loadMapData({ type = null, block = null , oa = null} = {}) {
 
     // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
   // const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
@@ -921,7 +948,7 @@ async function loadMapData(type,block,oa) {
     const res = await fetch('assets/php/data.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({type:type, block:block, oa:oa})
+      body: JSON.stringify({type:type, block:block?? "", oa:oa?? ""})
     });
     console.log(typeMap[type].latLongField);
     const data = await res.json();
@@ -939,8 +966,6 @@ async function loadMapData(type,block,oa) {
   }
 }
 
-let itemMarkers=[];
-let labeledMarkers = []; 
 
 function createMarker(item,type) {
     const pos = parseLatLng(item[typeMap[type].latLongField]);
@@ -972,9 +997,9 @@ function createMarker(item,type) {
   itemMarkers.push(itemmarker);
 
  // store for zoom control
-  labeledMarkers.push({ marker, text });
+  labeledMarkers.push({ itemmarker, text });
 
-  itemMarkers.push(marker);
+  itemMarkers.push(itemmarker);
 
     map.addListener("zoom_changed", () => {
     const zoom = map.getZoom();
@@ -998,10 +1023,14 @@ function createMarker(item,type) {
 function buildMetadata(item, type) {
   const fields = typeMap[type]?.metadataFields || [];
 
-  return fields.reduce((meta, key) => {
+  let fieldsData= fields.reduce((meta, key) => {
     meta[key] = item[key] ?? null;
     return meta;
   }, {});
+  let meta = { TYPE: type };
+  return { ...meta, ...fieldsData };
+
+
 }
 
 function buildInfoWindow(item, type) {
@@ -1284,7 +1313,7 @@ function decodePath(encoded) {
     return [];
   }
 }
-let allPaths = [];
+
 
 function createPath(item, type) {
  
@@ -1349,6 +1378,69 @@ function getPathColor(owner) {
     case null: return '#6c757d';    // gray
     default: return '#6c757d';     // gray
   }
+}
+
+
+function removeMapData({ type = null, block = null , oa = null} = {}) {
+
+   console.log("Before:", itemMarkers.length, "Type:", type, "Block:", block, "OA:", oa);
+  //  console.log("Before:", itemMarkers.length, "Type:", type, "Block:", block, "OA:", oa);
+   
+  // 🔴 Markers
+    try {
+    itemMarkers = itemMarkers.filter(marker => {
+   
+    if (!marker || !marker.meta) {
+      console.warn("⚠️ Skipping invalid marker:", marker);
+    return false; // remove bad entries
+   }
+    const meta = marker.meta || {};
+
+    const matchType = !type || meta.TYPE === type;
+
+    const matchBlock =   !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
+
+    const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
+
+    if (matchType && (matchBlock || matchOa)) {
+      marker.map = null;
+      console.log("removing marker:", marker.meta);
+      return false; // remove from array
+    }
+
+    return true;
+  });
+   } catch (e) {
+          console.error("Error in filter:", e);
+          return true;
+        }
+
+ console.log("After:", itemMarkers.length);
+
+  // 🔵 Paths
+  try {
+  allPaths = allPaths.filter(path => {
+
+    const meta = path.meta || {};
+
+    const matchType = !type || meta.TYPE === type;
+
+    const matchBlock = !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
+    const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
+
+    if (matchType && (matchBlock || matchOa)) {
+      path.setMap(null);
+      console.log("removing path:", path.meta);
+      return false;
+    
+    }
+
+    return true;
+  });
+  } catch (e) {
+          console.error("Error in filter:", e);
+          return true;
+        }
 }
 
 export { initMap, loadMapData, itemMarkers,loadHierarchy,loadTypeMap};

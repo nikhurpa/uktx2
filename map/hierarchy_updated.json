@@ -1,0 +1,135 @@
+{
+  "DEHRADUN": {
+    "DEHRADUN": [
+      "RAIPUR",
+      "DOIWALA",
+      "SAHASPUR",
+      "VIKAS NAGAR",
+      "KALSI",
+      "CHAKRATA"
+    ]
+  },
+  "NEW TEHRI": {
+    "NEW TEHRI": [
+      "NARENDRA NAGAR",
+      "CHAMBA",
+      "THAULDHAR",
+      "BHILANGANA",
+      "JAUNPUR",
+      "PRATAPNAGAR",
+      "JAKHNIDHAR",
+      "KIRTINAGAR",
+      "DEVPRAYAG"
+    ],
+    "UTTARKASHI": [
+      "BHATWARI",
+      "DUNDA",
+      "CHINIYALISAUR",
+      "NAUGAON",
+      "PUROLA",
+      "MORI"
+    ]
+  },
+  "NAINITAL": {
+    "NAINITAL": [
+      "HALDWANI",
+      "KOTABAG",
+      "RAMNAGAR",
+      "BHIMTAL",
+      "DHARI",
+      "BETALGHAT",
+      "OKHALKANDA",
+      "RAMGARH"
+    ],
+    "U S NAGAR": [
+      "RUDRAPUR",
+      "BAZPUR",
+      "GADARPUR",
+      "KASHIPUR",
+      "KHATIMA",
+      "SITARGANJ",
+      "JASPUR"
+    ]
+  },
+  "ALMORA": {
+    "ALMORA": [
+      "TAKULA",
+      "HAWALBAG",
+      "BHAISIYACHHANA",
+      "LAMGARA",
+      "TARIKHET",
+      "BHIKIYASEN",
+      "CHAUKHATIYA (GANAI)",
+      "DHAULADEVI",
+      "DWARAHAT",
+      "SULT (SHASHIKHAL)",
+      "SYALDE"
+    ],
+    "BAGESHWAR": [
+      "BAGESHWAR",
+      "KAPKOTE",
+      "GARUR"
+    ],
+    "CHAMPAWAT": [
+      "CHAMPAWAT",
+      "PATI",
+      "LOHAGAHT",
+      "BARAKOT"
+    ],
+    "PITHORAGARH": [
+      "MUNAKOT",
+      "BIN (PITHIRAGARH)",
+      "KANALICHHINA",
+      "DIDIHAT (ASKOT)",
+      "GANGOLIHAT",
+      "BERINAG",
+      "MUNSYARI",
+      "DHARCHULA"
+    ]
+  },
+  "HARIDWAR": {
+    "HARIDWAR": [
+      "BAHADRABAD",
+      "BHAGWANPUR",
+      "KHANPUR",
+      "LAKSAR",
+      "NARSAN",
+      "ROORKEE"
+    ]
+  },
+  "SRINAGAR": {
+    "PAURI GARHWAL": [
+      "BIRONKHAL",
+      "DUGGADA",
+      "DWARIKHAL",
+      "EKESHWAR",
+      "KALJIKHAL",
+      "KHIRSU",
+      "KOT",
+      "NAINIDANDA",
+      "PABAU",
+      "PAURI",
+      "POKHRA",
+      "RIKHNIKHAL",
+      "THALISAIN",
+      "YAMKESHWAR",
+      "ZAHRIKHAL"
+    ],
+    "CHAMOLI": [
+      "DASHOLI",
+      "DEWAL",
+      "GAIRSAIN",
+      "GHAT",
+      "JOSHIMATH",
+      "KARNAPRAYAG",
+      "NARAYANBAGAR",
+      "POKHARI",
+      "THARALI"
+    ],
+    "RUDRAPRAYAG": [
+      "AUGUSTMUNI",
+      "JAKHOLI",
+      "UKHIMATH"
+    ]
+  }
+}

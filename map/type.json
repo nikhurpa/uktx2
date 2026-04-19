@@ -64,7 +64,7 @@
     "oaField": "OA",
     "districtField": "",
     "blockField": "",
-    "metadataFields": ["LOCATION", "OA", "TYPE", "OLT_IP", "WKG_CONN", "BBC", "VENDOR","STATUS", "LOCATION_LATLONG","BNU_OLTE_YN"]
+    "metadataFields": ["LOCATION", "OA", "OLT_TYPE", "OLT_IP", "WKG_CONN", "BBC", "VENDOR","STATUS", "LOCATION_LATLONG","BNU_OLTE_YN"]
   },
   "SAS": {
     "table": "sas",
