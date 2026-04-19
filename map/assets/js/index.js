@@ -10,6 +10,11 @@ Router.add("/maps", () => console.log("maps page"));
 
 Router.add("/kml", () => {
 console.log("KML page");
+window.closeInfoWindow = () => {
+  if (window.infoWindow) {
+    window.infoWindow.close();
+  }
+};
 window.onload = async function () {
   try {
     console.log("Page loaded");
@@ -123,7 +128,10 @@ window.onload = async function () {
     await loadHierarchy();
     await loadTypeMap();
     await initMap();
-    // loadMapData("GP","Hawalbag","Almora");
+    loadMapData("GP","Hawalbag","Almora");
+    loadMapData("OLT","Hawalbag","Almora");
+    loadMapData("BTS","Hawalbag","Almora");
+    
     loadMapData("OFC","","Almora");
 
      console.log("All resources loaded");
@@ -142,3 +150,4 @@ Router.add("/map/draw", () => {
 //   enableDrawing();
  });
  Router.start();
+

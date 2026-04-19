@@ -187,3 +187,6 @@ body {
   .map-crosshair {
   cursor: url(crosshair.png) 8 8, crosshair;
 }
+.gm-style-iw .gm-ui-hover-effect {
+  display: none !important;
+}

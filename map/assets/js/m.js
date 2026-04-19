@@ -93,8 +93,8 @@ async function initMap() {
 
     bounds = new google.maps.LatLngBounds();
     infoWindow = new google.maps.InfoWindow();
+    window.infoWindow = infoWindow;
 
-    
 
 //   marker = new AdvanceMarkerManager(map);
 //   polyline = new PolylineManager(map,editPolyline.handleVertexClick,null,setMode)
@@ -963,17 +963,11 @@ function createMarker(item,type) {
     position: pos,
     map,
     title: item[typeMap[type].nameField],
-    content: wrapper
+    content: wrapper,
+    
   });
 
-  itemMarkers.meta = {
-    type: type,                 // GP, BTS, etc
-    oa: item[typeMap[type].oaField],
-    district: item[typeMap[type].districtField],
-    block: item[typeMap[type].blockField],
-    status: item[typeMap[type].statusField],     // UP / DN / M90
-    // options: item.OPTIONS || [] // ['UP','DN'] etc if multiple
-  };
+  itemmarker.meta = buildMetadata(item, type);
 
   itemMarkers.push(itemmarker);
 
@@ -996,9 +990,92 @@ function createMarker(item,type) {
 
   bounds.extend(pos);
   itemmarker.addListener("gmp-click", () => {
-    infoWindow.setContent(createInfoTable(item,type));
+    infoWindow.setContent(buildInfoWindow(item, type));
     infoWindow.open(map, itemmarker);
   });
+}
+
+function buildMetadata(item, type) {
+  const fields = typeMap[type]?.metadataFields || [];
+
+  return fields.reduce((meta, key) => {
+    meta[key] = item[key] ?? null;
+    return meta;
+  }, {});
+}
+
+function buildInfoWindow(item, type) {
+  const fields = typeMap[type]?.metadataFields || [];
+
+
+ let head = `
+    <div style="min-width:250px; font-family:Arial;">
+
+      <!-- Header -->
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        background:#f2f2f2;
+        padding:6px 8px;
+        border-bottom:1px solid #ddd;
+      ">
+        <span style="font-size:16px;">${getSvgByType(type, getStatusColor(item[typeMap[type].statusField]))} </span>
+        <span  style="font-weight:bold;">
+          ${item[typeMap[type].nameField] + ", TYPE:" + type || type}
+        </span>
+
+        <span id="iw-close-btn" 
+           style="
+          cursor:pointer;
+          color:#888;
+           padding:2px 6px;
+          font-weight:bold;
+          font-size:16px;
+          border-radius:50%;
+          background:#eee;
+          transition:0.2s;
+"
+          onmouseover="this.style.background='#ddd'"
+          onmouseout="this.style.background='#eee'"
+         onclick="closeInfoWindow()">✖</span>
+      </div>`
+
+  let html = head + `
+
+  
+    <table style="border-collapse: collapse; width: 100%;">
+      <tr style="background:#007bff;">
+        <th style="padding:5px;">Field</th>
+        <th style="padding:5px;">Value</th>
+      </tr>
+  `;
+
+   fields.forEach((f, i) => {
+    html += `
+      <tr style="background:${i % 2 === 0 ? '#ffffff' : '#fafafa'};">
+        <td style="
+          padding:5px;
+          border:1px solid #ddd;
+          font-weight:bold;
+          color:#444;
+        ">
+          ${f.replace(/_/g, ' ')}
+        </td>
+        <td style="
+          padding:5px;
+          border:1px solid #ddd;
+          color:#333;
+        ">
+          ${item[f] ?? ''}
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+
+  return html;
 }
 
 function createInfoTable(item,type) {
@@ -1218,40 +1295,60 @@ function createPath(item, type) {
     console.log("❌ Invalid Path:", item[typeMap[type].encodedPathField], item);
     return;
   }
-
+    const plusSymbol = {
+    // SVG path for a '+' sign
+    path: "M 0,-1 L 0,1 M -1,0 L 1,0",
+    strokeOpacity: 1,
+    scale: 3,           // Adjust this to make the '+' larger or smaller
+    strokeWeight: 2,
+    strokeColor: "#000802"
+  };
   const polyline = new google.maps.Polyline({
     path: path,
     map: map,
-    strokeColor: getStatusColor(item[typeMap[type].statusField]),
-    strokeOpacity: 0.9,
-    strokeWeight: 3
+    strokeColor: getPathColor(item[typeMap[type].ownerField]),
+    // strokeColor: "#555", // Base track bed color
+    strokeOpacity: 0.7,
+    strokeWeight: 3,
+    // icons: [
+    //   {
+    //     icon: plusSymbol,
+    //     offset: "0",
+    //     repeat: "15px",  // Adjust distance between sleepers
+    //   },
+    // ],
   });
 
+  if(item[typeMap[type].statusField]!="UP"){polyline.setOptions({   icons: [
+      {
+        icon: plusSymbol,
+        offset: "0",
+        repeat: "15px",  // Adjust distance between sleepers
+      },
+    ],});} // 🔥 visually differentiate non-UP paths
+
   // 🔥 metadata
-  polyline.meta = {
-    oa: item[typeMap[type].oaField],
-    district: item[typeMap[type].districtField],
-    block: item[typeMap[type].blockField],
-    status: item[typeMap[type].statusField],
-    type: type
-  };
+  polyline.meta = buildMetadata(item, type);
   path.forEach(p => bounds.extend(p));
   allPaths.push(polyline);
 
   // click event
   polyline.addListener("click", (e) => {
-    infoWindow.setContent(`
-      <div>
-        <b>${type}</b><br>
-        District: ${item[typeMap[type].districtField]}<br>
-        Block: ${item[typeMap[type].blockField]}<br>
-        Status: ${item[typeMap[type].statusField]}
-      </div>
-    `);
-
+    infoWindow.setContent(buildInfoWindow(item, type));
     infoWindow.setPosition(e.latLng);
     infoWindow.open(map);
   });
+}
+
+function getPathColor(owner) {
+  switch(owner) {
+    case 'CIRCLE': return '#ebe014';   // green
+    case 'CNTX': return '#fc0808';   // green
+    case 'VTL': return '#3564dc';   // red
+    case 'BN': return '#ff07c1';  // yellow
+    case null: return '#6c757d';    // gray
+    default: return '#6c757d';     // gray
+  }
 }
 
 export { initMap, loadMapData, itemMarkers,loadHierarchy,loadTypeMap};

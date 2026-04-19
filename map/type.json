@@ -41,7 +41,8 @@
     "oaField": "OA",
     "districtField": "",
     "blockField": "",
-    "metadataFields": ["ID","NAME", "OWNER", "START_LAT", "START_LONG", "END_LAT", "END_LONG", "STATUS"]
+    "ownerField": "OWNER",
+    "metadataFields": ["ID","NAME", "OWNER", "START_LAT", "START_LNG", "END_LAT", "END_LNG", "STATUS"]
   },
   "BTS": {
     "table": "bts",
