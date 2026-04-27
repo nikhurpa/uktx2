@@ -105,6 +105,28 @@ async function initMap() {
 
     $("#right-panel").rightPullPanel({ width: 300,topOffset: 60 });
     $('#jqxtabs').jqxTabs({ width:  295, height: '100%'});
+    $('#jqxtabs').on('tabclick', function (event) 
+    { 
+        var clickedItem = event.args.item; 
+        if(clickedItem === 0){
+            map.getDiv().style.display = 'block';
+            document.getElementById("mode-ui").style.display = 'flex';  
+            document.getElementById("status").style.display = 'block'; 
+            document.getElementById("dataTable").style.display = 'none';
+        } else if(clickedItem === 1){
+            map.getDiv().style.display = 'block';
+            document.getElementById("mode-ui").style.display = 'none';
+            document.getElementById("status").style.display = 'none'; 
+            document.getElementById("dataTable").style.display = 'none';
+        } else if(clickedItem === 2){
+            map.getDiv().style.display = 'none';
+            document.getElementById("mode-ui").style.display = 'none';  
+            document.getElementById("dataTable").style.display = 'block';
+        }
+    }); 
+
+
+
 
    ///////////////////////////////////////////////////////////////////////////////////////////////
    // FORM CREATION 
@@ -469,15 +491,15 @@ async function initMap() {
             var subFormTemplate = {GP :[ ],VIL :[ ],BHQ :[ ],OFC :[ ],BTS :[ ],OLT :[ ],SAS :[ ],SCH :[ ],PHC :[ ]};
  
             var subFormElements = {
-                GP :['UP','DN','M90','L90'],
+                GP :['UP','DN','M90','L90','COV','NCO'],
                 VIL :['COV','NCO'],
                 BHQ :['PH1','ABP'],
                 OFC :['BN','CIR','CNTX','VTL'],
                 BTS :['2G','3G','4G','UP','DN','ML','OFC',"SAT"],
                 OLT :['TIP','BNU','BAF'],
                 SAS :['UP','DN','M90'],
-                SCH:['WK','NWK','FES'],
-                PHC:['WK','NWK','FES']
+                SCH:['WK','NWK','FES','UP','DN'], 
+                PHC:['WK','NWK','FES','UP','DN ']
             };     
             
             // make object for storing subform values for each block
@@ -1442,5 +1464,9 @@ function removeMapData({ type = null, block = null , oa = null} = {}) {
           return true;
         }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 export { initMap, loadMapData, itemMarkers,loadHierarchy,loadTypeMap};
