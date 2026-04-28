@@ -19,6 +19,10 @@
     <script src="./../plugins/jqwidgets/jqxdropdownlist.js"></script>
     <script src="./../plugins/jqwidgets/jqxlistbox.js"></script>
     <script src="./../plugins/jqwidgets/jqxnumberinput.js"></script>
+    <script src="./../plugins/jqwidgets/jqxwindow.js"></script>
+    <script src="./../plugins/jqwidgets/jqxcheckbox.js"></script>
+    <script src="./../plugins/jqwidgets/jqxform.js"></script>
+    <script src="./../plugins/jqwidgets/jqxinput.js"></script>
 </head>
 <body>
 
@@ -28,8 +32,18 @@
 </div>
 
 <div id="grid"></div>
-   <button id="addBtn">fth</button>
-    <button id="deleteBtn">block</button>
+<button id="addBtn">ADD</button>
+<button id="deleteBtn">DELETE</button>
+
+<div id="popupForm">
+    <div>Add Record</div>
+    <div style="padding:10px;">
+        <div id="formContainer"></div>
+        <br/>
+        <button id="saveBtn">Save</button>
+        <button id="cancelBtn">Cancel</button>
+    </div>
+</div>    
 
 <script src="columns/tableConfigs.js"></script>
 <script src="services/dataService.js"></script>

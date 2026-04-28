@@ -1,3 +1,4 @@
+let currentTable = "";
 $(document).ready(function () {
 
     $("#grid").jqxGrid({
@@ -32,12 +33,57 @@ $(document).ready(function () {
     $("#tableSelector").on('change', function () {
         loadTable(this.value);
     });
+
+    $("#popupForm").jqxWindow({
+        width: 400,
+        height: 400,
+        isModal: true,
+        autoOpen: false
+    });
+
+    $("#addBtn").off().on("click", function () {
+
+        let table = currentTable; // store current table globally
+        let config = TABLE_CONFIGS[table];
+
+        let formTemplate = config.columns.map(col => {
+            return {
+                bind: col.datafield,
+                type: "text",
+                label: col.text
+            };
+        });
+
+        $("#formContainer").jqxForm({
+            template: formTemplate,
+            value: {}
+        });
+
+        $("#popupForm").jqxWindow('open');
+    });
+
+    $("#saveBtn").on("click", function () {
+
+        let data = $("#formContainer").jqxForm('val');
+
+        $.ajax({
+            url: `api/api.php?action=insert&table=${currentTable}`,
+            method: "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json",
+            success: function () {
+                $("#grid").jqxGrid('updatebounddata');
+                $("#popupForm").jqxWindow('close');
+            }
+        });
+    });
     
 
 });
 
 function loadTable(tableName) {
-
+    
+    currentTable = tableName;
     let config = TABLE_CONFIGS[tableName];
 
     // let source = {

@@ -26,25 +26,85 @@ var TABLE_CONFIGS = {
         columns: [
             { text: 'ID', datafield: 'ID', width: 80, columntype: 'numberinput', editable: false },
             { text: 'OA', datafield: 'OA', width: 120 },
-            { text: 'DISTRICT', datafield: 'DISTRICT', width: 150 },
-            { text: 'BLOCK', datafield: 'BLOCK', width: 150 },
+
+            {
+                text: 'DISTRICT',
+                datafield: 'DISTRICT',
+                columntype: 'dropdownlist',
+                createeditor: function (row, value, editor) {
+                    editor.jqxDropDownList({
+                        source: ["Dehradun","Haridwar","Nainital"],
+                        autoDropDownHeight: true
+                    });
+                }
+            },
+
+            {
+                text: 'BLOCK',
+                datafield: 'BLOCK',
+                columntype: 'dropdownlist',
+                createeditor: function (row, value, editor) {
+                    editor.jqxDropDownList({
+                        source: ["Raipur","Doiwala","Vikasnagar"],
+                        autoDropDownHeight: true
+                    });
+                }
+            },
             { text: 'CODE', datafield: 'CODE', width: 120 },
             { text: 'TE_NAME', datafield: 'TE_NAME', width: 180 },
             { text: 'LAT_LNG', datafield: 'LAT_LNG', width: 150 },
             { text: 'ENTITY_CODE', datafield: 'ENTITY_CODE', width: 150 },
 
-            { text: 'LAT', datafield: 'LAT', width: 120, columntype: 'numberinput' },
-            { text: 'LNG', datafield: 'LNG', width: 120, columntype: 'numberinput' },
+            {
+                text: 'LAT',
+                datafield: 'LAT',
+                columntype: 'numberinput',
+                validation: function (cell, value) {
+
+                    if (value < 6 || value > 38) {
+                        return { result: false, message: "Invalid India Latitude" };
+                    }
+
+                    return true;
+                }
+            },
+            {
+                text: 'LNG',
+                datafield: 'LNG',
+                columntype: 'numberinput',
+                validation: function (cell, value) {
+
+                    if (value < 68 || value > 98) {
+                        return { result: false, message: "Invalid India Longitude" };
+                    }
+
+                    return true;
+                }
+            },
 
             { text: 'RENTED', datafield: 'RENTED', width: 100 },
-            { text: 'BHQ_STATUS', datafield: 'BHQ_STATUS', width: 120 },
+            {
+                text: 'BHQ_STATUS',
+                datafield: 'BHQ_STATUS',
+                columntype: 'dropdownlist',
+                createeditor: function (row, value, editor) {
+                    editor.jqxDropDownList({
+                        source: ["UP","DOWN"],
+                        autoDropDownHeight: true
+                    });
+                }
+            },
             { text: 'PHASE', datafield: 'PHASE', width: 100 },
             { text: 'BACKHAUL', datafield: 'BACKHAUL', width: 120 },
-            { text: 'RING', datafield: 'RING', width: 100 },
+            {
+                text: 'RING',
+                datafield: 'RING',
+                columntype: 'checkbox'
+            },
             { text: 'INFRA', datafield: 'INFRA', width: 100 }
         ]
     },
-
+    /////////////////////////////////////////////////////////////////////
     fth: {
         table: "fth",
         primaryKey: "CUSTOMER_ID",
