@@ -49,6 +49,7 @@ $(document).ready(function () {
         let formTemplate = config.columns.map(col => {
             return {
                 bind: col.datafield,
+                name: col.datafield,   // ✅ REQUIRED
                 type: "text",
                 label: col.text
             };
@@ -64,8 +65,9 @@ $(document).ready(function () {
 
     $("#saveBtn").on("click", function () {
 
-        let data = $("#formContainer").jqxForm('val');
+        let data = $("#formContainer").jqxForm('getValue');
 
+        console.log("Form Data:", data);
         $.ajax({
             url: `api/api.php?action=insert&table=${currentTable}`,
             method: "POST",
@@ -82,7 +84,7 @@ $(document).ready(function () {
 });
 
 function loadTable(tableName) {
-    
+
     currentTable = tableName;
     let config = TABLE_CONFIGS[tableName];
 
