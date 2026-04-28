@@ -1,35 +1,20 @@
 $(document).ready(function () {
 
-    // function createGrid(tableKey) {
-    //     let config = TABLE_CONFIGS[tableKey];
-
-    //     let source = {
-    //         datatype: "array",
-    //         localdata: tableKey === "table1" ?
-    //             [{ id: 1, name: "John", age: 25 }] :
-    //             [{ code: "A1", city: "Dehradun" }]
-    //     };
-
-    //     let dataAdapter = new $.jqx.dataAdapter(source);
-
-    //     $("#grid").jqxGrid({
-    //         width: "100%",
-    //         height: 400,
-    //         source: dataAdapter,
-    //         editable: true,
-    //         pageable: true,
-    //         sortable: true,
-    //         filterable: true,
-    //         showfilterrow: true,
-    //         columns: config.columns
-    //     });
-    // }
-
-    // createGrid("table1");
+    $("#grid").jqxGrid({
+        width: "100%",
+        height: 500,
+        editable: true,
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        showfilterrow: true,
+        selectionmode: 'singlerow',
+        columns: [] // empty initially
+        });
 
     $("#btnTable1").click(() => loadTable("fth"));
     $("#btnTable2").click(() => loadTable("block"));
-
+   
     $("#addBtn").click(() => {
         $("#grid").jqxGrid('addrow', null, {});
     });
@@ -42,6 +27,7 @@ $(document).ready(function () {
             $("#grid").jqxGrid('deleterow', id);
         }
     });
+   
 
     $("#tableSelector").on('change', function () {
         loadTable(this.value);
@@ -98,6 +84,14 @@ function loadTable(tableName) {
     datatype: "json",
     url: `api/api.php?action=get&table=${tableName}`,
     id: config.primaryKey,
+    datafields: config.columns.map(col => ({
+        name: col.datafield
+    })),
+
+    loadError: function (xhr) {
+        console.error("API ERROR:", xhr.responseText);
+    },
+    
 
     addrow: function (rowid, rowdata, commit) {
 
@@ -137,16 +131,31 @@ function loadTable(tableName) {
 
     let adapter = new $.jqx.dataAdapter(source);
 
+    if ($("#grid").length) {
+        try {
+            $("#grid").jqxGrid('destroy');
+            $("body").append('<div id="grid"></div>');
+             
+        } catch (e) {}
+    }
     $("#grid").jqxGrid({
         source: adapter,
         columns: config.columns,
-
-        editable: true,
-        pageable: true,
-        sortable: true,
-        filterable: true,
-        showfilterrow: true,
-
-        selectionmode: 'singlerow'
+      
     });
+
+     $("#grid").one('bindingcomplete', function () {
+     $("#grid").jqxGrid({
+                width: "100%",
+                height: 500,
+                editable: true,
+                pageable: true,
+                sortable: true,
+                filterable: true,
+                showfilterrow: true,
+                selectionmode: 'singlerow',
+                // columns: [] // empty initially
+                });
+    });
+    
 }

@@ -47,7 +47,7 @@ var TABLE_CONFIGS = {
 
     fth: {
         table: "fth",
-        primaryKey: "NUMBER",
+        primaryKey: "CUSTOMER_ID",
 
         columns: [
             { text: 'NUMBER', datafield: 'NUMBER', width: 120 },

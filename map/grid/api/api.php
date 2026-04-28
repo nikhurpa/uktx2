@@ -1,8 +1,10 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', 0);
 header("Content-Type: application/json");
 
 // 🔥 DB CONNECTION
-$conn = new mysqli("localhost", "root", "", "your_db");
+$conn = new mysqli("localhost", "uktx", "uktx123", "ukcfa");
 
 if ($conn->connect_error) {
     die(json_encode(["error" => $conn->connect_error]));
@@ -45,8 +47,18 @@ if ($action === "get") {
 // =====================
 elseif ($action === "insert") {
 
-    $columns = implode(",", array_keys($data));
-    $values  = implode("','", array_values($data));
+    $ignoreFields = ['uid', 'boundindex', 'uniqueid', 'visibleindex'];
+
+    $filteredData = [];
+
+    foreach ($data as $key => $value) {
+        if (!in_array($key, $ignoreFields)) {
+            $filteredData[$key] = $value;
+        }
+    }
+
+    $columns = implode(",", array_keys($filteredData));
+    $values  = implode("','", array_values($filteredData));
 
     $sql = "INSERT INTO $table ($columns) VALUES ('$values')";
 
@@ -62,9 +74,16 @@ elseif ($action === "insert") {
 // =====================
 elseif ($action === "update") {
 
+    $ignoreFields = ['uid', 'boundindex', 'uniqueid', 'visibleindex'];
+
     $updates = [];
 
     foreach ($data as $key => $value) {
+
+        if (in_array($key, $ignoreFields)) {
+            continue; // ❌ skip jqxGrid internal fields
+        }
+
         $updates[] = "$key='$value'";
     }
 
@@ -75,6 +94,7 @@ elseif ($action === "update") {
     if ($conn->query($sql)) {
         echo json_encode(["status" => "updated"]);
     } else {
+        echo $sql;
         echo json_encode(["error" => $conn->error]);
     }
 }
