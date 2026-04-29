@@ -16,9 +16,9 @@ $(document).ready(function () {
     $("#btnTable1").click(() => loadTable("fth"));
     $("#btnTable2").click(() => loadTable("block"));
    
-    $("#addBtn").click(() => {
-        $("#grid").jqxGrid('addrow', null, {});
-    });
+    // $("#addBtn").click(() => {
+    //     $("#grid").jqxGrid('addrow', null, {});
+    // });
 
     $("#deleteBtn").click(() => {
         let row = $("#grid").jqxGrid('getselectedrowindex');
@@ -45,15 +45,19 @@ $(document).ready(function () {
 
         let table = currentTable; // store current table globally
         let config = TABLE_CONFIGS[table];
+        let formTemplate = generateFormTemplate(config.columns);
+        console.log("Generated Form Template:", formTemplate);
+        // $("#formContainer").html("");
 
-        let formTemplate = config.columns.map(col => {
-            return {
-                bind: col.datafield,
-                name: col.datafield,   // ✅ REQUIRED
-                type: "text",
-                label: col.text
-            };
-        });
+
+        // let formTemplate = config.columns.map(col => {
+        //     return {
+        //         bind: col.datafield,
+        //         name: col.datafield,   // ✅ REQUIRED
+        //         type: "text",
+        //         label: col.text
+        //     };
+        // });
 
         $("#formContainer").jqxForm({
             template: formTemplate,
@@ -65,9 +69,9 @@ $(document).ready(function () {
 
     $("#saveBtn").on("click", function () {
 
-        let data = $("#formContainer").jqxForm('getValue');
-
+        let data = getFormValues();
         console.log("Form Data:", data);
+
         $.ajax({
             url: `api/api.php?action=insert&table=${currentTable}`,
             method: "POST",
@@ -82,6 +86,96 @@ $(document).ready(function () {
     
 
 });
+
+
+function getFormValues(formSelector = "#formContainer") {
+    // 1. Get the original template used to create the form
+    var template = $(formSelector).jqxForm('template');
+    var formData = {};
+
+    // 2. Iterate through the template items
+    template.forEach(function (item) {
+        // Only process items that have a 'name' or 'bind' property (the data fields)
+        var fieldName = item.name || item.bind;
+        
+        if (fieldName) {
+            // jqxForm stores the actual widget instance in the component's internal structure
+            // We use the jqxForm 'getComponentByName' method to find the specific widget
+            var component = $(formSelector).jqxForm('getComponentByName', fieldName);
+            
+            if (component) {
+                // Use the universal .val() method on the specific jqxWidget
+                formData[fieldName] = component.val();
+            }
+        }
+    });
+
+    return formData;
+}
+
+
+function generateFormTemplate(columns) {
+
+    return columns.map(col => {
+
+        let field = {
+            name: col.datafield,
+            bind: col.datafield,
+            label: col.text || col.datafield
+        };
+
+        // 🔥 Detect type
+        switch (col.columntype) {
+
+            case "dropdownlist":
+                field.type = "option";
+                field.component = 'jqxDropDownList';
+                field.options = col.options || []; // pass from config
+                break;
+
+            case "checkbox":
+                field.type = "boolean";
+                break;
+
+            case "datetimeinput":
+                field.type = "date";
+                break;
+
+            case "numberinput":
+                field.type = "number";
+                break;
+
+            case "radiobutton":
+                field.type = "option";
+                field.options = col.options || [];
+                // field.component = 'jqxRadioButton';
+                break;
+
+            default:
+                field.type = "text";
+        }
+
+        // 🔥 Extra enhancements
+
+        // required field
+        if (col.required) {
+            field.required = true;
+        }
+
+        // placeholder
+        if (col.placeholder) {
+            field.placeholder = col.placeholder;
+        }
+
+        // validation
+        if (col.validation) {
+            field.validation = col.validation;
+        }
+
+        return field;
+    });
+}
+
 
 function loadTable(tableName) {
 

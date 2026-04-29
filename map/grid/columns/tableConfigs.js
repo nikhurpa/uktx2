@@ -31,9 +31,10 @@ var TABLE_CONFIGS = {
                 text: 'DISTRICT',
                 datafield: 'DISTRICT',
                 columntype: 'dropdownlist',
+                options: ["Dehradun","Haridwar","Nainital"],
                 createeditor: function (row, value, editor) {
                     editor.jqxDropDownList({
-                        source: ["Dehradun","Haridwar","Nainital"],
+                        source: this.options,
                         autoDropDownHeight: true
                     });
                 }
@@ -43,9 +44,10 @@ var TABLE_CONFIGS = {
                 text: 'BLOCK',
                 datafield: 'BLOCK',
                 columntype: 'dropdownlist',
+                options:["Raipur","Doiwala","Vikasnagar"],
                 createeditor: function (row, value, editor) {
                     editor.jqxDropDownList({
-                        source: ["Raipur","Doiwala","Vikasnagar"],
+                        source: this.options,
                         autoDropDownHeight: true
                     });
                 }
@@ -87,14 +89,15 @@ var TABLE_CONFIGS = {
                 text: 'BHQ_STATUS',
                 datafield: 'BHQ_STATUS',
                 columntype: 'dropdownlist',
+                options: ["Active", "Inactive"],
                 createeditor: function (row, value, editor) {
                     editor.jqxDropDownList({
-                        source: ["UP","DOWN"],
+                        source: this.options,
                         autoDropDownHeight: true
                     });
                 }
             },
-            { text: 'PHASE', datafield: 'PHASE', width: 100 },
+            { text: 'PHASE', datafield: 'PHASE', width: 100 ,columntype: 'datetimeinput' },
             { text: 'BACKHAUL', datafield: 'BACKHAUL', width: 120 },
             {
                 text: 'RING',
