@@ -1,4 +1,6 @@
 let currentTable = "";
+
+
 $(document).ready(function () {
 
     $("#grid").jqxGrid({
@@ -13,6 +15,7 @@ $(document).ready(function () {
         columns: [] // empty initially
         });
 
+  
     $("#btnTable1").click(() => loadTable("fth"));
     $("#btnTable2").click(() => loadTable("block"));
    
