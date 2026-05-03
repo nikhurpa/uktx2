@@ -134,6 +134,16 @@ function generateFormTemplate(columns) {
                 field.type = "option";
                 field.component = 'jqxDropDownList';
                 field.options = col.options || []; // pass from config
+                field.init=col.init || function (component) {
+                };
+                // field.init=function (component) {
+
+                //     component.jqxDropDownList({
+                //         source: field.options ,
+                //         width: '100%',
+                //         autoDropDownHeight: true
+                //     });
+                // }
                 break;
 
             case "checkbox":

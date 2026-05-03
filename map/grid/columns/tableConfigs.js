@@ -108,6 +108,28 @@ TABLE_CONFIGS = {
                 width: 120,
                 columntype: 'dropdownlist',
                 options: OA_NAMES,
+                init: function (component) {
+
+                        component.jqxDropDownList({
+                            source: Object.keys(OA),
+                            width: '100%'
+                        });
+                        component.jqxDropDownList('selectIndex', 0 ); 
+                        component.on('change', function (event) {
+
+                            let oa = event.args.item.value;
+                            let districts = OA[oa]?.Districts || [];
+                            let districtComp = $("#formContainer")
+                                .jqxForm('getComponentByName', 'DISTRICT');
+
+                            districtComp.jqxDropDownList({
+                                source: districts
+                            });
+
+                            districtComp.jqxDropDownList('clearSelection');
+                        });
+                    },
+
                 createeditor: function (row, value, editor) {
                     editor.jqxDropDownList({
                         source: OA_NAMES,
@@ -126,7 +148,28 @@ TABLE_CONFIGS = {
                 datafield: 'DISTRICT',
                 width: 120,
                 columntype: 'dropdownlist',
-                options: generateDistricts, // function that generates district options based on selected OA
+                options: [], // function that generates district options based on selected OA
+                init: function (component) {
+
+                        component.jqxDropDownList({
+                            source: OA["Almora"].Districts, // default to first OA's districts
+                            width: '100%'
+                        });
+                        component.jqxDropDownList('selectIndex', 0 ); 
+                        component.on('change', function (event) {
+
+                            let district = event.args.item.value;
+                            let blocks = BLOCKS[district] || [];
+                            let blockComp = $("#formContainer")
+                                .jqxForm('getComponentByName', 'BLOCK');
+
+                            blockComp.jqxDropDownList({
+                                source: blocks
+                            });
+
+                            blockComp.jqxDropDownList('clearSelection');
+                        });
+                    },
                 createeditor: function (row, value, editor) {
 
                     let rowData = $("#grid").jqxGrid('getrowdata', row);
@@ -159,7 +202,15 @@ TABLE_CONFIGS = {
                 datafield: 'BLOCK',
                 width: 120,
                 columntype: 'dropdownlist',
-                options:generateBlocks, // function that generates block options based on selected district
+                options: BLOCKS["Almora"], // f
+                 init: function (component) {
+
+                        component.jqxDropDownList({
+                            source: BLOCKS["Almora"], // default to first OA's districts
+                            width: '100%'
+                        });
+                        component.jqxDropDownList('selectIndex', 0 ); 
+                    },
                 createeditor: function (row, value, editor) {
                     let rowData = $("#grid").jqxGrid('getrowdata', row);
                     let selectedDistrict = rowData.DISTRICT;
