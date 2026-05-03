@@ -1,0 +1,7 @@
+LAT,LON,NAME,STATUS,PATH
+37.7749,-122.4194,San Francisco,Active,Route1
+37.8044,-122.2712,Oakland,Active,Route1
+37.3382,-121.8863,San Jose,Pending,Route1
+34.0522,-118.2437,Los Angeles,Active,Route2
+32.7157,-117.1611,San Diego,Inactive,Route2
+36.1699,-115.1398,Las Vegas,Active,
