@@ -3,6 +3,24 @@ let currentTable = "";
 
 $(document).ready(function () {
 
+    var customStyle = {
+        // Defines a header style
+        'headerStyle': {
+            'font-name': 'Arial',
+            'font-size': '14px',
+            'font-weight': 'bold',
+            'color': '#FFFFFF',
+            'background-color': '#4472C4'
+        },
+        // Defines a cell style
+        'rowStyle': {
+            'font-name': 'Courier New',
+            'font-size': '12px',
+            'font-style': 'italic'
+        }
+    
+    };
+
     $("#grid").jqxGrid({
         width: "100%",
         height: 500,
@@ -12,7 +30,9 @@ $(document).ready(function () {
         filterable: true,
         showfilterrow: true,
         selectionmode: 'singlerow',
-        columns: [] // empty initially
+        columns: [] ,// empty initially
+        // theme: 'energyblue',
+         
         });
 
   
@@ -86,6 +106,14 @@ $(document).ready(function () {
             }
         });
     });
+
+       
+        
+    
+    $("#excelExport").jqxButton();
+     $("#excelExport").click(function () {
+         $("#grid").jqxGrid('exportdata', 'xlsx', 'report',true, null, true, null, customStyle);          
+     });
     
 
 });
@@ -303,7 +331,11 @@ function loadTable(tableName) {
                 filterable: true,
                 showfilterrow: true,
                 selectionmode: 'singlerow',
-                // columns: [] // empty initially
+                // theme: 'energyblue',
+            //      headerClassName: 'headerStyle', 
+            // // Apply cell style to this column's data
+            // cellClassName: 'rowStyle' 
+                
                 });
     });
     

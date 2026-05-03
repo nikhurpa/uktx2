@@ -1,50 +1,60 @@
 import { PolylineManager } from "./PolylineManager.js";
 import { MultiPolylineManager } from "./MultiPolylineManager.js";
-import { UltraPolylineManager } from "./UltraPolylineManager.js"; 
+import { UltraPolylineManager } from "./UltraPolylineManager.js";
 
 // import { kml } from "https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.0.1/dist/togeojson.esm.js"
- import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
+import { kml } from "https://unpkg.com/@tmcw/togeojson@7.1.2?module";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
-import { loadJS, loadCSS, loadModule ,addDiv,Router} from "./loader.js";
-import  { ribbon,initializeRibbon } from "./jqxRibbon.js";
+import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
+import { ribbon, initializeRibbon } from "./jqxRibbon.js";
 import { initializeTabs } from "./jqxTab.js";
 
 // ------------------- Asynch Loader-------------------
-(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams;
-const f=()=>h||(h=new Promise(async(n,o)=>{await (a=m.createElement("script"));
-e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);
-e.set("callback",c+".maps."+q);a.src=`https://maps.googleapis.com/maps/api/js?`+e;
-d[q]=n;a.onerror=()=>o(Error(p+" could not load."));m.head.append(a)}));
-d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(n,...o)=>r.add(n)&&f().then(()=>d[l](n,...o))})
-({key:"AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE", v:"weekly"});
+(g => {
+  var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams;
+  const f = () => h || (h = new Promise(async (n, o) => {
+    await (a = m.createElement("script"));
+    e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
+    e.set("callback", c + ".maps." + q); a.src = `https://maps.googleapis.com/maps/api/js?` + e;
+    d[q] = n; a.onerror = () => o(Error(p + " could not load.")); m.head.append(a)
+  }));
+  d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (n, ...o) => r.add(n) && f().then(() => d[l](n, ...o))
+})
+  ({ key: "AIzaSyAH06384nr0EpGqBZXDmkbGxHoWtpKjGPE", v: "weekly" });
 // ------------------- End Asynch Loader-------------------
 
-const minPixelDistance = 8; 
-let map, mode = null,oldMode=null, statusEl, ctxMenu, selectedTarget,isMouseDown,isDragging=false,arrowMarker,isDrawing = false;
-let polylineSelected=false,markerSelected=false;
-let selectedPolyline,selectedMarker;
-let curpolyline,curmarker,prpolyline,prmarker;
+const minPixelDistance = 8;
+let map, mode = null, oldMode = null, statusEl, ctxMenu, selectedTarget, isMouseDown, isDragging = false, arrowMarker, isDrawing = false;
+let polylineSelected = false, markerSelected = false;
+let selectedPolyline, selectedMarker;
+let curpolyline, curmarker, prpolyline, prmarker;
 let lastPoint = null;
 let pathCoords = [];
-let polyline,marker,bounds,infoWindow;
-let polylines=[],markers=[];
-let polylineindex=0;
-let nextmarkerindex,prmarkerindex,markerindex;
+let polyline, marker, bounds, infoWindow;
+let polylines = [], markers = [];
+let polylineindex = 0;
+let nextmarkerindex, prmarkerindex, markerindex;
 let tempTree;
-let oaTypeList=["OFC", "BTS", "OLT"];
+let oaTypeList = ["OFC", "BTS", "OLT"];
 // let blockTypeList=["GP", "VIL", "BHQ","SAS","SCH","PHC"];
 // let oaTypeList=["OLT"];
-let blockTypeList=["GP"];
+let blockTypeList = ["GP"];
 
 
 
-let mapoptions_clear={cursor: "default" , draggableCursor: "grab",     // 👈 normal hand cursor for map panning
-                            draggingCursor: "grabbing" ,scrollwheel: true, gestureHandling: "greedy"}
+let mapoptions_clear = {
+  cursor: "default", draggableCursor: "grab",     // 👈 normal hand cursor for map panning
+  draggingCursor: "grabbing", scrollwheel: true, gestureHandling: "greedy"
+}
 
-let mapoptions_startroute={draggableCursor: "crosshair",draggingCursor: "crosshair" 
-                            ,scrollwheel: true, gestureHandling: "greedy"}
-let mapoptions_startmarker={draggableCursor: "crosshair",draggingCursor: "crosshair" 
-                            ,scrollwheel: true, gestureHandling: "greedy"}                            
+let mapoptions_startroute = {
+  draggableCursor: "crosshair", draggingCursor: "crosshair"
+  , scrollwheel: true, gestureHandling: "greedy"
+}
+let mapoptions_startmarker = {
+  draggableCursor: "crosshair", draggingCursor: "crosshair"
+  , scrollwheel: true, gestureHandling: "greedy"
+}
 const { Map } = await google.maps.importLibrary("maps");
 const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 const { Marker } = await google.maps.importLibrary("marker");
@@ -91,618 +101,613 @@ async function initMap() {
     mapId: "DEMO_MAP_ID"
   });
 
-    bounds = new google.maps.LatLngBounds();
-    infoWindow = new google.maps.InfoWindow();
-    window.infoWindow = infoWindow;
+  bounds = new google.maps.LatLngBounds();
+  infoWindow = new google.maps.InfoWindow();
+  window.infoWindow = infoWindow;
 
 
-//   marker = new AdvanceMarkerManager(map);
-//   polyline = new PolylineManager(map,editPolyline.handleVertexClick,null,setMode)
+  //   marker = new AdvanceMarkerManager(map);
+  //   polyline = new PolylineManager(map,editPolyline.handleVertexClick,null,setMode)
 
-  let  polyManager = new PolylineManager(map);
-  let  multiPolyManager = new MultiPolylineManager(map);
-  let  ultraPolyManager = new UltraPolylineManager(map);  
+  let polyManager = new PolylineManager(map);
+  let multiPolyManager = new MultiPolylineManager(map);
+  let ultraPolyManager = new UltraPolylineManager(map);
+  document.getElementById("dataTable").style.display = 'none';
+  $("#right-panel").rightPullPanel({ width: 300, topOffset: 60 });
+  $('#jqxtabs').jqxTabs({ width: 295, height: '100%' });
+  $('#jqxtabs').on('tabclick', function (event) {
+    var clickedItem = event.args.item;
+    if (clickedItem === 0) {
+      map.getDiv().style.display = 'block';
+      document.getElementById("mode-ui").style.display = 'flex';
+      document.getElementById("status").style.display = 'block';
+      document.getElementById("dataTable").style.display = 'none';
+    } else if (clickedItem === 1) {
+      map.getDiv().style.display = 'block';
+      document.getElementById("mode-ui").style.display = 'none';
+      document.getElementById("status").style.display = 'none';
+      document.getElementById("dataTable").style.display = 'none';
+    } else if (clickedItem === 2) {
+      map.getDiv().style.display = 'none';
+      document.getElementById("mode-ui").style.display = 'none';
+      document.getElementById("dataTable").style.display = 'block';
+    }
+  });
 
-    $("#right-panel").rightPullPanel({ width: 300,topOffset: 60 });
-    $('#jqxtabs').jqxTabs({ width:  295, height: '100%'});
-    $('#jqxtabs').on('tabclick', function (event) 
-    { 
-        var clickedItem = event.args.item; 
-        if(clickedItem === 0){
-            map.getDiv().style.display = 'block';
-            document.getElementById("mode-ui").style.display = 'flex';  
-            document.getElementById("status").style.display = 'block'; 
-            document.getElementById("dataTable").style.display = 'none';
-        } else if(clickedItem === 1){
-            map.getDiv().style.display = 'block';
-            document.getElementById("mode-ui").style.display = 'none';
-            document.getElementById("status").style.display = 'none'; 
-            document.getElementById("dataTable").style.display = 'none';
-        } else if(clickedItem === 2){
-            map.getDiv().style.display = 'none';
-            document.getElementById("mode-ui").style.display = 'none';  
-            document.getElementById("dataTable").style.display = 'block';
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  // FORM CREATION 
+  var template = [{
+    type: 'label',
+    bind: 'radiobuttonValue_out',
+    label: 'Select OA :',
+    rowHeight: '40px',
+  }];
+
+  var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
+  var OAValues = { DDN: false, HWR: false, NTL: false, NWT: false, SGR: false, ALM: true };
+  var OANames = { DDN: 'DEHRADUN', HWR: 'HARIDWAR', NTL: 'NAINITAL', NWT: 'NEW TEHRI', SGR: 'SRINAGAR', ALM: 'ALMORA' };
+  var OAvalues1 = [false, false, false, true, false, true];
+  var OAelementId = { DDN: 'el_elementForm1_0', HWR: 'el_elementForm1_1', NTL: 'el_elementForm1_2', NWT: 'el_elementForm2_0', SGR: 'el_elementForm2_1', ALM: 'el_elementForm2_2' };
+  var districtValues = { ALMORA: true, DEHRADUN: false, HARIDWAR: false, NAINITAL: false, "U S NAGAR": false, SRINAGAR: false, "PAURI GARHWAL": false, PITHORAGARH: false, CHAMPAWAT: false, RUDRAPRAYAG: false, "NEW TEHRI": false, UTTARKASHI: false };
+
+  let oaValueObj = OA.reduce((acc, key, index) => {
+    acc["chk" + key] = OAValues[key];
+    return acc;
+  }, {});
+
+
+  for (let i = 0; i < OA.length; i += 3) {
+    let row = { columns: [] };
+
+    for (let j = i; j < i + 3 && j < OA.length; j++) {
+      row.columns.push({
+        bind: "chk" + OA[j],
+        type: 'boolean',
+        label: OA[j]
+      });
+    }
+
+    template.push(row);
+  }
+
+  template = template.concat([
+    {
+      type: 'label',
+      bind: 'Select_District_Block',
+      label: 'Select District and Block :',
+      rowHeight: '40px',
+    },
+    {
+      bind: 'dropdownDistrict',
+      type: 'option',
+      label: 'District',
+      labelPosition: 'left',
+      // checkboxes: true,
+      labelWidth: '30%',
+      align: 'left',
+      width: '150px',
+      // required: true,
+      component: 'jqxDropDownList',
+      options: [
+        { label: 'Dehradun', value: 'Dehradun' },
+
+      ],
+      // init: function (component) {
+      // component.jqxDropDownList({
+      //     checkboxes: true,
+      //     displayMember: 'label',
+      //     valueMember: 'value'
+      // }); }   
+    },
+
+    {
+      bind: 'dropdownBlock',
+      type: 'option',
+      label: 'Block',
+      // checkboxes: true,
+      labelPosition: 'left',
+      labelWidth: '30%',
+      align: 'left',
+      width: '150px',
+      // required: true,
+      component: 'jqxDropDownList',
+      options: [
+        { label: 'Raipur', value: 'Raipur' },
+        { label: 'Haldwani', value: 'Haldwani' },
+        { label: 'Hawalbag', value: 'Hawalbag' },
+        { label: 'Laksar', value: 'Laksar' }
+      ],
+
+      // init: function (component) {
+      // component.jqxDropDownList({
+      //     checkboxes: true,
+      //     displayMember: 'label',
+      //     valueMember: 'value'
+      // });} 
+    },
+    {
+      type: 'label',
+      bind: 'select_options',
+      label: 'Select Elements :',
+      rowHeight: '40px',
+    }]
+
+
+  );
+
+
+
+  var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"];
+  var btnElementId = { GP: 'el_elementForm7_1', VIL: 'el_elementForm7_3', BHQ: 'el_elementForm7_5', OFC: 'el_elementForm8_1', BTS: 'el_elementForm8_3', OLT: 'el_elementForm8_5', SAS: 'el_elementForm9_1', SCH: 'el_elementForm9_3', PHC: 'el_elementForm9_5' };
+  var btnValues = [false, false, true, false, true, false, true, false, true];
+  var btnValueObj = { GP: false, VIL: false, BHQ: true, OFC: false, BTS: true, OLT: false, SAS: true, SCH: false, PHC: true };
+
+
+
+  let btnInitialValue = btnElements.reduce((acc, key, index) => {
+    acc["chk" + key] = btnValueObj[key];
+    return acc;
+  }, {});
+
+  var btns = []
+
+  for (let i = 0; i < btnElements.length; i += 3) {
+    let row = { columns: [] };
+
+    for (let j = i; j < i + 3 && j < btnElements.length; j++) {
+      row.columns.push({
+        bind: "chk" + btnElements[j],
+        type: 'boolean',
+
+      });
+      row.columns.push({
+
+        type: 'button',
+        bind: 'btn' + btnElements[j],
+        text: btnElements[j],
+        width: '40px',
+        height: '30px',
+        rowHeight: '30px',
+        align: 'left',
+      });
+
+
+
+    }
+
+    btns.push(row);
+  }
+
+  template = template.concat(btns);
+
+  $('#elementForm').jqxForm({
+    template: template,
+    value: { ...oaValueObj, ...btnInitialValue },
+    padding: { left: 2, top: 2, right: 2, bottom: 2 }
+  });
+
+
+
+  btnElements.forEach(item => { $("#" + btnElementId[item]).jqxButton({ disabled: !btnValueObj[item] }) });
+
+
+  const selectedOAs = ["ALMORA"]; // Example: Getting districts for a specific OA
+  //et district and block from hierarchy
+  const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
+  let selectedDistricts = Object.keys(districtValues).filter(key => districtValues[key] === true);
+
+  const blocks = [...new Set(selectedDistricts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()))];
+
+  $("#el_elementForm4").jqxDropDownList("clear");
+  $("#el_elementForm4").jqxDropDownList({ checkboxes: true, source: districts });
+  //check selected districts
+
+  selectedDistricts.forEach(item => { $("#el_elementForm4").jqxDropDownList('checkItem', item); });
+
+  // District Dropdown change event
+  $("#el_elementForm4").on('checkChange', function (event) {
+    if (event.args) {
+      var item = event.args.item;
+      var value = item.value;
+      var label = item.label;
+      var checked = item.checked;
+      var checkedItems = $("#el_elementForm4").jqxDropDownList('getCheckedItems');
+      // Addig removing blocks based on district selection
+      const blocks = Object.values(hierarchy).flatMap(oa => oa[label] || []);
+      checked ? blocks.forEach(block => $("#el_elementForm5").jqxDropDownList('addItem', block)) : blocks.forEach(block => $("#el_elementForm5").jqxDropDownList('removeItem', block));
+
+    }
+
+    // Disabling other districts if 2 are already selected
+    if (!event.args) return;
+
+    var dropdown = $("#el_elementForm4");
+
+    var checkedItems = dropdown.jqxDropDownList('getCheckedItems');
+
+    // 🔥 Step 1: count checked
+    if (checkedItems.length >= 2) {
+
+      // disable all unchecked items
+      var allItems = dropdown.jqxDropDownList('getItems');
+
+      allItems.forEach(item => {
+        if (!item.checked) {
+          dropdown.jqxDropDownList('disableItem', item);
         }
-    }); 
+      });
 
+    } else {
+      // 🔥 enable all again
+      var allItems = dropdown.jqxDropDownList('getItems');
 
+      allItems.forEach(item => {
+        dropdown.jqxDropDownList('enableItem', item);
+      });
+    }
 
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////
-   // FORM CREATION 
-        var template = [ {
-        type: 'label',
-        bind: 'radiobuttonValue_out',
-        label: 'Select OA :',
-        rowHeight: '40px',
-         }];     
-   
-          var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
-          var OAValues= {DDN:false, HWR:false, NTL:false, NWT:false, SGR:false, ALM:true};
-          var OANames= {DDN:'DEHRADUN',HWR:'HARIDWAR',NTL:'NAINITAL',NWT:'NEW TEHRI',SGR:'SRINAGAR',ALM:'ALMORA'};
-          var OAvalues1= [false, false, false, true, false, true];
-          var OAelementId= {DDN:'el_elementForm1_0',HWR:'el_elementForm1_1',NTL:'el_elementForm1_2',NWT:'el_elementForm2_0',SGR:'el_elementForm2_1',ALM:'el_elementForm2_2'};
-          var districtValues= {ALMORA:true, DEHRADUN:false, HARIDWAR:false, NAINITAL:false, "U S NAGAR":false, SRINAGAR:false,"PAURI GARHWAL":false, PITHORAGARH:false, CHAMPAWAT:false, RUDRAPRAYAG:false, "NEW TEHRI":false, UTTARKASHI:false};
 
-        let oaValueObj = OA.reduce((acc, key, index) => {
-            acc["chk" + key] = OAValues[key];
-            return acc;
-        }, {});
+  });
 
 
-            for (let i = 0; i < OA.length; i += 3) {
-                let row = { columns: [] };
 
-                for (let j = i; j < i + 3 && j < OA.length; j++) {
-                    row.columns.push({
-                        bind: "chk"+ OA[j],
-                        type: 'boolean',
-                        label: OA[j]
-                    });
-                }
+  // districtValues.forEach(val => {
+  //     $("#el_elementForm4").jqxDropDownList('checkItem', val);
+  // });
 
-                template.push(row);
-            }  
+  $("#el_elementForm5").jqxDropDownList({ checkboxes: true });
+  $("#el_elementForm5").jqxDropDownList("clear");
+  $("#el_elementForm5").jqxDropDownList({ checkboxes: true, source: blocks });
 
-               template= template.concat([
-                {
-                        type: 'label',
-                        bind: 'Select_District_Block',
-                        label: 'Select District and Block :',
-                        rowHeight: '40px',
-                } ,
-                {
-                        bind: 'dropdownDistrict',
-                        type: 'option',
-                        label: 'District',
-                        labelPosition: 'left',
-                        // checkboxes: true,
-                        labelWidth: '30%',
-                        align: 'left',
-                        width: '150px',
-                        // required: true,
-                        component: 'jqxDropDownList',
-                        options: [
-                            { label: 'Dehradun', value: 'Dehradun' },
-                           
-                        ],
-                        // init: function (component) {
-                        // component.jqxDropDownList({
-                        //     checkboxes: true,
-                        //     displayMember: 'label',
-                        //     valueMember: 'value'
-                        // }); }   
-                },
+  // blockValues.forEach(val => {
+  //     $("#el_elementForm5").jqxDropDownList('checkItem', val);
+  // });
 
-                {
-                        bind: 'dropdownBlock',
-                        type: 'option',
-                        label: 'Block',
-                        // checkboxes: true,
-                        labelPosition: 'left',
-                        labelWidth: '30%',
-                        align: 'left',
-                        width: '150px',
-                        // required: true,
-                        component: 'jqxDropDownList',
-                         options: [
-                            { label: 'Raipur', value: 'Raipur' },
-                            { label: 'Haldwani', value: 'Haldwani' },
-                            { label: 'Hawalbag', value: 'Hawalbag' },
-                            { label: 'Laksar', value: 'Laksar' }
-                        ],
- 
-                        // init: function (component) {
-                        // component.jqxDropDownList({
-                        //     checkboxes: true,
-                        //     displayMember: 'label',
-                        //     valueMember: 'value'
-                        // });} 
-                },
-                {
-                        type: 'label',
-                        bind: 'select_options',
-                        label: 'Select Elements :',
-                        rowHeight: '40px',
-                }]
+  $("#el_elementForm5").on('checkChange', function (event) {
+    if (event.args) {
+      var item = event.args.item;
+      var value = item.value;
+      var label = item.label;
+      var checked = item.checked;
+      var checkedItems = $("#el_elementForm4").jqxDropDownList('getCheckedItems');
 
+    }
 
-               );
-            
-            
+    // Disabling other blocks if 2 are already selected
+    if (!event.args) return;
 
-            var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"  ];
-            var btnElementId= {GP:'el_elementForm7_1',VIL:'el_elementForm7_3',BHQ:'el_elementForm7_5',OFC:'el_elementForm8_1',BTS:'el_elementForm8_3',OLT:'el_elementForm8_5',SAS:'el_elementForm9_1',SCH:'el_elementForm9_3',PHC:'el_elementForm9_5'}; 
-            var btnValues = [false, false, true, false, true, false, true, false, true];
-            var btnValueObj ={GP:false, VIL:false, BHQ:true, OFC:false, BTS:true, OLT:false, SAS:true, SCH:false, PHC:true};
+    var dropdown = $("#el_elementForm5");
 
+    var checkedItems = dropdown.jqxDropDownList('getCheckedItems');
 
+    // 🔥 Step 1: count checked
+    if (checkedItems.length >= 2) {
 
-            let btnInitialValue = btnElements.reduce((acc, key, index) => {
-                acc["chk"+ key] = btnValueObj[key];
-                return acc;
-            }, {});
+      // disable all unchecked items
+      var allItems = dropdown.jqxDropDownList('getItems');
 
-            var btns=[]   
+      allItems.forEach(item => {
+        if (!item.checked) {
+          dropdown.jqxDropDownList('disableItem', item);
+        }
+      });
 
-            for (let i = 0; i < btnElements.length; i += 3) {
-                let row = { columns: [] };
+    } else {
+      // 🔥 enable all again
+      var allItems = dropdown.jqxDropDownList('getItems');
 
-                for (let j = i; j < i + 3 && j < btnElements.length; j++) {
-                    row.columns.push({
-                        bind: "chk"+ btnElements[j],
-                        type: 'boolean',
-                        
-                    });
-                    row.columns.push({  
+      allItems.forEach(item => {
+        dropdown.jqxDropDownList('enableItem', item);
+      });
+    }
 
-                            type: 'button',
-                            bind: 'btn' + btnElements[j],
-                            text: btnElements[j],
-                            width: '40px',
-                            height: '30px',
-                            rowHeight: '30px',
-                            align: 'left',
-                        });
 
 
+  });
 
-                }
 
-                btns.push(row);
-            }      
-                
-           template= template.concat(btns);
-  
-            $('#elementForm').jqxForm({
-                template: template,
-                value: {...oaValueObj,...btnInitialValue      },
-                padding: { left: 2, top: 2, right: 2, bottom: 2 }
-            });
-          
+  /// main form rendered
+  $("#elementForm").on('formDataChange', function (event) {
 
-          
-            btnElements.forEach(item => {$("#" + btnElementId[item]).jqxButton({ disabled: !btnValueObj[item] })});
-       
+    let prev = event.args.previousValue;
+    let curr = event.args.value;
+    let changedField = Object.keys(curr).find(k => prev[k] !== curr[k]);
 
-            const selectedOAs= ["ALMORA"]; // Example: Getting districts for a specific OA
-            //et district and block from hierarchy
-            const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
-            let selectedDistricts = Object.keys(districtValues).filter(key => districtValues[key] === true);
+    let chel = changedField?.replace('chk', '');
+    // Check if Checkbox field is changed and belongs to OA or Element
+    if (OA.includes(chel)) {
 
-            const blocks = [...new Set(selectedDistricts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
+      let isChecked = curr[changedField];
+      console.log("✅ OA checkbox changed:", chel, ",Checked:", isChecked);
+      // 🔥 Step 2: count checked OA checkboxes
+      let checkedOAs = OA.filter(chel => curr["chk" + chel] === true);
+      console.log("Checked OAs:", checkedOAs);
+      // 🔥 Step 3: apply rule that if >2 OA is selected then disable others
+      if (checkedOAs.length >= 2) {
 
-            $("#el_elementForm4").jqxDropDownList("clear");
-            $("#el_elementForm4").jqxDropDownList({checkboxes:true,source: districts  }); 
-           //check selected districts
-           
-            selectedDistricts.forEach(item => { $("#el_elementForm4").jqxDropDownList('checkItem', item );}); 
-
-            // District Dropdown change event
-            $("#el_elementForm4").on('checkChange', function (event)
-                {
-                    if (event.args) {
-                    var item = event.args.item;
-                    var value = item.value;
-                    var label = item.label;
-                    var checked = item.checked;
-                    var checkedItems = $("#el_elementForm4").jqxDropDownList('getCheckedItems');
-                    // Addig removing blocks based on district selection
-                    const blocks = Object.values(hierarchy).flatMap(oa => oa[label] || []);
-                    checked ? blocks.forEach(block=> $("#el_elementForm5").jqxDropDownList('addItem',block )) : blocks.forEach(block=> $("#el_elementForm5").jqxDropDownList('removeItem',block)); 
-                        
-                }
-
-                // Disabling other districts if 2 are already selected
-                if (!event.args) return;
-
-                var dropdown = $("#el_elementForm4");
-
-                var checkedItems = dropdown.jqxDropDownList('getCheckedItems');
-
-                // 🔥 Step 1: count checked
-                if (checkedItems.length >= 2) {
-
-                    // disable all unchecked items
-                    var allItems = dropdown.jqxDropDownList('getItems');
-
-                    allItems.forEach(item => {
-                        if (!item.checked) {
-                            dropdown.jqxDropDownList('disableItem', item);
-                        }
-                    });
-
-                } else {
-                    // 🔥 enable all again
-                    var allItems = dropdown.jqxDropDownList('getItems');
-
-                    allItems.forEach(item => {
-                        dropdown.jqxDropDownList('enableItem', item);
-                    });
-                }
-
-
-
-                });
-
-
-
-            // districtValues.forEach(val => {
-            //     $("#el_elementForm4").jqxDropDownList('checkItem', val);
-            // });
-
-            $("#el_elementForm5").jqxDropDownList({checkboxes:true}); 
-            $("#el_elementForm5").jqxDropDownList("clear");
-            $("#el_elementForm5").jqxDropDownList({checkboxes:true,source: blocks  }); 
-            
-            // blockValues.forEach(val => {
-            //     $("#el_elementForm5").jqxDropDownList('checkItem', val);
-            // });
-
-            $("#el_elementForm5").on('checkChange', function (event)
-                {
-                    if (event.args) {
-                    var item = event.args.item;
-                    var value = item.value;
-                    var label = item.label;
-                    var checked = item.checked;
-                    var checkedItems = $("#el_elementForm4").jqxDropDownList('getCheckedItems');
-                       
-                }
-
-                // Disabling other blocks if 2 are already selected
-                if (!event.args) return;
-
-                var dropdown = $("#el_elementForm5");
-
-                var checkedItems = dropdown.jqxDropDownList('getCheckedItems');
-
-                // 🔥 Step 1: count checked
-                if (checkedItems.length >= 2) {
-
-                    // disable all unchecked items
-                    var allItems = dropdown.jqxDropDownList('getItems');
-
-                    allItems.forEach(item => {
-                        if (!item.checked) {
-                            dropdown.jqxDropDownList('disableItem', item);
-                        }
-                    });
-
-                } else {
-                    // 🔥 enable all again
-                    var allItems = dropdown.jqxDropDownList('getItems');
-
-                    allItems.forEach(item => {
-                        dropdown.jqxDropDownList('enableItem', item);
-                    });
-                }
-
-
-
-                });
-
-         
-            /// main form rendered
-            $("#elementForm").on('formDataChange', function (event) {
-
-                let prev = event.args.previousValue;
-                let curr = event.args.value;
-                let changedField = Object.keys(curr).find(k => prev[k] !== curr[k]);
-               
-                let chel = changedField?.replace('chk', '');
-                // Check if Checkbox field is changed and belongs to OA or Element
-                if (OA.includes(chel)) {
-                        
-                        let isChecked = curr[changedField];
-                        console.log("✅ OA checkbox changed:", chel , ",Checked:", isChecked);
-                         // 🔥 Step 2: count checked OA checkboxes
-                        let checkedOAs = OA.filter(chel => curr["chk" + chel] === true);
-                        console.log("Checked OAs:", checkedOAs);
-                        // 🔥 Step 3: apply rule that if >2 OA is selected then disable others
-                        if (checkedOAs.length >= 2) {
-
-                            OA.forEach(item => {
-                                if (!checkedOAs.includes(item)) {
-                                  // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
-                                  $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
-                                   $("#label_" + OAelementId[item]).css("pointer-events", "none");  // Disable click on label
-                                }
-                            });
-
-                        } else {
-                            // enable all
-                            OA.forEach(item => {
-                                // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
-                                $("#" + OAelementId[item]).jqxCheckBox({ disabled: false }); // Enable Checkbokes
-                                 $("#label_" + OAelementId[item]).css("pointer-events", "auto"); // Enablee click on label
-                            });
-                        }
-
-                        // load or unload distrct based on OA selection
-                        const districts = Object.keys(hierarchy[OANames[chel]] || {}).sort();
-                        console.log("Districts for selected OAs:", districts);
-                        isChecked ? districts.forEach(district=> $("#el_elementForm4").jqxDropDownList('addItem',district )) : districts.forEach(district=> $("#el_elementForm4").jqxDropDownList('removeItem',district)); 
-                        if(isChecked){
-                          districts.forEach(district=> $("#el_elementForm4").jqxDropDownList('addItem',district ))
-                          oaTypeList.forEach(type => {loadMapData({ type:type, block: null,oa:OANames[chel]}  )});
-                        } 
-                        else {
-
-                         
-                          oaTypeList.forEach(type => {removeMapData({ type:type, block: null,oa:OANames[chel] }  )});
-
-
-                          districts.forEach (district=> {
-                              $("#el_elementForm4").jqxDropDownList('removeItem',district);
-                              const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []); 
-                              console.log("Blocks for selected Districts:", blocks);
-                              blocks.forEach(block=> {                                
-                                  $("#el_elementForm5").jqxDropDownList('removeItem',block);
-                              }); 
-                              
-                              blocks.forEach(block=> {                                 
-                                 
-                                  blockTypeList.forEach(type => {removeMapData({ type, block }  )});
-                              }); 
-                              
-                          }); 
-                        }
-
-                }
-
-                // Check if changed field is element button
-                if (btnElements.includes(chel)) {
-                        
-                        let isChecked = curr[changedField];
-                        console.log("✅ Element checkbox changed:", chel , ",Checked:", isChecked);
-                     
-                        isChecked ? $('#' + btnElementId[chel] ).jqxButton({ disabled: false }) : $('#' + btnElementId[chel] ).jqxButton({ disabled: true });
-                }
-
-              
-    
-            });
-
-
-            // let blockValue= {Raipur:{District:"Dehradun",OA:"DN",GP:{UP:true,DN:false,M90:true,L90:false },VIL:{COV:true,NCO:false},
-            // BHQ:{PH1:true,ABP:false},OFC:{BN:true,CIR:false,CNTX:false},BTS:{"2G":true,"3G":false,"4G":false,UP:true,DN:},OLT:{},SAS:{},SCH:{},PHC:{}}};
-           // SUB FORM CREATION for every element button                     
-            var subFormTemplate = {GP :[ ],VIL :[ ],BHQ :[ ],OFC :[ ],BTS :[ ],OLT :[ ],SAS :[ ],SCH :[ ],PHC :[ ]};
- 
-            var subFormElements = {
-                GP :['UP','DN','M90','L90','COV','NCO'],
-                VIL :['COV','NCO'],
-                BHQ :['PH1','ABP'],
-                OFC :['BN','CIR','CNTX','VTL'],
-                BTS :['2G','3G','4G','UP','DN','ML','OFC',"SAT"],
-                OLT :['TIP','BNU','BAF'],
-                SAS :['UP','DN','M90'],
-                SCH:['WK','NWK','FES','UP','DN'], 
-                PHC:['WK','NWK','FES','UP','DN ']
-            };     
-            
-            // make object for storing subform values for each block
-            let blockElementsValue= createBlockValueData()
-            console.log(blockElementsValue);
-
-            function createBlockValueData() {
-
-                // list all blocks from hierarchy
-                let allBlocks = [...new Set(
-                      Object.values(hierarchy)
-                        .flatMap(d => Object.values(d))
-                        .flat()
-                    )];
-
-                // get district and block from hierarchy
-                let elements={}    
-                let districtOa={};
-                let results = {};
-
-                allBlocks.forEach(blockName => {
-
-                results[blockName] = {};
-
-                let districtOa = Object.entries(hierarchy).flatMap(([oa, districts]) =>
-                  Object.entries(districts).flatMap(([district, blocks]) =>
-                    blocks.includes(blockName) ? [{ oa, district }] : []
-                  )
-                )[0]; 
-
-              
-
-                Object.entries(subFormElements).forEach(([key, values]) => {
-                  elements[key] = {};
-
-                  values.forEach(v => {
-                  elements[key][v] = false;
-                  });
-                });
-
-
-              results[blockName] = {...districtOa, ...elements};
-                  
-                });    
-
-            
-                return results;
-            }
-            
-          
-            var subFormElementsValue = {
-                GP :[true, false, true, false],
-                VIL :[true, false],
-                BHQ :[true, false],
-                OFC :[true, false, false,false],
-                BTS :[true, false, false, true, false, false, false, true],
-                OLT :[true, false, false],
-                SAS :[true,false, false],
-                SCH :[true,false, false],
-                PHC :[true,false, false]
-            };   
-
-            let initialElementValue = {};
-
-            Object.keys(subFormElementsValue).forEach(group => {
-                let values = subFormElementsValue[group];
-                let keys = subFormElements[group];
-
-                let groupName = group.replace("Options", "").toUpperCase();
-
-                initialElementValue[groupName] = {};
-
-                values.forEach((val, index) => {
-                    initialElementValue[groupName]['chk'+ groupName+ keys[index]] = val;
-                });
-            });
-
-
-
-            Object.entries(subFormElements).forEach(([key, value]) => {
-                for (let i = 0; i < value.length; i += 3) {
-                let row = { columns: [] };
-
-                for (let j = i; j < i + 3 && j < value.length; j++) {
-                    row.columns.push({
-                        bind: 'chk' + key+ value[j],
-                        type: 'boolean',
-                        label: value[j]
-                    });
-                }
-
-                subFormTemplate[key].push(row);
-            } 
-               
-            });
-
-
-
-
-            $('#elementForm').on('buttonClick', function (event) {
-            var args = event.args;
-            var text = args.text // clicked button's text.;
-            var name = args.name // clicked button's name.;
-            createSubForm(text);
-
-             });
-                
-    
-
-            function createSubForm(type){
-                // console.log(subFormTemplate[type]);
-                // console.log(initialElementValue[type]);
-                let tmpl = [{
-                    type: 'label',
-                    bind: type,
-                    label: type.replace("Options","").toUpperCase() + ' Options :',
-                    rowHeight: '40px',
-                },...subFormTemplate[type]];
-              
-                if ($("#elementSubForm").data('jqxForm')) {
-                    $("#elementSubForm").jqxForm('destroy');
-                    $("#elementSubForm").remove();
-                    $("#infoPanel").append('<div id="elementSubForm" style="width: 280px; height: auto;"></div>   ');
-                }
-                $('#elementSubForm').jqxForm({
-                    template: tmpl,
-                    padding: { left: 2, top: 2, right: 2, bottom: 2 },
-                    value: initialElementValue[type] || {}
-                });
-                
-             
-                $('#elementSubForm').on('formDataChange', function (event) {
-                  var args = event.args;
-                  console.log(args)
-                  var newValue = args.value;
-                  var previousValue = args.previousValue;
-
-                  var formattedChanges = getFormattedChanges(args);
-                  applyFilters(formattedChanges);
-
-                  // for (var i in newValue) {
-                  //   // var newInputValue = newValue[i]; // current input's value.
-                  //   // var previousInputValue = previousValue[i]; // previous input's value.
-                  // }
-                });
-                $('#elementSubForm').jqxForm('refresh');
-
-
-            }
-
-          function getFormattedChanges(obj) {
-              let { value, previousValue } = obj;
-
-              // ✅ Get type (key without 'chk')
-              let typeKey = Object.keys(value).find(k => !k.startsWith('chk'));
-              let type = typeKey;
-
-              let changes = [];
-
-              Object.keys(value).forEach(key => {
-                  if (key.startsWith('chk')) {
-                      let oldVal = previousValue[key];
-                      let newVal = value[key];
-
-                      if (oldVal !== newVal) {
-                          // Extract suffix (remove 'chk' + type)
-                          let suffix = key.replace('chk' + type, '');
-
-                          changes.push(`${suffix}=${newVal.toString().toUpperCase()}`);
-                      }
-                  }
-              });
-
-              return {
-                  type: type,
-                  changes: `(${changes.join(', ')})`
-              };
+        OA.forEach(item => {
+          if (!checkedOAs.includes(item)) {
+            // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
+            $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
+            $("#label_" + OAelementId[item]).css("pointer-events", "none");  // Disable click on label
           }
+        });
 
-          function applyFilters(formattedChanges) {
+      } else {
+        // enable all
+        OA.forEach(item => {
+          // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
+          $("#" + OAelementId[item]).jqxCheckBox({ disabled: false }); // Enable Checkbokes
+          $("#label_" + OAelementId[item]).css("pointer-events", "auto"); // Enablee click on label
+        });
+      }
 
-            
-
-
-
-            switch (value) {
-              case 'A':
-                // code
-                break;
-
-              case 'B':
-                // code
-                break;
-
-              default:
-                // fallback
-            }
-
-
-          }            
-////////////////////////////////////////////////////////////////////////////////
+      // load or unload distrct based on OA selection
+      const districts = Object.keys(hierarchy[OANames[chel]] || {}).sort();
+      console.log("Districts for selected OAs:", districts);
+      isChecked ? districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district)) : districts.forEach(district => $("#el_elementForm4").jqxDropDownList('removeItem', district));
+      if (isChecked) {
+        districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district))
+        oaTypeList.forEach(type => { loadMapData({ type: type, block: null, oa: OANames[chel] }) });
+      }
+      else {
 
 
+        oaTypeList.forEach(type => { removeMapData({ type: type, block: null, oa: OANames[chel] }) });
+
+
+        districts.forEach(district => {
+          $("#el_elementForm4").jqxDropDownList('removeItem', district);
+          const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []);
+          console.log("Blocks for selected Districts:", blocks);
+          blocks.forEach(block => {
+            $("#el_elementForm5").jqxDropDownList('removeItem', block);
+          });
+
+          blocks.forEach(block => {
+
+            blockTypeList.forEach(type => { removeMapData({ type, block }) });
+          });
+
+        });
+      }
+
+    }
+
+    // Check if changed field is element button
+    if (btnElements.includes(chel)) {
+
+      let isChecked = curr[changedField];
+      console.log("✅ Element checkbox changed:", chel, ",Checked:", isChecked);
+
+      isChecked ? $('#' + btnElementId[chel]).jqxButton({ disabled: false }) : $('#' + btnElementId[chel]).jqxButton({ disabled: true });
+    }
+
+
+
+  });
+
+
+  // let blockValue= {Raipur:{District:"Dehradun",OA:"DN",GP:{UP:true,DN:false,M90:true,L90:false },VIL:{COV:true,NCO:false},
+  // BHQ:{PH1:true,ABP:false},OFC:{BN:true,CIR:false,CNTX:false},BTS:{"2G":true,"3G":false,"4G":false,UP:true,DN:},OLT:{},SAS:{},SCH:{},PHC:{}}};
+  // SUB FORM CREATION for every element button                     
+  var subFormTemplate = { GP: [], VIL: [], BHQ: [], OFC: [], BTS: [], OLT: [], SAS: [], SCH: [], PHC: [] };
+
+  var subFormElements = {
+    GP: ['UP', 'DN', 'M90', 'L90', 'COV', 'NCO'],
+    VIL: ['COV', 'NCO'],
+    BHQ: ['PH1', 'ABP'],
+    OFC: ['BN', 'CIR', 'CNTX', 'VTL'],
+    BTS: ['2G', '3G', '4G', 'UP', 'DN', 'ML', 'OFC', "SAT"],
+    OLT: ['TIP', 'BNU', 'BAF'],
+    SAS: ['UP', 'DN', 'M90'],
+    SCH: ['WK', 'NWK', 'FES', 'UP', 'DN'],
+    PHC: ['WK', 'NWK', 'FES', 'UP', 'DN ']
+  };
+
+  // make object for storing subform values for each block
+  let blockElementsValue = createBlockValueData()
+  console.log(blockElementsValue);
+
+  function createBlockValueData() {
+
+    // list all blocks from hierarchy
+    let allBlocks = [...new Set(
+      Object.values(hierarchy)
+        .flatMap(d => Object.values(d))
+        .flat()
+    )];
+
+    // get district and block from hierarchy
+    let elements = {}
+    let districtOa = {};
+    let results = {};
+
+    allBlocks.forEach(blockName => {
+
+      results[blockName] = {};
+
+      let districtOa = Object.entries(hierarchy).flatMap(([oa, districts]) =>
+        Object.entries(districts).flatMap(([district, blocks]) =>
+          blocks.includes(blockName) ? [{ oa, district }] : []
+        )
+      )[0];
+
+
+
+      Object.entries(subFormElements).forEach(([key, values]) => {
+        elements[key] = {};
+
+        values.forEach(v => {
+          elements[key][v] = false;
+        });
+      });
+
+
+      results[blockName] = { ...districtOa, ...elements };
+
+    });
+
+
+    return results;
+  }
+
+
+  var subFormElementsValue = {
+    GP: [true, false, true, false],
+    VIL: [true, false],
+    BHQ: [true, false],
+    OFC: [true, false, false, false],
+    BTS: [true, false, false, true, false, false, false, true],
+    OLT: [true, false, false],
+    SAS: [true, false, false],
+    SCH: [true, false, false],
+    PHC: [true, false, false]
+  };
+
+  let initialElementValue = {};
+
+  Object.keys(subFormElementsValue).forEach(group => {
+    let values = subFormElementsValue[group];
+    let keys = subFormElements[group];
+
+    let groupName = group.replace("Options", "").toUpperCase();
+
+    initialElementValue[groupName] = {};
+
+    values.forEach((val, index) => {
+      initialElementValue[groupName]['chk' + groupName + keys[index]] = val;
+    });
+  });
+
+
+
+  Object.entries(subFormElements).forEach(([key, value]) => {
+    for (let i = 0; i < value.length; i += 3) {
+      let row = { columns: [] };
+
+      for (let j = i; j < i + 3 && j < value.length; j++) {
+        row.columns.push({
+          bind: 'chk' + key + value[j],
+          type: 'boolean',
+          label: value[j]
+        });
+      }
+
+      subFormTemplate[key].push(row);
+    }
+
+  });
+
+
+
+
+  $('#elementForm').on('buttonClick', function (event) {
+    var args = event.args;
+    var text = args.text // clicked button's text.;
+    var name = args.name // clicked button's name.;
+    createSubForm(text);
+
+  });
+
+
+
+  function createSubForm(type) {
+    // console.log(subFormTemplate[type]);
+    // console.log(initialElementValue[type]);
+    let tmpl = [{
+      type: 'label',
+      bind: type,
+      label: type.replace("Options", "").toUpperCase() + ' Options :',
+      rowHeight: '40px',
+    }, ...subFormTemplate[type]];
+
+    if ($("#elementSubForm").data('jqxForm')) {
+      $("#elementSubForm").jqxForm('destroy');
+      $("#elementSubForm").remove();
+      $("#infoPanel").append('<div id="elementSubForm" style="width: 280px; height: auto;"></div>   ');
+    }
+    $('#elementSubForm').jqxForm({
+      template: tmpl,
+      padding: { left: 2, top: 2, right: 2, bottom: 2 },
+      value: initialElementValue[type] || {}
+    });
+
+
+    $('#elementSubForm').on('formDataChange', function (event) {
+      var args = event.args;
+      console.log(args)
+      var newValue = args.value;
+      var previousValue = args.previousValue;
+
+      var formattedChanges = getFormattedChanges(args);
+      applyFilters(formattedChanges);
+
+      // for (var i in newValue) {
+      //   // var newInputValue = newValue[i]; // current input's value.
+      //   // var previousInputValue = previousValue[i]; // previous input's value.
+      // }
+    });
+    $('#elementSubForm').jqxForm('refresh');
+
+
+  }
+
+  function getFormattedChanges(obj) {
+    let { value, previousValue } = obj;
+
+    // ✅ Get type (key without 'chk')
+    let typeKey = Object.keys(value).find(k => !k.startsWith('chk'));
+    let type = typeKey;
+
+    let changes = [];
+
+    Object.keys(value).forEach(key => {
+      if (key.startsWith('chk')) {
+        let oldVal = previousValue[key];
+        let newVal = value[key];
+
+        if (oldVal !== newVal) {
+          // Extract suffix (remove 'chk' + type)
+          let suffix = key.replace('chk' + type, '');
+
+          changes.push(`${suffix}=${newVal.toString().toUpperCase()}`);
+        }
+      }
+    });
+
+    return {
+      type: type,
+      changes: `(${changes.join(', ')})`
+    };
+  }
+
+  function applyFilters(formattedChanges) {
+
+
+
+
+
+    switch (value) {
+      case 'A':
+        // code
+        break;
+
+      case 'B':
+        // code
+        break;
+
+      default:
+      // fallback
+    }
+
+
+  }
+  ////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -711,10 +716,12 @@ async function initMap() {
 
 
 
-         
-/////////////////////////////////////////////////////////////////////////////////
 
-           
+
+
+  /////////////////////////////////////////////////////////////////////////////////
+
+
 
 
 
@@ -724,51 +731,51 @@ async function initMap() {
 
 
   statusEl = document.getElementById("status");
-  
 
 
 
-// initializeRibbon();
-// initializeTabs();
-//    let tabTree = `    
-//         <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
-       
-//         </button>  
-//         <div class="controls">
-//           <button id="saveSelected" class="btn small">Save Selected</button>
-//           <button id="saveAll" class="btn primary small">Save All</button>
-//           <button id="clearTemp" class="btn small">Clear Temp</button>
-//         </div>
-//         <div id="sidepanel" class="card"><h2>Places</h2> 
-//           <input id="kmlFile" type="file" accept=".kml" />
-//           <div style="height:10px"></div>
-//           <div id="jqxTree" class="card-body"></div>
-//         </div>`;
 
-// const tabs = [
-//   { id: "jqxTree", title: "Load KML", content: tabTree },
-//   { id: "EditMaps", title: "Users", url: "/users.html" },     // Ajax load
-//   { id: "Settings", title: "Settings", content: "<p>Settings</p>" }
-// ];
+  // initializeRibbon();
+  // initializeTabs();
+  //    let tabTree = `    
+  //         <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
 
-// const tabManager = $("#appTabs").advancedTabs({
-//   data: tabs,
-//   activeIndex: 0,
-//   animation: true
-// });
+  //         </button>  
+  //         <div class="controls">
+  //           <button id="saveSelected" class="btn small">Save Selected</button>
+  //           <button id="saveAll" class="btn primary small">Save All</button>
+  //           <button id="clearTemp" class="btn small">Clear Temp</button>
+  //         </div>
+  //         <div id="sidepanel" class="card"><h2>Places</h2> 
+  //           <input id="kmlFile" type="file" accept=".kml" />
+  //           <div style="height:10px"></div>
+  //           <div id="jqxTree" class="card-body"></div>
+  //         </div>`;
+
+  // const tabs = [
+  //   { id: "jqxTree", title: "Load KML", content: tabTree },
+  //   { id: "EditMaps", title: "Users", url: "/users.html" },     // Ajax load
+  //   { id: "Settings", title: "Settings", content: "<p>Settings</p>" }
+  // ];
+
+  // const tabManager = $("#appTabs").advancedTabs({
+  //   data: tabs,
+  //   activeIndex: 0,
+  //   animation: true
+  // });
 
 
-   let treeSource= [
-    {label: "My Places", expanded: true,checked: true ,icon:"./img/earth.jpg",id:"myplaces",value:"main_folder"},
-    {label: "Temporary Places", expanded: true,checked: true,icon:"./img/folder.png",id:"tempplaces",value:"temp_folder" },
+  let treeSource = [
+    { label: "My Places", expanded: true, checked: true, icon: "./img/earth.jpg", id: "myplaces", value: "main_folder" },
+    { label: "Temporary Places", expanded: true, checked: true, icon: "./img/folder.png", id: "tempplaces", value: "temp_folder" },
 
   ];
 
-  $("#jqxTree").jqxTree({ source: treeSource, width: "100%", height: "300px", checkboxes: true ,allowDrag: true, allowDrop: true});
+  $("#jqxTree").jqxTree({ source: treeSource, width: "100%", height: "300px", checkboxes: true, allowDrag: true, allowDrop: true });
 
 
 
-   $("#mode-ui").verticalToolbar({
+  $("#mode-ui").verticalToolbar({
     tools: [
       { id: "point", title: "Point", icon: "./img/point.svg" },
       { id: "route", title: "Route", html: '<i class="fas fa-route"></i>' },
@@ -782,25 +789,25 @@ async function initMap() {
       { id: "redo", title: "Redo", icon: "./img/redo.svg" },
       { id: "export", title: "Export", icon: "./img/download.svg" },
       { id: "upload", title: "Upload", icon: "./img/upload.svg" },
-      { id: "maps", title: "Maps", html: '<i class="fas fa-globe"></i>', href:"#/map" },
-      { id: "kml", title: "KML", html: '<i class="fas fa-map"></i>', href:"#/kml" },
+      { id: "maps", title: "Maps", html: '<i class="fas fa-globe"></i>', href: "#/map" },
+      { id: "kml", title: "KML", html: '<i class="fas fa-map"></i>', href: "#/kml" },
     ],
 
-      onSelect: function ({ id }) {
+    onSelect: function ({ id }) {
       if (toolActions[id]) {
-          oldMode=mode;
-          mode = id;
-          statusEl.textContent = `Mode: ${mode}`;
-          google.maps.event.clearInstanceListeners(map);
-          // manager.disable();
-          toolActions[id]();
+        oldMode = mode;
+        mode = id;
+        statusEl.textContent = `Mode: ${mode}`;
+        google.maps.event.clearInstanceListeners(map);
+        // manager.disable();
+        toolActions[id]();
       } else {
-         console.warn("No action defined for:", id);
+        console.warn("No action defined for:", id);
       }
     }
-   });
+  });
 
-   const toolActions = {
+  const toolActions = {
     point() {
       console.log("Point mode activated");
       editMarker.setMarker()
@@ -810,7 +817,7 @@ async function initMap() {
     route() {
       console.log("Route mode activated");
       // polyManager.enableDraw()
-      ultraPolyManager.enableDraw();  
+      ultraPolyManager.enableDraw();
 
       // manager.enable();
       // editPolyline.setRoute()
@@ -831,9 +838,9 @@ async function initMap() {
     select() {
       console.log("Select mode activated");
       // clear previous mode
-       if(oldMode=="Route")  ultraPolyManager.clearDrawing();
+      if (oldMode == "Route") ultraPolyManager.clearDrawing();
 
-        
+
     },
 
     resize() {
@@ -842,18 +849,18 @@ async function initMap() {
 
     delete() {
       console.log("Delete all");
-        if(mode=="point") editMarker.remove();
-        if(mode=="route") ultraPolyManager.delete(1);
+      if (mode == "point") editMarker.remove();
+      if (mode == "route") ultraPolyManager.delete(1);
     },
 
     undo() {
       console.log("Undo last action");
-        if(mode=="route") ultraPolyManager.undo();
+      if (mode == "route") ultraPolyManager.undo();
     },
 
     redo() {
       console.log("Redo last action");
-       if(mode=="route") ultraPolyManager.redo();
+      if (mode == "route") ultraPolyManager.redo();
     },
 
     export() {
@@ -861,15 +868,15 @@ async function initMap() {
     },
     save() {
       console.log("Save data");
-     if(mode=="route")  ultraPolyManager.save("Route 1")
+      if (mode == "route") ultraPolyManager.save("Route 1")
     },
     load() {
       console.log("Load data");
-     if(mode=="route") ultraPolyManager.load(1)
+      if (mode == "route") ultraPolyManager.load(1)
     },
     upload() {
       console.log("Upload data");
-     if(mode=="route")  ultraPolyManager.save("Route 1")
+      if (mode == "route") ultraPolyManager.save("Route 1")
     },
     maps() {
       console.log("maps");
@@ -879,49 +886,49 @@ async function initMap() {
       console.log("Upload data");
       Router.go("uktx/map/#/kml");
     },
-   
-   };
- 
-   document.getElementById("clearTemp").addEventListener("click",()=>{
+
+  };
+
+  document.getElementById("clearTemp").addEventListener("click", () => {
 
     var items = $('#jqxTree').jqxTree('getItems');
     console.log(items)
-   })
+  })
 
-  
+
   ctxMenu = document.getElementById("contextMenu");
-  
-
-//   const viewer = new KMLViewer(map);
-
-//   document.getElementById("kmlFile").addEventListener("change", e => {
-//   viewer.loadFile(e.target.files[0]);
-// });
 
 
-document.addEventListener('keydown', e => {
+  //   const viewer = new KMLViewer(map);
+
+  //   document.getElementById("kmlFile").addEventListener("change", e => {
+  //   viewer.loadFile(e.target.files[0]);
+  // });
+
+
+  document.addEventListener('keydown', e => {
     if (e.key === 'n') ultraPolyManager.startCreate();
     if (e.ctrlKey && e.key === 'z') ultraPolyManager.undo();
     if (e.ctrlKey && e.key === 'y') ultraPolyManager.redo();
     if (e.key === 'Delete' && ultraPolyManager.activePolyline)
-        ultraPolyManager.delete(ultraPolyManager.activePolyline);
+      ultraPolyManager.delete(ultraPolyManager.activePolyline);
     if (e.key === 's' && ultraPolyManager.activePolyline)
-        ultraPolyManager.save(ultraPolyManager.activePolyline, 'Polyline');
-});
+      ultraPolyManager.save(ultraPolyManager.activePolyline, 'Polyline');
+  });
 
-  
+
 }
 
 /// new function 
 function setMode(newMode) {
-$("#" + newMode).trigger("click");
+  $("#" + newMode).trigger("click");
 }
 
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-let itemMarkers=[];
-let labeledMarkers = []; 
+let itemMarkers = [];
+let labeledMarkers = [];
 let allPaths = [];
 
 function parseLatLng(str) {
@@ -956,32 +963,32 @@ function getDistricts(oa) {
   return Object.keys(hierarchy[oa] || {});
 }
 
-async function loadMapData({ type = null, block = null , oa = null} = {}) {
+async function loadMapData({ type = null, block = null, oa = null } = {}) {
 
-    // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
+  // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
   // const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
   // const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
   // console.log(districts);
   // const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
   // console.log(blocks);
-//  console.log(typeMap);
+  //  console.log(typeMap);
 
   try {
     const res = await fetch('assets/php/data.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({type:type, block:block?? "", oa:oa?? ""})
+      body: JSON.stringify({ type: type, block: block ?? "", oa: oa ?? "" })
     });
     console.log(typeMap[type].latLongField);
     const data = await res.json();
     data.forEach(item => {
 
-      typeMap[type].latLongField != "" ?     createMarker(item,type) : null;
-      typeMap[type].encodedPathField != "" ? createPath(item,type) : null;
+      typeMap[type].latLongField != "" ? createMarker(item, type) : null;
+      typeMap[type].encodedPathField != "" ? createPath(item, type) : null;
 
-   });
-  
-   map.fitBounds(bounds);
+    });
+
+    map.fitBounds(bounds);
 
   } catch (err) {
     console.error(err);
@@ -989,51 +996,51 @@ async function loadMapData({ type = null, block = null , oa = null} = {}) {
 }
 
 
-function createMarker(item,type) {
-    const pos = parseLatLng(item[typeMap[type].latLongField]);
-    // 🔥 VALIDATION CHECK
-    if (!isValidLatLng(pos)) {
-      console.log("❌ Invalid LatLng:", item.present_lat_long, item);
-      return; // ⛔ skip marker
-    }
+function createMarker(item, type) {
+  const pos = parseLatLng(item[typeMap[type].latLongField]);
+  // 🔥 VALIDATION CHECK
+  if (!isValidLatLng(pos)) {
+    console.log("❌ Invalid LatLng:", item.present_lat_long, item);
+    return; // ⛔ skip marker
+  }
 
 
-    const color = getStatusColor(item[typeMap[type].statusField]);
+  const color = getStatusColor(item[typeMap[type].statusField]);
 
-    const { wrapper, text } = getSvgElement(
+  const { wrapper, text } = getSvgElement(
     type,
     color,
     item[typeMap[type].nameField]
   );
 
-    const itemmarker = new AdvancedMarkerElement({
+  const itemmarker = new AdvancedMarkerElement({
     position: pos,
     map,
     title: item[typeMap[type].nameField],
     content: wrapper,
-    
+
   });
 
   itemmarker.meta = buildMetadata(item, type);
 
   itemMarkers.push(itemmarker);
 
- // store for zoom control
+  // store for zoom control
   labeledMarkers.push({ itemmarker, text });
 
   itemMarkers.push(itemmarker);
 
-    map.addListener("zoom_changed", () => {
+  map.addListener("zoom_changed", () => {
     const zoom = map.getZoom();
 
     labeledMarkers.forEach(obj => {
-        if (zoom >= 13) {
+      if (zoom >= 13) {
         obj.text.style.display = "block"; // show name
-        } else {
+      } else {
         obj.text.style.display = "none";  // hide name
-        }
+      }
     });
-    });
+  });
 
   bounds.extend(pos);
   itemmarker.addListener("gmp-click", () => {
@@ -1045,7 +1052,7 @@ function createMarker(item,type) {
 function buildMetadata(item, type) {
   const fields = typeMap[type]?.metadataFields || [];
 
-  let fieldsData= fields.reduce((meta, key) => {
+  let fieldsData = fields.reduce((meta, key) => {
     meta[key] = item[key] ?? null;
     return meta;
   }, {});
@@ -1059,7 +1066,7 @@ function buildInfoWindow(item, type) {
   const fields = typeMap[type]?.metadataFields || [];
 
 
- let head = `
+  let head = `
     <div style="min-width:250px; font-family:Arial;">
 
       <!-- Header -->
@@ -1102,7 +1109,7 @@ function buildInfoWindow(item, type) {
       </tr>
   `;
 
-   fields.forEach((f, i) => {
+  fields.forEach((f, i) => {
     html += `
       <tr style="background:${i % 2 === 0 ? '#ffffff' : '#fafafa'};">
         <td style="
@@ -1129,7 +1136,7 @@ function buildInfoWindow(item, type) {
   return html;
 }
 
-function createInfoTable(item,type) {
+function createInfoTable(item, type) {
   return `
     <div style="
       font-family: Arial;
@@ -1195,50 +1202,50 @@ function createInfoTable(item,type) {
 }
 
 function getSvgElement(type, color, label = "") {
-        const wrapper = document.createElement("div");
-        // wrapper.style.display = "flex";
-        // wrapper.style.alignItems = "center";
-        // wrapper.style.justifyContent = "center";
-        wrapper.style.display = "flex";
-        wrapper.style.alignItems = "center";
-        wrapper.style.gap = "4px";
+  const wrapper = document.createElement("div");
+  // wrapper.style.display = "flex";
+  // wrapper.style.alignItems = "center";
+  // wrapper.style.justifyContent = "center";
+  wrapper.style.display = "flex";
+  wrapper.style.alignItems = "center";
+  wrapper.style.gap = "4px";
 
-        // ICON CONTAINER (🔥 border applied here)
-        const iconDiv = document.createElement("div");
+  // ICON CONTAINER (🔥 border applied here)
+  const iconDiv = document.createElement("div");
 
-        iconDiv.style.display = "flex";
-        iconDiv.style.alignItems = "center";
-        iconDiv.style.justifyContent = "center";
+  iconDiv.style.display = "flex";
+  iconDiv.style.alignItems = "center";
+  iconDiv.style.justifyContent = "center";
 
-        // 🔥 VERY LIGHT BORDER EFFECT
-        iconDiv.style.background = "rgba(255,255,255,0.5)"; // ✅ 50% transparent
-        iconDiv.style.borderRadius = "50%";
-        iconDiv.style.padding = "1px";
+  // 🔥 VERY LIGHT BORDER EFFECT
+  iconDiv.style.background = "rgba(255,255,255,0.5)"; // ✅ 50% transparent
+  iconDiv.style.borderRadius = "50%";
+  iconDiv.style.padding = "1px";
 
-        // subtle shadow (like Google Maps)
-        iconDiv.style.boxShadow = "0 0 2px rgba(0,0,0,0.2)";
+  // subtle shadow (like Google Maps)
+  iconDiv.style.boxShadow = "0 0 2px rgba(0,0,0,0.2)";
 
-    
-        iconDiv.innerHTML = getSvgByType(type, color);
+
+  iconDiv.innerHTML = getSvgByType(type, color);
 
   // TEXT (right side)
-    const text = document.createElement("div");
-    text.innerText = label;
+  const text = document.createElement("div");
+  text.innerText = label;
 
-    text.style.fontSize = "11px";
-    text.style.fontWeight = "bold";
-    text.style.color = "black";
+  text.style.fontSize = "11px";
+  text.style.fontWeight = "bold";
+  text.style.color = "black";
 
-    // 🔥 WHITE BORDER (HALO EFFECT like Google Maps)
-    text.style.textShadow = `
+  // 🔥 WHITE BORDER (HALO EFFECT like Google Maps)
+  text.style.textShadow = `
         -1px -1px 0 #fff,
         1px -1px 0 #fff,
         -1px  1px 0 #fff,
         1px  1px 0 #fff
     `;
 
-    text.style.whiteSpace = "nowrap";
-    text.style.display = "none"; // hidden initially
+  text.style.whiteSpace = "nowrap";
+  text.style.display = "none"; // hidden initially
 
   wrapper.appendChild(iconDiv);
   wrapper.appendChild(text);
@@ -1248,7 +1255,7 @@ function getSvgElement(type, color, label = "") {
 
 
 function getStatusColor(status) {
-  switch(status) {
+  switch (status) {
     case 'UP': return '#28a745';   // green
     case 'OK': return '#28a745';   // green
     case 'DN': return '#dc3545';   // red
@@ -1259,7 +1266,7 @@ function getStatusColor(status) {
 }
 
 function getSvgByType(type, color) {
-  switch(type) {
+  switch (type) {
 
     // 🏠 Gram Panchayat
     case 'GP':
@@ -1326,7 +1333,7 @@ function getSvgByType(type, color) {
 }
 
 function decodePath(encoded) {
-  
+
   try {
     // console.log("Decoding path:", encoded);
     return encoding.decodePath(encoded);
@@ -1338,7 +1345,7 @@ function decodePath(encoded) {
 
 
 function createPath(item, type) {
- 
+
   const path = decodePath(item[typeMap[type].encodedPathField]);
 
   // 🔥 VALIDATION
@@ -1346,7 +1353,7 @@ function createPath(item, type) {
     console.log("❌ Invalid Path:", item[typeMap[type].encodedPathField], item);
     return;
   }
-    const plusSymbol = {
+  const plusSymbol = {
     // SVG path for a '+' sign
     path: "M 0,-1 L 0,1 M -1,0 L 1,0",
     strokeOpacity: 1,
@@ -1370,13 +1377,17 @@ function createPath(item, type) {
     // ],
   });
 
-  if(item[typeMap[type].statusField]!="UP"){polyline.setOptions({   icons: [
-      {
-        icon: plusSymbol,
-        offset: "0",
-        repeat: "15px",  // Adjust distance between sleepers
-      },
-    ],});} // 🔥 visually differentiate non-UP paths
+  if (item[typeMap[type].statusField] != "UP") {
+    polyline.setOptions({
+      icons: [
+        {
+          icon: plusSymbol,
+          offset: "0",
+          repeat: "15px",  // Adjust distance between sleepers
+        },
+      ],
+    });
+  } // 🔥 visually differentiate non-UP paths
 
   // 🔥 metadata
   polyline.meta = buildMetadata(item, type);
@@ -1392,7 +1403,7 @@ function createPath(item, type) {
 }
 
 function getPathColor(owner) {
-  switch(owner) {
+  switch (owner) {
     case 'CIRCLE': return '#ebe014';   // green
     case 'CNTX': return '#fc0808';   // green
     case 'VTL': return '#3564dc';   // red
@@ -1403,70 +1414,70 @@ function getPathColor(owner) {
 }
 
 
-function removeMapData({ type = null, block = null , oa = null} = {}) {
+function removeMapData({ type = null, block = null, oa = null } = {}) {
 
-   console.log("Before:", itemMarkers.length, "Type:", type, "Block:", block, "OA:", oa);
+  console.log("Before:", itemMarkers.length, "Type:", type, "Block:", block, "OA:", oa);
   //  console.log("Before:", itemMarkers.length, "Type:", type, "Block:", block, "OA:", oa);
-   
+
   // 🔴 Markers
-    try {
+  try {
     itemMarkers = itemMarkers.filter(marker => {
-   
-    if (!marker || !marker.meta) {
-      console.warn("⚠️ Skipping invalid marker:", marker);
-    return false; // remove bad entries
-   }
-    const meta = marker.meta || {};
 
-    const matchType = !type || meta.TYPE === type;
+      if (!marker || !marker.meta) {
+        console.warn("⚠️ Skipping invalid marker:", marker);
+        return false; // remove bad entries
+      }
+      const meta = marker.meta || {};
 
-    const matchBlock =   !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
+      const matchType = !type || meta.TYPE === type;
 
-    const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
+      const matchBlock = !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
 
-    if (matchType && (matchBlock || matchOa)) {
-      marker.map = null;
-      console.log("removing marker:", marker.meta);
-      return false; // remove from array
-    }
+      const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
 
+      if (matchType && (matchBlock || matchOa)) {
+        marker.map = null;
+        console.log("removing marker:", marker.meta);
+        return false; // remove from array
+      }
+
+      return true;
+    });
+  } catch (e) {
+    console.error("Error in filter:", e);
     return true;
-  });
-   } catch (e) {
-          console.error("Error in filter:", e);
-          return true;
-        }
+  }
 
- console.log("After:", itemMarkers.length);
+  console.log("After:", itemMarkers.length);
 
   // 🔵 Paths
   try {
-  allPaths = allPaths.filter(path => {
+    allPaths = allPaths.filter(path => {
 
-    const meta = path.meta || {};
+      const meta = path.meta || {};
 
-    const matchType = !type || meta.TYPE === type;
+      const matchType = !type || meta.TYPE === type;
 
-    const matchBlock = !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
-    const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
+      const matchBlock = !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
+      const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
 
-    if (matchType && (matchBlock || matchOa)) {
-      path.setMap(null);
-      console.log("removing path:", path.meta);
-      return false;
-    
-    }
+      if (matchType && (matchBlock || matchOa)) {
+        path.setMap(null);
+        console.log("removing path:", path.meta);
+        return false;
 
-    return true;
-  });
+      }
+
+      return true;
+    });
   } catch (e) {
-          console.error("Error in filter:", e);
-          return true;
-        }
+    console.error("Error in filter:", e);
+    return true;
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-export { initMap, loadMapData, itemMarkers,loadHierarchy,loadTypeMap};
+export { initMap, loadMapData, itemMarkers, loadHierarchy, loadTypeMap };
