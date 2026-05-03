@@ -124,7 +124,9 @@ function generateFormTemplate(columns) {
         let field = {
             name: col.datafield,
             bind: col.datafield,
-            label: col.text || col.datafield
+            label: col.text || col.datafield,
+            validation: col.validation || null,
+            width: "100%"
         };
 
         // 🔥 Detect type
@@ -134,16 +136,8 @@ function generateFormTemplate(columns) {
                 field.type = "option";
                 field.component = 'jqxDropDownList';
                 field.options = col.options || []; // pass from config
-                field.init=col.init || function (component) {
-                };
-                // field.init=function (component) {
-
-                //     component.jqxDropDownList({
-                //         source: field.options ,
-                //         width: '100%',
-                //         autoDropDownHeight: true
-                //     });
-                // }
+                field.init=col.init || null;
+                
                 break;
 
             case "checkbox":

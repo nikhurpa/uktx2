@@ -112,7 +112,8 @@ TABLE_CONFIGS = {
 
                         component.jqxDropDownList({
                             source: Object.keys(OA),
-                            width: '100%'
+                            width: "100%",
+                            autoDropDownHeight: true
                         });
                         component.jqxDropDownList('selectIndex', 0 ); 
                         component.on('change', function (event) {
@@ -133,6 +134,7 @@ TABLE_CONFIGS = {
                 createeditor: function (row, value, editor) {
                     editor.jqxDropDownList({
                         source: OA_NAMES,
+                         width: "100%",   
                         autoDropDownHeight: true
                     });
                 },
@@ -153,7 +155,8 @@ TABLE_CONFIGS = {
 
                         component.jqxDropDownList({
                             source: OA["Almora"].Districts, // default to first OA's districts
-                            width: '100%'
+                            width: "100%",                            
+                             autoDropDownHeight: true
                         });
                         component.jqxDropDownList('selectIndex', 0 ); 
                         component.on('change', function (event) {
@@ -170,6 +173,7 @@ TABLE_CONFIGS = {
                             blockComp.jqxDropDownList('clearSelection');
                         });
                     },
+                 
                 createeditor: function (row, value, editor) {
 
                     let rowData = $("#grid").jqxGrid('getrowdata', row);
@@ -203,11 +207,12 @@ TABLE_CONFIGS = {
                 width: 120,
                 columntype: 'dropdownlist',
                 options: BLOCKS["Almora"], // f
-                 init: function (component) {
+                init: function (component) {
 
                         component.jqxDropDownList({
                             source: BLOCKS["Almora"], // default to first OA's districts
-                            width: '100%'
+                            width: "100%",   
+                             autoDropDownHeight: true
                         });
                         component.jqxDropDownList('selectIndex', 0 ); 
                     },
@@ -231,15 +236,16 @@ TABLE_CONFIGS = {
                             }
                         }  
             },
-            { text: 'CODE', datafield: 'CODE', width: 120 },
-            { text: 'TE_NAME', datafield: 'TE_NAME', width: 180 },
-            { text: 'LAT_LNG', datafield: 'LAT_LNG', width: 150 },
-            { text: 'ENTITY_CODE', datafield: 'ENTITY_CODE', width: 150 },
+            { text: 'CODE', datafield: 'CODE', width: 120 ,required: true},
+            { text: 'TE_NAME', datafield: 'TE_NAME', width:  120 ,required: true},
+            { text: 'LAT_LNG', datafield: 'LAT_LNG', width:  120 ,required: true},
+            { text: 'ENTITY_CODE', datafield: 'ENTITY_CODE', width:  120 ,required: true},
 
             {
                 text: 'LAT',
                 datafield: 'LAT',
-                width: 120,
+                width:  120,
+                required: true,    
                 columntype: 'numberinput',
                 validation: function (cell, value) {
 
@@ -253,7 +259,8 @@ TABLE_CONFIGS = {
             {
                 text: 'LNG',
                 datafield: 'LNG',
-                width: 120,
+                width:  120,
+                required: true,
                 columntype: 'numberinput',
                 validation: function (cell, value) {
 
@@ -265,29 +272,32 @@ TABLE_CONFIGS = {
                 }
             },
 
-            { text: 'RENTED', datafield: 'RENTED', width: 100 },
+            { text: 'RENTED', datafield: 'RENTED', width: 100,required: true },
             {
                 text: 'BHQ_STATUS',
                 datafield: 'BHQ_STATUS',
-                width: 120,
+                width:  120, 
+                required: true,
                 columntype: 'dropdownlist',
                 options: ["Active", "Inactive"],
+                
                 createeditor: function (row, value, editor) {
                     editor.jqxDropDownList({
-                        source: this.options,
+                        source: ["Active", "Inactive"],
                         autoDropDownHeight: true
                     });
                 }
             },
-            { text: 'PHASE', datafield: 'PHASE', width: 100 ,columntype: 'datetimeinput' },
-            { text: 'BACKHAUL', datafield: 'BACKHAUL', width: 120 },
+            { text: 'PHASE', datafield: 'PHASE', width:  120 ,columntype: 'datetimeinput' ,required: true },
+            { text: 'BACKHAUL', datafield: 'BACKHAUL', width:  120 ,required: true },
             {
                 text: 'RING',
                 datafield: 'RING',
-                width: 120,
+                required: true,
+                width:  120,
                 columntype: 'checkbox'
             },
-            { text: 'INFRA', datafield: 'INFRA', width: 100 }
+            { text: 'INFRA', datafield: 'INFRA', width:  120 ,required: true}
         ]
     },
     /////////////////////////////////////////////////////////////////////
@@ -296,59 +306,22 @@ TABLE_CONFIGS = {
         primaryKey: "CUSTOMER_ID",
 
         columns: [
-            { text: 'NUMBER', datafield: 'NUMBER', width: 120 },
-            { text: 'OLT_IP', datafield: 'OLT_IP', width: 140 },
-            { text: 'ONT_MAC_ID', datafield: 'ONT_MAC_ID', width: 160 },
-            { text: 'BNU_NAME', datafield: 'BNU_NAME', width: 160 },
-            { text: 'BNU_MOBILE', datafield: 'BNU_MOBILE', width: 130 },
-            { text: 'BNU_CODE', datafield: 'BNU_CODE', width: 120 },
-            { text: 'BNU_TYPE', datafield: 'BNU_TYPE', width: 120 },
-            { text: 'PAN_NUMBER', datafield: 'PAN_NUMBER', width: 140 },
-            { text: 'STATE', datafield: 'STATE', width: 120 },
-            { text: 'DISTRICT', datafield: 'DISTRICT', width: 140 },
-            { text: 'BLOCK', datafield: 'BLOCK', width: 140 },
-            { text: 'GP_NAME', datafield: 'GP_NAME', width: 160 },
-            { text: 'GP_CODE', datafield: 'GP_CODE', width: 120 }
+            { text: 'NUMBER', datafield: 'NUMBER', width:  120 },
+            { text: 'OLT_IP', datafield: 'OLT_IP', width:  120 },
+            { text: 'ONT_MAC_ID', datafield: 'ONT_MAC_ID', width:  120 },
+            { text: 'BNU_NAME', datafield: 'BNU_NAME', width:  120 },
+            { text: 'BNU_MOBILE', datafield: 'BNU_MOBILE', width:  120 },
+            { text: 'BNU_CODE', datafield: 'BNU_CODE', width:  120 },
+            { text: 'BNU_TYPE', datafield: 'BNU_TYPE', width:  120 },
+            { text: 'PAN_NUMBER', datafield: 'PAN_NUMBER', width:  120 },
+            { text: 'STATE', datafield: 'STATE', width:  120 },
+            { text: 'DISTRICT', datafield: 'DISTRICT', width:  120 },
+            { text: 'BLOCK', datafield: 'BLOCK', width:  120 },
+            { text: 'GP_NAME', datafield: 'GP_NAME', width:  120 },
+            { text: 'GP_CODE', datafield: 'GP_CODE', width:  120 }
         ]
     }
 
     // 👉 Add more tables here (same pattern)
 };
 
-function generateDistricts(){
-        formSelector = "#formContainer"
-        var fieldName = "OA";
-        
-        if (fieldName) {
-            // jqxForm stores the actual widget instance in the component's internal structure
-            // We use the jqxForm 'getComponentByName' method to find the specific widget
-            var component = $(formSelector).jqxForm('getComponentByName', fieldName);
-            
-            if (component) {
-                // Use the universal .val() method on the specific jqxWidget
-                let selectedOA = component.val();
-                let districts = OA[selectedOA].Districts || []  ;
-            }
-        } 
-        console.log("Generated Districts:", districts);
-        return districts;   
-}
-
-function generateBlocks(){
-        formSelector = "#formContainer"
-        var fieldName = "DISTRICT";
-        
-        if (fieldName) {
-            // jqxForm stores the actual widget instance in the component's internal structure
-            // We use the jqxForm 'getComponentByName' method to find the specific widget
-            var component = $(formSelector).jqxForm('getComponentByName', fieldName);
-            
-            if (component) {
-                // Use the universal .val() method on the specific jqxWidget
-                let district = component.val();
-                let blocks = BLOCKS[district] || []  ;
-            }
-        } 
-        console.log("Generated Blocks:", blocks);
-        return blocks;   
-}
