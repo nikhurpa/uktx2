@@ -16,9 +16,9 @@ $(document).ready(function () {
     $("#btnTable1").click(() => loadTable("fth"));
     $("#btnTable2").click(() => loadTable("block"));
    
-    $("#addBtn").click(() => {
-        $("#grid").jqxGrid('addrow', null, {});
-    });
+    // $("#addBtn").click(() => {
+    //     $("#grid").jqxGrid('addrow', null, {});
+    // });
 
     $("#deleteBtn").click(() => {
         let row = $("#grid").jqxGrid('getselectedrowindex');
@@ -57,7 +57,7 @@ $(document).ready(function () {
 
         $("#formContainer").jqxForm({
             template: formTemplate,
-            value: {}
+            // value: {}
         });
 
         $("#popupForm").jqxWindow('open');
@@ -65,9 +65,11 @@ $(document).ready(function () {
 
     $("#saveBtn").on("click", function () {
 
-        let data = $("#formContainer").jqxForm('getValue');
+        let data = $("#formContainer").jqxForm('val');
+           
 
         console.log("Form Data:", data);
+
         $.ajax({
             url: `api/api.php?action=insert&table=${currentTable}`,
             method: "POST",
