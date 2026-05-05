@@ -92,13 +92,7 @@ $(document).ready(function () {
 
     $("#saveBtn").on("click", function () {
 
-<<<<<<< HEAD
-        let data = $("#formContainer").jqxForm('val');
-           
-
-=======
         let data = getFormValues();
->>>>>>> 326f4af7c8bf35e159390595e57cd7c86bd98abc
         console.log("Form Data:", data);
 
         $.ajax({

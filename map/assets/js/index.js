@@ -76,13 +76,13 @@ Router.add("/kml", () => {
       await loadJS("./plugins/jqwidgets/jqxdata.js");
       await loadJS("./plugins/jqwidgets/jqxgrid.js");
       await loadJS("./plugins/jqwidgets/jqxgrid.filter.js");
-      await loadJS("./plugins/jqwidgets/jqxgrid.short.js");
+      await loadJS("./plugins/jqwidgets/jqxgrid.sort.js");
       await loadJS("./plugins/jqwidgets/jqxgrid.pager.js");
       await loadJS("./plugins/jqwidgets/jqxgrid.edit.js");
       await loadJS("./plugins/jqwidgets/jqxgrid.selection.js");
       await loadJS("./plugins/jqwidgets/jqxgrid.grouping.js");
       await loadJS("./plugins/jqwidgets/jqxgrid.aggregates.js");
-      await loadJS("./plugins/jqwidgets/jqxgrid.toolbar.js");
+      // await loadJS("./plugins/jqwidgets/jqxgrid.toolbar.js");
 
       await loadJS("./plugins/jqwidgets/jqxexport.js");
       await loadJS("./plugins/jqwidgets/jszip.min.js");
