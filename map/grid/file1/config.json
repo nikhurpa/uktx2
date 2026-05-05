@@ -1,0 +1,9 @@
+{
+    "table_name": "BLOCK",
+    "action": "update",
+    "sheet": "Sheet1",
+    "unique_id": "A",
+    "unique_id_field": "CODE",
+    "update_fields": ["PHASE", "BACKHAUL", "MEDIA"],
+    "values": ["B", "C", "D"]
+}

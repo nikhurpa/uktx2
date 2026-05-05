@@ -1,0 +1,9 @@
+const conf = {
+  table_name: "BLOCK",
+  action: "update",            // "insert" or "update"
+  sheet: "Sheet1",
+  unique_id: "A",              // Excel column letter whose value is read for matching
+  unique_id_field: "BLOCK_ID", // DB column name to match against (used in WHERE / INSERT)
+  update_fields: ["PHASE", "BACKHAUL", "MEDIA"],   // DB column names to write
+  values: ["B", "C", "D"]     // Excel column letters that hold the values
+};

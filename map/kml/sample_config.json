@@ -1,0 +1,13 @@
+{
+  "sheet": "Sheet1",
+  "latitude_column": "LAT",
+  "longitude_column": "LON",
+  "name_column": "NAME",
+  "info_columns": ["LAT", "LON", "STATUS"],
+  "marker_icon": "default",
+  "polyline": {
+    "path_columns": "PATH",
+    "color": "#4F46E5",
+    "width": 4
+  }
+}

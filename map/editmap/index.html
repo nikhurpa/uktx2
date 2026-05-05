@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS Web Editor</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div id="app-container">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fa-solid fa-earth-americas"></i> Places</h2>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Data Source Selection -->
+                <div class="panel">
+                    <h3>Data Sources</h3>
+                    <div class="action-buttons">
+                        <button id="btn-load-db" class="btn"><i class="fa-solid fa-database"></i> Load Database</button>
+                        <input type="file" id="kml-upload" accept=".kml" style="display: none;" />
+                        <button id="btn-upload-kml" class="btn" onclick="document.getElementById('kml-upload').click();"><i class="fa-solid fa-file-import"></i> Upload KML</button>
+                    </div>
+                </div>
+
+                <!-- Layer Tree -->
+                <div class="panel tree-panel">
+                    <h3><i class="fa-solid fa-layer-group"></i> Layer Manager</h3>
+                    <div id="layer-tree" class="tree-container">
+                        <!-- Tree items will be dynamically generated here -->
+                        <ul id="tree-root"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Area -->
+        <div id="main-content">
+            <!-- Toolbar -->
+            <div id="toolbar">
+                <div class="toolbar-group">
+                    <button class="tool-btn active" id="tool-pan" title="Pan Map"><i class="fa-solid fa-hand"></i></button>
+                    <button class="tool-btn" id="tool-add-point" title="Add Point"><i class="fa-solid fa-location-dot"></i></button>
+                    <button class="tool-btn" id="tool-add-polyline" title="Add Polyline"><i class="fa-solid fa-route"></i></button>
+                    <button class="tool-btn" id="tool-edit" title="Edit Features"><i class="fa-solid fa-pen-to-square"></i></button>
+                </div>
+                <div class="toolbar-group">
+                    <button class="tool-btn action" id="tool-save" title="Save Changes"><i class="fa-solid fa-floppy-disk"></i></button>
+                    <button class="tool-btn action" id="tool-export" title="Export KML"><i class="fa-solid fa-file-export"></i></button>
+                </div>
+                <div class="toolbar-info" id="toolbar-info">
+                    Select a tool to begin.
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="save-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Save Feature</h2>
+            <form id="save-form">
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="feature-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="feature-desc"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Save To:</label>
+                    <select id="save-destination">
+                        <option value="db">Database</option>
+                        <option value="kml">KML File</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/kml_parser.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataSync — Excel to Database</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface2: #f0f1f4;
+    --border: #dde0e6;
+    --accent: #1a6ef5;
+    --accent-light: #e8f0fe;
+    --accent2: #6b4fbb;
+    --warn: #d93025;
+    --warn-light: #fce8e6;
+    --success: #1e8e3e;
+    --success-light: #e6f4ea;
+    --text: #1f2128;
+    --muted: #80848f;
+    --mono: 'Space Mono', monospace;
+    --display: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    min-height: 100vh;
+  }
+
+  .app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .logo-icon::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: #fff;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+
+  .header-text h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .header-text h1 span { color: var(--accent); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 1px;
+  }
+
+  /* Panels */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-num {
+    width: 18px; height: 18px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-family: var(--display);
+  }
+
+  .panel-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .panel-body {
+    padding: 12px 14px;
+  }
+
+  /* Upload zones */
+  .upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 500px) {
+    .upload-grid { grid-template-columns: 1fr; }
+  }
+
+  .drop-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 6px;
+    padding: 14px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    background: var(--bg);
+  }
+
+  .drop-zone:hover, .drop-zone.over {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .drop-zone.filled {
+    border-style: solid;
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .drop-icon { font-size: 20px; margin-bottom: 5px; line-height: 1; }
+
+  .drop-label {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .drop-hint { color: var(--muted); font-size: 10px; }
+
+  .drop-filename {
+    margin-top: 5px;
+    font-size: 10px;
+    color: var(--accent);
+    word-break: break-all;
+    font-weight: 700;
+  }
+
+  input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Labels */
+  .config-label, .field-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  /* Textarea */
+  textarea {
+    width: 100%;
+    background: #fafbfc;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--accent2);
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 155px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+
+  /* DB grid */
+  .db-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+  }
+
+  @media (max-width: 500px) { .db-grid { grid-template-columns: 1fr; } }
+
+  .field-group { display: flex; flex-direction: column; }
+
+  input[type="text"], input[type="password"], input[type="number"] {
+    background: #fafbfc;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 10px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+  }
+
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+
+  /* Batch row */
+  .batch-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .batch-row .field-group { flex-direction: row; align-items: center; gap: 6px; }
+  .batch-row .field-label { margin-bottom: 0; white-space: nowrap; }
+  .batch-row input[type="number"] { width: 80px; }
+  .batch-hint { color: var(--muted); font-size: 10px; }
+
+  /* Run button */
+  .run-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+    margin-top: 10px;
+  }
+
+  .run-btn:hover:not(:disabled) { background: #1559cc; }
+  .run-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .run-btn.running { background: var(--warn); }
+  .btn-icon { font-size: 13px; }
+
+  /* Progress panel */
+  .progress-panel { display: none; }
+  .progress-panel.active { display: block; }
+
+  /* Progress bar */
+  .pct-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 10px;
+  }
+
+  .pct-label { color: var(--muted); }
+  .pct-val { font-family: var(--display); font-weight: 800; color: var(--accent); }
+
+  .progress-track {
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.3s ease;
+    width: 0%;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 30px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5));
+    animation: shimmer 1.2s infinite;
+  }
+
+  @keyframes shimmer { 0%,100%{opacity:0} 50%{opacity:1} }
+
+  /* Stats */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 500px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .stat-val.warn { color: var(--warn); }
+  .stat-val.purple { color: var(--accent2); }
+  .stat-val.muted { color: var(--muted); }
+  .stat-label { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+  /* Log */
+  .log-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+
+  .log-title { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+
+  .log-clear {
+    font-size: 10px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--mono);
+    text-decoration: underline;
+  }
+
+  .log-clear:hover { color: var(--text); }
+
+  #log {
+    background: #fafbfc;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    height: 160px;
+    overflow-y: auto;
+    padding: 8px 10px;
+    font-size: 10px;
+    line-height: 1.6;
+  }
+
+  #log::-webkit-scrollbar { width: 3px; }
+  #log::-webkit-scrollbar-track { background: transparent; }
+  #log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  .log-entry { display: flex; gap: 8px; padding: 1px 0; border-bottom: 1px solid var(--surface2); }
+  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-msg { color: var(--text); }
+  .log-msg.success { color: var(--success); }
+  .log-msg.error { color: var(--warn); }
+  .log-msg.info { color: var(--accent); }
+  .log-msg.warn { color: #b06000; }
+
+  /* Done banner */
+  .done-banner {
+    display: none;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .done-banner.visible {
+    display: block;
+    background: var(--success-light);
+    border: 1px solid #a8d5b5;
+    color: var(--success);
+  }
+
+  .done-banner.error-banner {
+    display: block;
+    background: var(--warn-light);
+    border: 1px solid #f5b8b3;
+    color: var(--warn);
+  }
+
+  /* Tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 99;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo-mark">
+      <div class="logo-icon"></div>
+      <span class="logo-label">DataSync</span>
+    </div>
+    <h1>Excel → <span>Database</span><br>Sync Engine</h1>
+    <p class="subtitle">Batch-process large Excel datasets with real-time feedback</p>
+  </header>
+
+  <!-- Step 1: Files -->
+  <div class="panel" data-label="01 — Files">
+    <div class="panel-body">
+      <div class="upload-grid">
+        <div>
+          <div class="config-label">Excel File (.xlsx / .xls)</div>
+          <div class="drop-zone" id="excelZone">
+            <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="handleFile(this,'excelZone','excelName')">
+            <div class="drop-icon">📊</div>
+            <div class="drop-label">Drop Excel File</div>
+            <div class="drop-hint">or click to browse</div>
+            <div class="drop-filename" id="excelName"></div>
+          </div>
+        </div>
+        <div>
+          <div class="config-label">Config File (.txt / .js) — optional</div>
+          <div class="drop-zone" id="confZone">
+            <input type="file" id="confFile" accept=".txt,.js" onchange="handleFile(this,'confZone','confName');loadConfFile(this)">
+            <div class="drop-icon">⚙️</div>
+            <div class="drop-label">Drop Config File</div>
+            <div class="drop-hint">or paste config below</div>
+            <div class="drop-filename" id="confName"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Config -->
+  <div class="panel" data-label="02 — Configuration">
+    <div class="panel-body">
+      <div class="config-label">Paste or edit your config object</div>
+      <textarea id="configText" spellcheck="false">const conf = {
+  table_name: "BLOCK",
+  action: "update",           // "insert" or "update"
+  sheet: "Sheet1",
+  unique_id: "A",             // Excel column letter whose value is used for matching
+  unique_id_field: "BLOCK_ID", // DB column name to match against (WHERE unique_id_field = ?)
+  update_fields: ["PHASE", "BACKHAUL", "MEDIA"],
+  values: ["B", "C", "D"]    // Excel column letters that supply the update values
+};</textarea>
+    </div>
+  </div>
+
+  <!-- Step 3: Database -->
+  <div class="panel" data-label="03 — Database Connection">
+    <div class="panel-body">
+      <div class="db-grid">
+        <div class="field-group">
+          <label class="field-label">Host</label>
+          <input type="text" id="dbHost" value="localhost" placeholder="localhost">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Port</label>
+          <input type="number" id="dbPort" value="3306" placeholder="3306">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Database Name</label>
+          <input type="text" id="dbName" placeholder="my_database">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Username</label>
+          <input type="text" id="dbUser" placeholder="root">
+        </div>
+        <div class="field-group" style="grid-column:1/-1">
+          <label class="field-label">Password</label>
+          <input type="password" id="dbPass" placeholder="••••••••">
+        </div>
+      </div>
+      <div class="batch-row">
+        <div class="field-group">
+          <label class="field-label">Batch Size</label>
+          <input type="number" id="batchSize" value="200" min="10" max="1000">
+        </div>
+        <span class="batch-hint">Rows per AJAX request (100–500 recommended)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Run Button -->
+  <button class="run-btn" id="runBtn" onclick="startSync()">
+    <span class="btn-icon">▶</span>
+    <span id="runLabel">Run Sync</span>
+  </button>
+
+  <!-- Progress -->
+  <div class="panel progress-panel" id="progressPanel" data-label="04 — Live Progress" style="margin-top:16px">
+    <div class="panel-body">
+      <div class="pct-row">
+        <span class="pct-label">Progress</span>
+        <span class="pct-val" id="pctVal">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box" data-tip="Total rows in Excel">
+          <div class="stat-val muted" id="statTotal">—</div>
+          <div class="stat-label">Total Rows</div>
+        </div>
+        <div class="stat-box" data-tip="Successfully processed">
+          <div class="stat-val" id="statDone">0</div>
+          <div class="stat-label">Processed</div>
+        </div>
+        <div class="stat-box" data-tip="Rows skipped or errored">
+          <div class="stat-val warn" id="statErr">0</div>
+          <div class="stat-label">Errors</div>
+        </div>
+        <div class="stat-box" data-tip="Elapsed time">
+          <div class="stat-val purple" id="statTime">0s</div>
+          <div class="stat-label">Elapsed</div>
+        </div>
+      </div>
+
+      <div class="log-header">
+        <span class="log-title">Activity Log</span>
+        <button class="log-clear" onclick="clearLog()">clear</button>
+      </div>
+      <div id="log"></div>
+
+      <div class="done-banner" id="doneBanner"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SheetJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+// ─── File handlers ────────────────────────────────────────────────────────────
+function handleFile(input, zoneId, nameId) {
+  const zone = document.getElementById(zoneId);
+  const nameEl = document.getElementById(nameId);
+  if (input.files[0]) {
+    zone.classList.add('filled');
+    nameEl.textContent = input.files[0].name;
+  }
+}
+
+function loadConfFile(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => { document.getElementById('configText').value = e.target.result; };
+  reader.readAsText(input.files[0]);
+}
+
+// Drag-over style
+['excelZone','confZone'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('over'));
+  el.addEventListener('drop', () => el.classList.remove('over'));
+});
+
+// ─── Config parser ────────────────────────────────────────────────────────────
+function parseConfig(src) {
+  // Strip "const conf =" wrapper and evaluate safely
+  let cleaned = src.replace(/\/\/[^\n]*/g, '').trim();
+  cleaned = cleaned.replace(/^const\s+\w+\s*=\s*/, '').replace(/;$/, '');
+  try {
+    return Function('"use strict"; return (' + cleaned + ')')();
+  } catch(e) {
+    throw new Error('Config parse error: ' + e.message);
+  }
+}
+
+// ─── Logging ──────────────────────────────────────────────────────────────────
+function log(msg, type='') {
+  const el = document.getElementById('log');
+  const now = new Date().toLocaleTimeString('en-US', {hour12:false});
+  const row = document.createElement('div');
+  row.className = 'log-entry';
+  row.innerHTML = `<span class="log-time">${now}</span><span class="log-msg ${type}">${msg}</span>`;
+  el.appendChild(row);
+  el.scrollTop = el.scrollHeight;
+}
+
+function clearLog() { document.getElementById('log').innerHTML = ''; }
+
+// ─── Progress helpers ─────────────────────────────────────────────────────────
+let startTime, timerInterval, totalRows = 0, processedRows = 0, errorRows = 0;
+
+function setProgress(done, total) {
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('pctVal').textContent = pct + '%';
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statErr').textContent = errorRows;
+}
+
+function startTimer() {
+  startTime = Date.now();
+  timerInterval = setInterval(() => {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    document.getElementById('statTime').textContent = s + 's';
+  }, 500);
+}
+
+function stopTimer() { clearInterval(timerInterval); }
+
+// ─── Main sync ────────────────────────────────────────────────────────────────
+async function startSync() {
+  const excelInput = document.getElementById('excelFile');
+  if (!excelInput.files[0]) { alert('Please select an Excel file.'); return; }
+
+  // Parse config
+  let conf;
+  try {
+    conf = parseConfig(document.getElementById('configText').value);
+  } catch(e) { alert(e.message); return; }
+
+  // Gather DB settings
+  const db = {
+    host: document.getElementById('dbHost').value.trim(),
+    port: document.getElementById('dbPort').value.trim(),
+    name: document.getElementById('dbName').value.trim(),
+    user: document.getElementById('dbUser').value.trim(),
+    pass: document.getElementById('dbPass').value,
+  };
+  if (!db.name || !db.user) { alert('Please fill in DB name and username.'); return; }
+
+  const batchSize = parseInt(document.getElementById('batchSize').value) || 200;
+
+  // Read Excel client-side
+  log('Reading Excel file…', 'info');
+  let rows;
+  try {
+    rows = await readExcel(excelInput.files[0], conf.sheet);
+  } catch(e) { log('Excel read error: ' + e.message, 'error'); return; }
+
+  if (!rows.length) { log('No data rows found in sheet.', 'warn'); return; }
+
+  totalRows = rows.length;
+  processedRows = 0;
+  errorRows = 0;
+
+  document.getElementById('statTotal').textContent = totalRows;
+  document.getElementById('progressPanel').classList.add('active');
+  document.getElementById('doneBanner').className = 'done-banner';
+  document.getElementById('doneBanner').textContent = '';
+
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.classList.add('running');
+  document.getElementById('runLabel').textContent = 'Syncing…';
+
+  startTimer();
+  log(`Starting sync: ${totalRows} rows, batch=${batchSize}, action=${conf.action}, uid_col=${conf.unique_id}→${conf.unique_id_field}`, 'info');
+
+  // Slice into batches
+  const batches = [];
+  for (let i = 0; i < rows.length; i += batchSize) {
+    batches.push(rows.slice(i, i + batchSize));
+  }
+
+  // Process batches sequentially
+  let batchNum = 0;
+  for (const batch of batches) {
+    batchNum++;
+    try {
+      const res = await sendBatch(batch, conf, db, batchNum, batches.length);
+      processedRows += res.processed;
+      errorRows += res.errors;
+      setProgress(processedRows, totalRows);
+      const errInfo = res.errors > 0 ? `, ${res.errors} errors` : '';
+      log(`Batch ${batchNum}/${batches.length}: ${res.processed} processed${errInfo}`,
+          res.errors > 0 ? 'warn' : 'success');
+      if (res.error_details) {
+        res.error_details.forEach(e => log('  ⚠ ' + e, 'error'));
+      }
+    } catch(e) {
+      log(`Batch ${batchNum} failed: ${e.message}`, 'error');
+      errorRows += batch.length;
+      setProgress(processedRows, totalRows);
+    }
+  }
+
+  stopTimer();
+  btn.disabled = false;
+  btn.classList.remove('running');
+  document.getElementById('runLabel').textContent = 'Run Sync';
+
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const banner = document.getElementById('doneBanner');
+
+  if (errorRows === 0) {
+    log(`✓ Complete — ${processedRows} rows synced in ${elapsed}s`, 'success');
+    banner.textContent = `✓ Sync complete — ${processedRows} rows processed in ${elapsed}s`;
+    banner.className = 'done-banner visible';
+  } else {
+    log(`⚠ Done with errors — ${processedRows} ok, ${errorRows} failed, ${elapsed}s`, 'warn');
+    banner.textContent = `⚠ Done with errors — ${processedRows} ok, ${errorRows} errors`;
+    banner.className = 'done-banner visible error-banner';
+  }
+}
+
+// ─── Read Excel via SheetJS ───────────────────────────────────────────────────
+function readExcel(file, sheetName) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+        const sheet = wb.Sheets[sheetName] || wb.Sheets[wb.SheetNames[0]];
+        if (!sheet) throw new Error('Sheet not found: ' + sheetName);
+        // Get raw rows as arrays (header = false for column-letter access)
+        const data = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+        // Remove header row (row 0 is headers)
+        const headers = data[0] || [];
+        const rows = data.slice(1).filter(r => r.some(c => c !== ''));
+        resolve({headers, rows});
+      } catch(e) { reject(e); }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ─── Send batch to PHP ────────────────────────────────────────────────────────
+async function sendBatch(batch, conf, db, batchNum, totalBatches) {
+  const payload = {
+    rows: batch.rows !== undefined ? batch : batch, // rows are arrays
+    conf,
+    db,
+    batch_num: batchNum,
+    total_batches: totalBatches
+  };
+
+  // batch here is {headers, rows} object merged from readExcel
+  // Actually batch is just a slice of rows array - we pass headers via conf reference
+  const fd = new FormData();
+  fd.append('payload', JSON.stringify({
+    headers: batch.headers || [],
+    rows: batch.rows || batch,
+    conf,
+    db,
+    batch_num: batchNum
+  }));
+
+  const resp = await fetch('sync.php', { method: 'POST', body: fd });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  const json = await resp.json();
+  if (json.fatal) throw new Error(json.fatal);
+  return json;
+}
+</script>
+
+<!-- Fix batch call to carry headers properly -->
+<script>
+// Patch: override startSync batch dispatch to carry headers
+const _origSendBatch = sendBatch;
+window.sendBatch = async function(batchRows, conf, db, batchNum, totalBatches) {
+  const fd = new FormData();
+  fd.append('payload', JSON.stringify({
+    rows: batchRows,
+    conf,
+    db,
+    batch_num: batchNum,
+    total_batches: totalBatches
+  }));
+  const resp = await fetch('sync.php', { method: 'POST', body: fd });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  const json = await resp.json();
+  if (json.fatal) throw new Error(json.fatal);
+  return json;
+};
+
+// Also patch readExcel to return flat rows (arrays), not object
+window.readExcel = function(file, sheetName) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+        const wsName = Object.keys(wb.Sheets).find(n => n === sheetName) || wb.SheetNames[0];
+        const sheet = wb.Sheets[wsName];
+        if (!sheet) throw new Error('Sheet not found');
+        const data = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+        const rows = data.slice(1).filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
+        resolve(rows);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('File read error'));
+    reader.readAsArrayBuffer(file);
+  });
+};
+</script>
+</body>
+</html>

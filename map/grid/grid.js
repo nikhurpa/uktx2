@@ -1,9 +1,5 @@
-let currentTable = "";
-
-
-$(document).ready(function () {
-
-    var customStyle = {
+function initGrid(){
+var customStyle = {
         // Defines a header style
         'headerStyle': {
             'font-name': 'Arial',
@@ -84,7 +80,7 @@ $(document).ready(function () {
 
         $("#formContainer").jqxForm({
             template: formTemplate,
-            // value: {}
+            value: {}
         });
 
         $("#popupForm").jqxWindow('open');
@@ -92,13 +88,7 @@ $(document).ready(function () {
 
     $("#saveBtn").on("click", function () {
 
-<<<<<<< HEAD
-        let data = $("#formContainer").jqxForm('val');
-           
-
-=======
         let data = getFormValues();
->>>>>>> 326f4af7c8bf35e159390595e57cd7c86bd98abc
         console.log("Form Data:", data);
 
         $.ajax({
@@ -120,9 +110,9 @@ $(document).ready(function () {
      $("#excelExport").click(function () {
          $("#grid").jqxGrid('exportdata', 'xlsx', 'report',true, null, true, null, customStyle);          
      });
-    
 
-});
+
+}
 
 
 function getFormValues(formSelector = "#formContainer") {

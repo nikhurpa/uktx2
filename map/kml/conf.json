@@ -1,0 +1,37 @@
+{
+    "sheet": "Data",
+    "latitude_column": "LAT",
+    "longitude_column": "LONG",
+    "name_column": "LOCATION",
+    "info_columns": [
+        "SSA",
+        "OLT IP",
+        "TYPE",
+        "Port",
+        "TIP CODE",
+        "VENDOR",
+        "MAKE",
+        "Location of OLTEs (Private/BSNL)",
+        "Power Backup (Avl / Not Avl)",
+        "Name of nearest Exch / Site from which OLT Media Extended",
+        "Connectivity (Ring / Linear)",
+        "BBC",
+        "LAT",
+        "LONG",
+        "U/R",
+        "BNU OLTE (Y/N)",
+        "Migrated to MANN (Y/N)",
+        "MAAN Node",
+        "IN_DATE",
+        "BNG_IP",
+        "Avl",
+        "Reboot",
+        "Connection"
+    ],
+    "marker_icon": "default",
+    "polyline": {
+        "path_columns": "PATH",
+        "color": "#4F46E5",
+        "width": 4
+    }
+}
