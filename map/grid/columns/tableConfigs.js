@@ -111,7 +111,7 @@ TABLE_CONFIGS = {
                 init: function (component) {
 
                         component.jqxDropDownList({
-                            source: Object.keys(OA),
+                            source: OA_NAMES, // Object.keys(OA),
                             width: "100%",
                             autoDropDownHeight: true
                         });
