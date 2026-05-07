@@ -1,5 +1,5 @@
 import { addDiv } from "./loader.js";
-import { initGrid } from "../../grid/myjqxgrid.js";
+import { initGrid } from "./myjqxgrid.js";
 
 function initRightPanel() {
 
@@ -61,7 +61,7 @@ addGeoDataMapperElements();
     } else if (clickedItem === 2) {
         // initGrid();
     //   map.getDiv().style.display = 'none';
-      document.getElementById("map").style.display = 'none';
+      document.getElementById("map").style.display = 'block';
         document.getElementById("main").style.display = 'none';
     //   document.getElementById("dataTable").style.display = 'block';
     } else if (clickedItem === 3) {

@@ -30,18 +30,18 @@ async function loadTypeMap() {
   }
 }
 
-window.addEventListener("load", function () {
+// window.addEventListener("load", function () {
+//   console.log("jqxform1")
+//  loadHierarchy();
+//  loadTypeMap();
 
- loadHierarchy();
- loadTypeMap();
-
-});
+// });
 
 
 ////////////////////////   FORM PART ////////////////////////////////////////////////////
 
-document.addEventListener('DOMContentLoaded', () => {
-
+function initForm (){
+ console.log("jqxform2")
 var template = [{
     type: 'label',
     bind: 'radiobuttonValue_out',
@@ -589,7 +589,7 @@ var template = [{
     };
   }
 
-});
+};
   ////////////////////////// MAP PART //////////////////////////////////////////
 
   
@@ -1143,3 +1143,4 @@ var template = [{
     }
   }
   
+export {initForm,loadHierarchy,loadTypeMap,loadMapData}

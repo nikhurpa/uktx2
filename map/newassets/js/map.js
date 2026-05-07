@@ -46,6 +46,8 @@ function initMap() {
 }
 
 
-window.addEventListener("load", function () {
- initMap()
-});
+// window.addEventListener("load", function () {
+//  initMap()
+// });
+
+export {initMap}
