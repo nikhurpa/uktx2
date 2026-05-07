@@ -1,8 +1,8 @@
 import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
 import { loadStyles, loadTopDependencies ,loadBottomDependencies,loadAllModules } from "./scripts_css.js";
 import { initRightPanel } from "./rightpanel.js";
-import { initForm ,loadHierarchy,loadMapData,loadTypeMap} from "./myjqxform.js";
-import { initMap } from "./map.js";
+// import { initForm ,loadHierarchy,loadMapData,loadTypeMap} from "./myjqxform.js";
+// import { initMap } from "./map.js";
 
 // import { ribbon, initializeRibbon } from "./jqxRibbon.js";
 // import { tab, initializeTabs } from "./jqxTab.js";
@@ -32,15 +32,16 @@ Router.add("/main", () => {
         await loadStyles();
         await loadTopDependencies();
         await loadAllModules();
-        
+
         addDiv({ id: "main", parent: document.body });
         addDiv({ id: "map", parent: document.body });
         initRightPanel();
         await loadBottomDependencies();
         loadHierarchy()
         loadTypeMap()
-        initForm();
-        initMap();
+        // initForm();
+        window.initMap();
+        window.initForm();
 
       console.log("All resources loaded");
     } catch (err) {

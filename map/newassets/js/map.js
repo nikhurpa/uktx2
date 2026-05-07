@@ -5,7 +5,7 @@ let map;
 let featureGroup; // Layer group to hold all drawn and loaded features
 let baseLayers = {};
 
-function initMap() {
+window.initMap = function() {
     // Initialize map
     map = L.map('map', {
         center: [20.5937, 78.9629], // Center of India, arbitrary default
@@ -50,4 +50,3 @@ function initMap() {
 //  initMap()
 // });
 
-export {initMap}

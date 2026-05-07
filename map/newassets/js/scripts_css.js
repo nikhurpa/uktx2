@@ -3,14 +3,14 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
     // "https://code.jquery.com/jquery-3.6.4.min.js",
     "./newassets/js/jquery-3.6.4.min.js",
 
-    // "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
-     "./newassets/js/xlsx.full.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
+    //  "./newassets/js/xlsx.full.min.js",
     // "./assets/js/jqverticaltoolbar.js",
     "./newassets/js/jqrightpanel.js",
    
      // Leaflet Map
-    //  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
-     "./newassets/js/leaflet.js",
+     "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+    //  "./newassets/js/leaflet.js",
     //  "./editmap/js/kml_parser.js",
     //  "./editmap/js/editor.js",
     //  "./editmap/js/app.js",
@@ -60,26 +60,26 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
   
   const scriptsB = [
      "./newassets/js/columns/tableConfigs.js" ,
-    //  "./newassets/js/map.js",
+     "./newassets/js/map.js",
      "./newassets/js/kml.js",
-    //  "./newassets/js/myjqxform.js",
+     "./newassets/js/myjqxform.js",
 
   ]
 
 
   const modules =[
-"./newassets/js/map.js",
-"./newassets/js/myjqxform.js",
+// "./newassets/js/map.js",
+// "./newassets/js/myjqxform.js",
   ]
   const cssFiles = [
     // External Libraries & Frameworks
-    // "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
     // "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
-    // "https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css",
+    "https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css",
 
-    "./newassets/css/bootstrap.min.css",
-    "./newassets/css/all.min.css",
-    "./newassets/css/ionicons.min.css",
+    // "./newassets/css/bootstrap.min.css",
+    // "./newassets/css/all.min.css",
+    // "./newassets/css/ionicons.min.css",
 
 
     "./grid/bulkupload.css",

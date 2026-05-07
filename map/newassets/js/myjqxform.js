@@ -40,7 +40,9 @@ async function loadTypeMap() {
 
 ////////////////////////   FORM PART ////////////////////////////////////////////////////
 
-function initForm (){
+window.initForm = function (){
+ loadHierarchy();
+ loadTypeMap();
  console.log("jqxform2")
 var template = [{
     type: 'label',
@@ -1143,4 +1145,3 @@ var template = [{
     }
   }
   
-export {initForm,loadHierarchy,loadTypeMap,loadMapData}
