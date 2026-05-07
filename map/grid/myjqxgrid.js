@@ -36,7 +36,7 @@ var customStyle = {
 
     $("#grid").jqxGrid({
         width: "100%",
-        height: 500,
+        height: 450,
         editable: true,
         pageable: true,
         sortable: true,
@@ -137,7 +137,7 @@ var customStyle = {
     
     $("#excelExport").jqxButton();
      $("#excelExport").click(function () {
-         $("#grid").jqxGrid('exportdata', 'xlsx', 'report',true, null, true, null, customStyle);          
+          $("#grid").jqxGrid('exportdata', 'xlsx', 'report',true, null, true, null, customStyle);          
      });
 
 
@@ -315,7 +315,7 @@ function loadTable(tableName) {
      $("#grid").one('bindingcomplete', function () {
      $("#grid").jqxGrid({
                 width: "100%",
-                height: 500,
+                heigh:450,
                 editable: true,
                 pageable: true,
                 sortable: true,
@@ -407,7 +407,7 @@ function addBulkUploadElements(){
     innerHTML:  `
                 <div class="app">
 
-                <header>
+              <!--  <header>
                     <div class="logo-mark">
                     <div class="logo-icon"></div>
                     <span class="logo-label">DataSync</span>
@@ -415,6 +415,7 @@ function addBulkUploadElements(){
                     <h1>Excel → <span>Database</span><br>Sync Engine</h1>
                     <p class="subtitle">Batch-process large Excel datasets with real-time feedback</p>
                 </header>
+                -->
 
                 <!-- Step 1: Files -->
                 <div class="panel" data-label="01 — Files">
@@ -445,7 +446,7 @@ function addBulkUploadElements(){
                 </div>
 
                 <!-- Step 2: Config -->
-                <div class="panel" data-label="02 — Configuration">
+                <div class="panel  d-none" data-label="02 — Configuration">
                     <div class="panel-body">
                     <div class="config-label">Paste or edit your config object</div>
                     <textarea id="configText" spellcheck="false">const conf = {
@@ -464,7 +465,9 @@ function addBulkUploadElements(){
                 <div class="panel" data-label="03 — Database Connection">
                     <div class="panel-body">
                     <div class="db-grid">
+                    <!--
                         <div class="field-group">
+                        
                         <label class="field-label">Host</label>
                         <input type="text" id="dbHost" value="localhost" placeholder="localhost">
                         </div>
@@ -483,15 +486,16 @@ function addBulkUploadElements(){
                         <div class="field-group" style="grid-column:1/-1">
                         <label class="field-label">Password</label>
                         <input type="password" id="dbPass" placeholder="••••••••">
-                        </div>
+                        </div>-->
                     </div>
-                    <div class="batch-row">
+                    <!-- <div class="batch-row"> -->
                         <div class="field-group">
                         <label class="field-label">Batch Size</label>
                         <input type="number" id="batchSize" value="200" min="10" max="1000">
-                        </div>
                         <span class="batch-hint">Rows per AJAX request (100–500 recommended)</span>
-                    </div>
+                        </div>
+                        
+                    <!-- </div> -->
                     </div>
                 </div>
 
@@ -541,8 +545,7 @@ function addBulkUploadElements(){
                     </div>
                 </div>
 
-                </div>
-                
+                </div
                 `   });
 }
 

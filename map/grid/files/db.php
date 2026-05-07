@@ -1,7 +1,7 @@
 <?php
 // db.php - update with your DB credentials
 $DB_HOST = 'localhost';
-$DB_NAME = 'TRANSMISSION1';
+$DB_NAME = 'ukcfa';
 $DB_USER = 'uktx';
 $DB_PASS = 'uktx123';
 $DB_CHARSET = 'utf8mb4';
@@ -13,7 +13,7 @@ $username = 'uktx';
 $password = 'uktx123';
 
 
-$dsn = "mysql:host=$DB_HOST;port=$DB_PORT;dbname=$DB_NAME;charset=$DB_CHARSET";
+$dsn = "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=$DB_CHARSET";
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

@@ -79,15 +79,17 @@ async function startSync() {
     conf = parseConfig(document.getElementById('configText').value);
   } catch(e) { alert(e.message); return; }
 
-  // Gather DB settings
-  const db = {
-    host: document.getElementById('dbHost').value.trim(),
-    port: document.getElementById('dbPort').value.trim(),
-    name: document.getElementById('dbName').value.trim(),
-    user: document.getElementById('dbUser').value.trim(),
-    pass: document.getElementById('dbPass').value,
-  };
-  if (!db.name || !db.user) { alert('Please fill in DB name and username.'); return; }
+
+  const db ={};
+  // // Gather DB settings
+  // const db = {
+  //   host: document.getElementById('dbHost').value.trim(),
+  //   port: document.getElementById('dbPort').value.trim(),
+  //   name: document.getElementById('dbName').value.trim(),
+  //   user: document.getElementById('dbUser').value.trim(),
+  //   pass: document.getElementById('dbPass').value,
+  // };
+  // if (!db.name || !db.user) { alert('Please fill in DB name and username.'); return; }
 
   const batchSize = parseInt(document.getElementById('batchSize').value) || 200;
 
@@ -191,7 +193,7 @@ async function sendBatch(batch, conf, db, batchNum, totalBatches) {
   const payload = {
     rows: batch.rows !== undefined ? batch : batch, // rows are arrays
     conf,
-    db,
+    // db,
     batch_num: batchNum,
     total_batches: totalBatches
   };
@@ -203,11 +205,11 @@ async function sendBatch(batch, conf, db, batchNum, totalBatches) {
     headers: batch.headers || [],
     rows: batch.rows || batch,
     conf,
-    db,
+    // db,
     batch_num: batchNum
   }));
 
-  const resp = await fetch('./grid/files/sync.php', { method: 'POST', body: fd });
+  const resp = await fetch('./newassets/php/sync.php', { method: 'POST', body: fd });
   if (!resp.ok) throw new Error('HTTP ' + resp.status);
   const json = await resp.json();
   if (json.fatal) throw new Error(json.fatal);
@@ -224,7 +226,7 @@ window.sendBatch = async function(batchRows, conf, db, batchNum, totalBatches) {
   fd.append('payload', JSON.stringify({
     rows: batchRows,
     conf,
-    db,
+    // db,
     batch_num: batchNum,
     total_batches: totalBatches
   }));

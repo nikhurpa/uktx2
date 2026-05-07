@@ -10,7 +10,7 @@ header('X-Content-Type-Options: nosniff');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 require_once 'db.php';
-// $pdo = getPDO();
+
 function json_out(array $data): void {
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
@@ -319,3 +319,4 @@ function insert_row_by_row(PDO $pdo, string $table, string $uid_col, array $fiel
     }
     return compact('processed', 'errors', 'error_details');
 }
+
