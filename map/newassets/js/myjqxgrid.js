@@ -36,7 +36,7 @@ var customStyle = {
 
     $("#grid").jqxGrid({
         width: "100%",
-        height: 450,
+        height: 480,
         editable: true,
         pageable: true,
         sortable: true,
@@ -315,7 +315,7 @@ function loadTable(tableName) {
      $("#grid").one('bindingcomplete', function () {
      $("#grid").jqxGrid({
                 width: "100%",
-                height:450,
+                height:480,
                 editable: true,
                 pageable: true,
                 sortable: true,
@@ -339,7 +339,7 @@ function addElement(){
 const mainDiv = document.getElementById("main");
 mainDiv.innerHTML = ""; // Clear existing content
 addDiv({ id: "gridmain", parent: mainDiv, 
-    innerHTML: `<div class="container mt-4">
+    innerHTML: `<div class="container pt-4">
   <div class="card shadow">
     <!-- Top Header: Multiple Buttons -->
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -403,7 +403,7 @@ function addBulkUploadElements(){
     const mainDiv = document.getElementById("gridContainer");
     mainDiv.innerHTML = ""; // Clear existing content
 
- addDiv({ id: "gridmain", parent: mainDiv, 
+ addDiv({ id: "upload", parent: mainDiv, 
     innerHTML:  `
                 <div class="app">
 

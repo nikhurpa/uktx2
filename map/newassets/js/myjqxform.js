@@ -96,16 +96,8 @@ var template = [{
       width: '150px',
       // required: true,
       component: 'jqxDropDownList',
-      options: [
-        { label: 'Dehradun', value: 'Dehradun' },
-
-      ],
-      // init: function (component) {
-      // component.jqxDropDownList({
-      //     checkboxes: true,
-      //     displayMember: 'label',
-      //     valueMember: 'value'
-      // }); }   
+      options: [],
+   
     },
 
     {
@@ -119,19 +111,9 @@ var template = [{
       width: '150px',
       // required: true,
       component: 'jqxDropDownList',
-      options: [
-        { label: 'Raipur', value: 'Raipur' },
-        { label: 'Haldwani', value: 'Haldwani' },
-        { label: 'Hawalbag', value: 'Hawalbag' },
-        { label: 'Laksar', value: 'Laksar' }
-      ],
+      options: [],
 
-      // init: function (component) {
-      // component.jqxDropDownList({
-      //     checkboxes: true,
-      //     displayMember: 'label',
-      //     valueMember: 'value'
-      // });} 
+     
     },
     {
       type: 'label',
@@ -142,7 +124,6 @@ var template = [{
 
 
   );
-
 
 
   var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"];
@@ -315,45 +296,62 @@ var template = [{
   });
 
 
-  /// main form rendered
+  /// --------main form element change-------------
   $("#elementForm").on('formDataChange', function (event) {
 
     let prev = event.args.previousValue;
     let curr = event.args.value;
     let changedField = Object.keys(curr).find(k => prev[k] !== curr[k]);
-
+   
     let chel = changedField?.replace('chk', '');
+
+
+
     // Check if Checkbox field is changed and belongs to OA or Element
     if (OA.includes(chel)) {
+        
+       
 
-      let isChecked = curr[changedField];
-      console.log("✅ OA checkbox changed:", chel, ",Checked:", isChecked);
-      // 🔥 Step 2: count checked OA checkboxes
-      let checkedOAs = OA.filter(chel => curr["chk" + chel] === true);
-      console.log("Checked OAs:", checkedOAs);
-      // 🔥 Step 3: apply rule that if >2 OA is selected then disable others
-      if (checkedOAs.length >= 2) {
-
+        let checkedOAs =[]
         OA.forEach(item => {
-          if (!checkedOAs.includes(item)) {
-            // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
-            $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
-            $("#label_" + OAelementId[item]).css("pointer-events", "none");  // Disable click on label
+          if ($("#" + OAelementId[item]).jqxCheckBox('checked')) {
+               checkedOAs.push(item) ;
           }
         });
+        // console.log("✅ Checked OAs:",  checkedOAs);
+        let isChecked = curr[changedField];
 
-      } else {
-        // enable all
-        OA.forEach(item => {
-          // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
-          $("#" + OAelementId[item]).jqxCheckBox({ disabled: false }); // Enable Checkbokes
-          $("#label_" + OAelementId[item]).css("pointer-events", "auto"); // Enablee click on label
-        });
-      }
+        console.log("✅ Checked OAs:",  checkedOAs, ",changed Field:", chel, ",Checked:", isChecked);
+
+    //   // 🔥 Step 2: count checked OA checkboxes
+    //   let checkedOAs = OA.filter(chel => curr["chk" + chel] === true);
+    //   console.log("Checked OAs:", checkedOAs);
+
+      // 🔥 Step 3: apply rule that if >2 OA is selected then disable others
+      
+    //   if (checkedOAs.length >= 2) {
+
+    //     OA.forEach(item => {
+    //       if (!checkedOAs.includes(item)) {
+    //         // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
+    //         $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
+    //         $("#label_" + OAelementId[item]).css("pointer-events", "none");  // Disable click on label
+    //       }
+    //     });
+
+    //   } else {
+    //     // enable all
+    //     OA.forEach(item => {
+    //       // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
+    //       $("#" + OAelementId[item]).jqxCheckBox({ disabled: false }); // Enable Checkbokes
+    //       $("#label_" + OAelementId[item]).css("pointer-events", "auto"); // Enablee click on label
+    //     });
+    //   }
 
       // load or unload distrct based on OA selection
       const districts = Object.keys(hierarchy[OANames[chel]] || {}).sort();
-      console.log("Districts for selected OAs:", districts);
+
+     
       isChecked ? districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district)) : districts.forEach(district => $("#el_elementForm4").jqxDropDownList('removeItem', district));
       if (isChecked) {
         districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district))

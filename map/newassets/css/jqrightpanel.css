@@ -42,3 +42,8 @@
 .rsp-panel.open .rsp-handle::before {
   content: "❯❯";
 }
+
+#main {
+   transition: margin-right 0.3s;
+}
+

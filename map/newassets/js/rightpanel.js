@@ -38,7 +38,7 @@ function initRightPanel() {
 
 addGeoDataMapperElements();
 
-  $("#right-panel").rightPullPanel({ width: 300, topOffset: 60 });
+  $("#right-panel").rightPullPanel({ width: 300, topOffset: 60 , contentSelector: "#main"});
   $('#jqxtabs').jqxTabs({ width: 295, height: '100%' });
   $('#jqxtabs').on('tabclick', function (event) {
     var clickedItem = event.args.item;
