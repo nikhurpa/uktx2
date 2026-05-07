@@ -328,25 +328,25 @@ var template = [{
     //   console.log("Checked OAs:", checkedOAs);
 
       // 🔥 Step 3: apply rule that if >2 OA is selected then disable others
-      
-    //   if (checkedOAs.length >= 2) {
 
-    //     OA.forEach(item => {
-    //       if (!checkedOAs.includes(item)) {
-    //         // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
-    //         $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
-    //         $("#label_" + OAelementId[item]).css("pointer-events", "none");  // Disable click on label
-    //       }
-    //     });
+      if (checkedOAs.length >= 2) {
 
-    //   } else {
-    //     // enable all
-    //     OA.forEach(item => {
-    //       // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
-    //       $("#" + OAelementId[item]).jqxCheckBox({ disabled: false }); // Enable Checkbokes
-    //       $("#label_" + OAelementId[item]).css("pointer-events", "auto"); // Enablee click on label
-    //     });
-    //   }
+        OA.forEach(item => {
+          if (!checkedOAs.includes(item)) {
+            // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
+            $("#" + OAelementId[item]).jqxCheckBox({ disabled: true });
+            $("#label_" + OAelementId[item]).css("pointer-events", "none");  // Disable click on label
+          }
+        });
+
+      } else {
+        // enable all
+        OA.forEach(item => {
+          // var chk =  $("#elementForm").jqxForm('getComponentByName', "chk" + item);
+          $("#" + OAelementId[item]).jqxCheckBox({ disabled: false }); // Enable Checkbokes
+          $("#label_" + OAelementId[item]).css("pointer-events", "auto"); // Enablee click on label
+        });
+      }
 
       // load or unload distrct based on OA selection
       const districts = Object.keys(hierarchy[OANames[chel]] || {}).sort();
