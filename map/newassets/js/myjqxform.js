@@ -30,12 +30,12 @@ async function loadTypeMap() {
   }
 }
 
-window.onload = function () {
+window.addEventListener("load", function () {
 
  loadHierarchy();
  loadTypeMap();
 
-};
+});
 
 
 ////////////////////////   FORM PART ////////////////////////////////////////////////////

@@ -46,6 +46,6 @@ function initMap() {
 }
 
 
-window.onload = function () {
+window.addEventListener("load", function () {
  initMap()
-};
+});
