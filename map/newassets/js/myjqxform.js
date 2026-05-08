@@ -394,7 +394,7 @@ var template = [{
 
       isChecked ? $('#' + btnElementId[chel]).jqxButton({ disabled: false }) : $('#' + btnElementId[chel]).jqxButton({ disabled: true });
       /// hear some code to load or remove MapElemets
-      
+
     }
 
 
@@ -465,7 +465,6 @@ var template = [{
 
     return results;
   }
-
 
   var subFormElementsValue = {
     GP: [true, false, true, false],
