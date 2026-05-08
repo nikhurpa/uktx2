@@ -352,29 +352,19 @@ var template = [{
       const districts = Object.keys(hierarchy[OANames[chel]] || {}).sort();
 
      
-      isChecked ? districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district)) : districts.forEach(district => $("#el_elementForm4").jqxDropDownList('removeItem', district));
-      if (isChecked) {
-        districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district))
-        oaTypeList.forEach(type => { loadMapData({ type: type, block: null, oa: OANames[chel] }) });
-      }
-      else {
+    //   isChecked ? districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district)) : districts.forEach(district => $("#el_elementForm4").jqxDropDownList('removeItem', district));
+    
+        if (isChecked) {
+            districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district))
+            oaTypeList.forEach(type => { loadMapData({ type: type, block: null, oa: OANames[chel] }) });
+            } else {
+            oaTypeList.forEach(type => { removeMapData({ type: type, block: null, oa: OANames[chel] }) });
+            districts.forEach(district => {$("#el_elementForm4").jqxDropDownList('removeItem', district);
 
-
-        oaTypeList.forEach(type => { removeMapData({ type: type, block: null, oa: OANames[chel] }) });
-
-
-        districts.forEach(district => {
-          $("#el_elementForm4").jqxDropDownList('removeItem', district);
-          const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []);
-          console.log("Blocks for selected Districts:", blocks);
-          blocks.forEach(block => {
-            $("#el_elementForm5").jqxDropDownList('removeItem', block);
-          });
-
-          blocks.forEach(block => {
-
-            blockTypeList.forEach(type => { removeMapData({ type, block }) });
-          });
+            const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []);
+            console.log("Blocks for selected Districts:", blocks);
+            blocks.forEach(block => {$("#el_elementForm5").jqxDropDownList('removeItem', block); });
+            blocks.forEach(block => {blockTypeList.forEach(type => { removeMapData({ type, block }) }); });
 
         });
       }
@@ -663,58 +653,91 @@ var template = [{
   }
   
   
+//   function createMarker(item, type) {
+//     const pos = parseLatLng(item[typeMap[type].latLongField]);
+//     // 🔥 VALIDATION CHECK
+//     if (!isValidLatLng(pos)) {
+//       console.log("❌ Invalid LatLng:", item.present_lat_long, item);
+//       return; // ⛔ skip marker
+//     }
+  
+  
+//     const color = getStatusColor(item[typeMap[type].statusField]);
+  
+//     const { wrapper, text } = getSvgElement(
+//       type,
+//       color,
+//       item[typeMap[type].nameField]
+//     );
+  
+//     const itemmarker = new AdvancedMarkerElement({
+//       position: pos,
+//       map,
+//       title: item[typeMap[type].nameField],
+//       content: wrapper,
+  
+//     });
+  
+//     itemmarker.meta = buildMetadata(item, type);
+  
+//     itemMarkers.push(itemmarker);
+  
+//     // store for zoom control
+//     labeledMarkers.push({ itemmarker, text });
+  
+//     itemMarkers.push(itemmarker);
+  
+//     map.addListener("zoom_changed", () => {
+//       const zoom = map.getZoom();
+  
+//       labeledMarkers.forEach(obj => {
+//         if (zoom >= 13) {
+//           obj.text.style.display = "block"; // show name
+//         } else {
+//           obj.text.style.display = "none";  // hide name
+//         }
+//       });
+//     });
+  
+//     bounds.extend(pos);
+//     itemmarker.addListener("gmp-click", () => {
+//       infoWindow.setContent(buildInfoWindow(item, type));
+//       infoWindow.open(map, itemmarker);
+//     });
+//   }
+
   function createMarker(item, type) {
-    const pos = parseLatLng(item[typeMap[type].latLongField]);
-    // 🔥 VALIDATION CHECK
-    if (!isValidLatLng(pos)) {
-      console.log("❌ Invalid LatLng:", item.present_lat_long, item);
-      return; // ⛔ skip marker
-    }
-  
-  
-    const color = getStatusColor(item[typeMap[type].statusField]);
-  
-    const { wrapper, text } = getSvgElement(
-      type,
-      color,
-      item[typeMap[type].nameField]
-    );
-  
-    const itemmarker = new AdvancedMarkerElement({
-      position: pos,
-      map,
-      title: item[typeMap[type].nameField],
-      content: wrapper,
-  
-    });
-  
-    itemmarker.meta = buildMetadata(item, type);
-  
-    itemMarkers.push(itemmarker);
-  
-    // store for zoom control
-    labeledMarkers.push({ itemmarker, text });
-  
-    itemMarkers.push(itemmarker);
-  
-    map.addListener("zoom_changed", () => {
-      const zoom = map.getZoom();
-  
-      labeledMarkers.forEach(obj => {
-        if (zoom >= 13) {
-          obj.text.style.display = "block"; // show name
-        } else {
-          obj.text.style.display = "none";  // hide name
-        }
-      });
-    });
-  
-    bounds.extend(pos);
-    itemmarker.addListener("gmp-click", () => {
-      infoWindow.setContent(buildInfoWindow(item, type));
-      infoWindow.open(map, itemmarker);
-    });
-  }
+
+  const pos = parseLatLng(item[typeMap[type].latLongField]);
+
+  if (!isValidLatLng(pos)) return;
+
+  const color = getStatusColor(item[typeMap[type].statusField]);
+
+  const { wrapper } = getSvgElement(
+    type,
+    color,
+    item[typeMap[type].nameField]
+  );
+
+  const icon = L.divIcon({
+    html: wrapper.outerHTML,
+    className: '',
+    iconSize: [30, 30]
+  });
+
+  const marker = L.marker([pos.lat, pos.lng], {
+    icon: icon
+  }).addTo(map);
+
+  marker.meta = buildMetadata(item, type);
+
+  marker.bindPopup(buildInfoWindow(item, type));
+
+  itemMarkers.push(marker);
+
+  bounds.extend([pos.lat, pos.lng]);
+}
   
   function buildMetadata(item, type) {
     const fields = typeMap[type]?.metadataFields || [];
@@ -1011,65 +1034,87 @@ var template = [{
   }
   
   
+//   function createPath(item, type) {
+  
+//     const path = decodePath(item[typeMap[type].encodedPathField]);
+  
+//     // 🔥 VALIDATION
+//     if (!path || path.length < 2) {
+//       console.log("❌ Invalid Path:", item[typeMap[type].encodedPathField], item);
+//       return;
+//     }
+//     const plusSymbol = {
+//       // SVG path for a '+' sign
+//       path: "M 0,-1 L 0,1 M -1,0 L 1,0",
+//       strokeOpacity: 1,
+//       scale: 3,           // Adjust this to make the '+' larger or smaller
+//       strokeWeight: 2,
+//       strokeColor: "#000802"
+//     };
+//     const polyline = new google.maps.Polyline({
+//       path: path,
+//       map: map,
+//       strokeColor: getPathColor(item[typeMap[type].ownerField]),
+//       // strokeColor: "#555", // Base track bed color
+//       strokeOpacity: 0.7,
+//       strokeWeight: 3,
+//       // icons: [
+//       //   {
+//       //     icon: plusSymbol,
+//       //     offset: "0",
+//       //     repeat: "15px",  // Adjust distance between sleepers
+//       //   },
+//       // ],
+//     });
+  
+//     if (item[typeMap[type].statusField] != "UP") {
+//       polyline.setOptions({
+//         icons: [
+//           {
+//             icon: plusSymbol,
+//             offset: "0",
+//             repeat: "15px",  // Adjust distance between sleepers
+//           },
+//         ],
+//       });
+//     } // 🔥 visually differentiate non-UP paths
+  
+//     // 🔥 metadata
+//     polyline.meta = buildMetadata(item, type);
+//     path.forEach(p => bounds.extend(p));
+//     allPaths.push(polyline);
+  
+//     // click event
+//     polyline.addListener("click", (e) => {
+//       infoWindow.setContent(buildInfoWindow(item, type));
+//       infoWindow.setPosition(e.latLng);
+//       infoWindow.open(map);
+//     });
+//   }
   function createPath(item, type) {
+
+  const decoded = polyline.decode(
+    item[typeMap[type].encodedPathField]
+  );
+
+  if (!decoded || decoded.length < 2) return;
+
+  const poly = L.polyline(decoded, {
+    color: getPathColor(item[typeMap[type].ownerField]),
+    weight: 3,
+    opacity: 0.7
+  }).addTo(map);
+
+  poly.meta = buildMetadata(item, type);
+
+  poly.bindPopup(buildInfoWindow(item, type));
+
+  allPaths.push(poly);
+
+  bounds.extend(decoded);
+}
   
-    const path = decodePath(item[typeMap[type].encodedPathField]);
-  
-    // 🔥 VALIDATION
-    if (!path || path.length < 2) {
-      console.log("❌ Invalid Path:", item[typeMap[type].encodedPathField], item);
-      return;
-    }
-    const plusSymbol = {
-      // SVG path for a '+' sign
-      path: "M 0,-1 L 0,1 M -1,0 L 1,0",
-      strokeOpacity: 1,
-      scale: 3,           // Adjust this to make the '+' larger or smaller
-      strokeWeight: 2,
-      strokeColor: "#000802"
-    };
-    const polyline = new google.maps.Polyline({
-      path: path,
-      map: map,
-      strokeColor: getPathColor(item[typeMap[type].ownerField]),
-      // strokeColor: "#555", // Base track bed color
-      strokeOpacity: 0.7,
-      strokeWeight: 3,
-      // icons: [
-      //   {
-      //     icon: plusSymbol,
-      //     offset: "0",
-      //     repeat: "15px",  // Adjust distance between sleepers
-      //   },
-      // ],
-    });
-  
-    if (item[typeMap[type].statusField] != "UP") {
-      polyline.setOptions({
-        icons: [
-          {
-            icon: plusSymbol,
-            offset: "0",
-            repeat: "15px",  // Adjust distance between sleepers
-          },
-        ],
-      });
-    } // 🔥 visually differentiate non-UP paths
-  
-    // 🔥 metadata
-    polyline.meta = buildMetadata(item, type);
-    path.forEach(p => bounds.extend(p));
-    allPaths.push(polyline);
-  
-    // click event
-    polyline.addListener("click", (e) => {
-      infoWindow.setContent(buildInfoWindow(item, type));
-      infoWindow.setPosition(e.latLng);
-      infoWindow.open(map);
-    });
-  }
-  
-  function getPathColor(owner) {
+function getPathColor(owner) {
     switch (owner) {
       case 'CIRCLE': return '#ebe014';   // green
       case 'CNTX': return '#fc0808';   // green
@@ -1103,7 +1148,8 @@ var template = [{
         const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
   
         if (matchType && (matchBlock || matchOa)) {
-          marker.map = null;
+        //   marker.map = null;
+          map.removeLayer(marker);
           console.log("removing marker:", marker.meta);
           return false; // remove from array
         }

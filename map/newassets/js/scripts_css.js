@@ -10,6 +10,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
    
      // Leaflet Map
      "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+     "https://unpkg.com/@mapbox/polyline",
     //  "./newassets/js/leaflet.js",
     //  "./editmap/js/kml_parser.js",
     //  "./editmap/js/editor.js",
