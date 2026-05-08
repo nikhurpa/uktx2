@@ -120,11 +120,26 @@ var template = [{
 
   );
 
+  // var btnElementId = [] el_elementForm7_1', 'el_elementForm7_3', 'el_elementForm7_5',  'el_elementForm8_1',  'el_elementForm8_3',  'el_elementForm8_5', SAS: 'el_elementForm9_1', SCH: 'el_elementForm9_3', PHC: 'el_elementForm9_5' };
+  var btnElements = Object.keys(typeMap) // ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"];
+  var btnElementId = Object.fromEntries(
+    btnElements.map((k, i) => [
+        k,
+        `el_elementForm${7 + Math.floor(i / 3)}_${(i % 3) * 2 + 1}`
+    ])
+);
 
-  var btnElements = ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"];
-  var btnElementId = { GP: 'el_elementForm7_1', VIL: 'el_elementForm7_3', BHQ: 'el_elementForm7_5', OFC: 'el_elementForm8_1', BTS: 'el_elementForm8_3', OLT: 'el_elementForm8_5', SAS: 'el_elementForm9_1', SCH: 'el_elementForm9_3', PHC: 'el_elementForm9_5' };
-  var btnValues = [false, false, true, false, true, false, true, false, true];
-  var btnValueObj = { GP: false, VIL: false, BHQ: true, OFC: false, BTS: true, OLT: false, SAS: true, SCH: false, PHC: true };
+  // var btnElementId = { GP: 'el_elementForm7_1', VIL: 'el_elementForm7_3', BHQ: 'el_elementForm7_5', OFC: 'el_elementForm8_1', BTS: 'el_elementForm8_3', OLT: 'el_elementForm8_5', SAS: 'el_elementForm9_1', SCH: 'el_elementForm9_3', PHC: 'el_elementForm9_5' };
+  
+  var btnValues = Object.values(typeMap).map(v => v.chkstatus);    // [false, false, true, false, true, false, true, false, true];
+  
+  var btnValueObj = Object.fromEntries(
+        Object.entries(typeMap).map(([key, value]) => [
+            key,
+            value.chkstatus
+        ])
+    );  
+ //{ GP: false, VIL: false, BHQ: true, OFC: false, BTS: true, OLT: false, SAS: true, SCH: false, PHC: true };
 
 
 
@@ -391,10 +406,9 @@ var template = [{
 
       let isChecked = curr[changedField];
       console.log("✅ Element checkbox changed:", chel, ",Checked:", isChecked);
-
       isChecked ? $('#' + btnElementId[chel]).jqxButton({ disabled: false }) : $('#' + btnElementId[chel]).jqxButton({ disabled: true });
-      /// hear some code to load or remove MapElemets
-
+      isChecked ? typeMap[clel].chkStatus=true :  typeMap[clel].chkStatus=false ;
+     
     }
 
 
@@ -405,19 +419,25 @@ var template = [{
   // let blockValue= {Raipur:{District:"Dehradun",OA:"DN",GP:{UP:true,DN:false,M90:true,L90:false },VIL:{COV:true,NCO:false},
   // BHQ:{PH1:true,ABP:false},OFC:{BN:true,CIR:false,CNTX:false},BTS:{"2G":true,"3G":false,"4G":false,UP:true,DN:},OLT:{},SAS:{},SCH:{},PHC:{}}};
   // SUB FORM CREATION for every element button                     
-  var subFormTemplate = { GP: [], VIL: [], BHQ: [], OFC: [], BTS: [], OLT: [], SAS: [], SCH: [], PHC: [] };
 
-  var subFormElements = {
-    GP: ['UP', 'DN', 'M90', 'L90', 'COV', 'NCO'],
-    VIL: ['COV', 'NCO'],
-    BHQ: ['PH1', 'ABP'],
-    OFC: ['BN', 'CIR', 'CNTX', 'VTL'],
-    BTS: ['2G', '3G', '4G', 'UP', 'DN', 'ML', 'OFC', "SAT"],
-    OLT: ['TIP', 'BNU', 'BAF'],
-    SAS: ['UP', 'DN', 'M90'],
-    SCH: ['WK', 'NWK', 'FES', 'UP', 'DN'],
-    PHC: ['WK', 'NWK', 'FES', 'UP', 'DN ']
-  };
+
+  var subFormTemplate = Object.fromEntries( Object.keys(typeMap).map(key => [key, []]));
+
+  var subFormElements = Object.fromEntries(
+      Object.entries(typeMap).map(([key, value]) => [
+          key,
+          [...value.subFields]
+      ])
+  );
+
+  var subFormElementsValue = Object.fromEntries(
+      Object.entries(typeMap).map(([key, value]) => [
+          key,
+          [...value.subFieldsStatus]
+      ])
+  );
+
+
 
   // make object for storing subform values for each block
   let blockElementsValue = createBlockValueData()
@@ -466,18 +486,7 @@ var template = [{
     return results;
   }
 
-  var subFormElementsValue = {
-    GP: [true, false, true, false],
-    VIL: [true, false],
-    BHQ: [true, false],
-    OFC: [true, false, false, false],
-    BTS: [true, false, false, true, false, false, false, true],
-    OLT: [true, false, false],
-    SAS: [true, false, false],
-    SCH: [true, false, false],
-    PHC: [true, false, false]
-  };
-
+ 
   let initialElementValue = {};
 
   Object.keys(subFormElementsValue).forEach(group => {
@@ -554,8 +563,12 @@ var template = [{
       var previousValue = args.previousValue;
 
       var formattedChanges = getFormattedChanges(args);
-      applyFilters(formattedChanges);
-
+     
+      console.log(formattedChanges);
+      let indx = typeMap[formattedChanges.type].subFields.indexOf(formattedChanges.subField, 0);
+      typeMap[formattedChanges.type].subFieldsStatus[indx]=formattedChanges.subFieldStatus;
+      console.log(typeMap)
+      // applyFilters(formattedChanges);
       // for (var i in newValue) {
       //   // var newInputValue = newValue[i]; // current input's value.
       //   // var previousInputValue = previousValue[i]; // previous input's value.
@@ -574,6 +587,7 @@ var template = [{
     let type = typeKey;
 
     let changes = [];
+    let changedField=[]
 
     Object.keys(value).forEach(key => {
       if (key.startsWith('chk')) {
@@ -583,7 +597,7 @@ var template = [{
         if (oldVal !== newVal) {
           // Extract suffix (remove 'chk' + type)
           let suffix = key.replace('chk' + type, '');
-
+          changedField.push({name:suffix,value:newVal});
           changes.push(`${suffix}=${newVal.toString().toUpperCase()}`);
         }
       }
@@ -591,6 +605,8 @@ var template = [{
 
     return {
       type: type,
+      subField:changedField[0].name, 
+      subFieldStatus:changedField[0].value,
       changes: `(${changes.join(', ')})`
     };
   }
@@ -1144,7 +1160,12 @@ function removeMapData({ type = null, block = null, oa = null } = {}) {
 }
   
 function loadMapLayers(block) {
-  mapLayers.forEach(type=> {loadMapData({type:type,block:block,oa:""});});
+  mapLayers.forEach(type=> {
+
+  typeMap[type].chkstatus?loadMapData({type:type,block:block,oa:""}):null;
+  
+  
+  });
 }
   
 function removeMapLayers(block) {
