@@ -353,22 +353,37 @@ var template = [{
       const districts = Object.keys(hierarchy[OANames[chel]] || {}).sort();
 
      
-    //   isChecked ? districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district)) : districts.forEach(district => $("#el_elementForm4").jqxDropDownList('removeItem', district));
+      // isChecked ? districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district)) : districts.forEach(district => $("#el_elementForm4").jqxDropDownList('removeItem', district));
     
         if (isChecked) {
-            districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district))
+            console.log("Districts for selected Districts:", districts);
+            districts.forEach(district => {
+              $("#el_elementForm4").jqxDropDownList('addItem', district)
+              // const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []);
+              // console.log("Blocks for selected Districts:", blocks);
+              // blocks.forEach(block => {$("#el_elementForm5").jqxDropDownList('addItem', block); });
+              
+            
+            });
+
             // oaTypeList.forEach(type => { loadMapData({ type: type, block: null, oa: OANames[chel] }) });
+
             } else {
             // oaTypeList.forEach(type => { removeMapData({ type: type, block: null, oa: OANames[chel] }) });
-            districts.forEach(district => {$("#el_elementForm4").jqxDropDownList('removeItem', district);
+            console.log("Districts for selected Districts:", districts);
+            districts.forEach(district => {
+                $("#el_elementForm4").jqxDropDownList('removeItem', district)
+                const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []);
+                console.log("Blocks for selected Districts:", blocks);
+                blocks.forEach(block => {$("#el_elementForm5").jqxDropDownList('removeItem', block); });
+                
+              
+              });
 
-            const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []);
-            console.log("Blocks for selected Districts:", blocks);
-            blocks.forEach(block => {$("#el_elementForm5").jqxDropDownList('removeItem', block); });
             // blocks.forEach(block => {blockTypeList.forEach(type => { removeMapData({ type, block }) }); });
 
-        });
-      }
+      
+         }
 
     }
 
@@ -635,22 +650,35 @@ var template = [{
     //  console.log(typeMap);
   
     try {
-      const res = await fetch('assets/php/data.php', {
+      const res = await fetch('newassets/php/data.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: type, block: block ?? "", oa: oa ?? "" })
       });
-      console.log(typeMap[type].latLongField);
+      // console.log(typeMap[type].latLongField);
       const data = await res.json();
       
       data.forEach(item => {
   
-       item[typeMap[type].latLongField] != "" ? createMarker(item, type) : null;
+       item[typeMap[type].latField] != "" &&  item[typeMap[type].longField]? createMarker(item, type) : null;
        item[typeMap[type].encodedPathField] != "" ? createPath(item, type) : null;
   
       });
   
-      map.fitBounds(bounds);
+      // map.fitBounds(bounds);
+
+      if (bounds.isValid()) {
+
+          map.fitBounds(bounds, {
+              padding: [20, 20]
+          });
+
+      } else {
+
+          console.log("Bounds not valid");
+      }
+
+
   
     } catch (err) {
       console.error(err);
@@ -713,7 +741,12 @@ var template = [{
 
   function createMarker(item, type) {
 
-  const pos = parseLatLng(item[typeMap[type].latLongField]);
+  // const pos = parseLatLng(item[typeMap[type].latLongField]);
+  let lat=parseFloat(item[typeMap[type].latField])
+  let lng=parseFloat(item[typeMap[type].longField])
+
+  const pos = { lat:lat,lng:lng};
+  console.log(pos)
 
   if (!isValidLatLng(pos)) return;
 

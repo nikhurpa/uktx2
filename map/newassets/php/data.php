@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-$conn = new mysqli("localhost", "uktx", "uktx123", "bnuknd");
+$conn = new mysqli("localhost", "uktx", "uktx123", "ukcfa");
 
 $input = json_decode(file_get_contents("php://input"), true);
 

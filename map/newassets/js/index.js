@@ -43,7 +43,11 @@ Router.add("/main", () => {
         // initForm();
         window.initMap();
         window.initForm();
-        await loadMapData({type:"BTS",block:"Hawalbag",oa:"Almora"});
+        // await loadMapData({type:"BTS",block:"Hawalbag",oa:"Almora"});
+        
+        // await loadMapData({type:"GP",block:"Takula",oa:"Almora"});
+        // await loadMapData({type:"OLT",block:"Takula",oa:"Almora"});
+        // await loadMapData({type:"OFC",block:"",oa:"Almora"});
 
 
    

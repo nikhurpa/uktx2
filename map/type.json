@@ -1,31 +1,37 @@
 {
   "GP": {
     "table": "gp",
-    "statusField": "GP_STATUS",
+    "statusField": "STATUS",
     "nameField": "GP_NAME",
-    "latLongField": "present_lat_long",
+    "latLongField": "LAT_LONG",
+    "latField":"LAT",
+    "longField":"LONG",
     "encodedPathField": "",
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["GP_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "GP_STATUS", "present_lat_long"]
+    "metadataFields": ["GP_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "GP_STATUS", "LAT_LONG"]
   },
   "VIL": {
     "table": "vil",
     "statusField": "VIL_STATUS",
     "nameField": "VIL_NAME",
-    "latLongField": "present_lat_long",
+    "latLongField": "LAT_LONG",
+     "latField":"LAT",
+    "longField":"LONG",
     "encodedPathField": "",
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["VIL_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "VIL_STATUS", "present_lat_long"]
+    "metadataFields": ["VIL_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "VIL_STATUS", "LAT_LONG"]
   },
   "BHQ": {
     "table": "block",
     "statusField": "BHQ_STATUS",
     "nameField": "BLOCK_NAME",
     "latLongField": "LAT_LNG",
+    "latField":"LAT",
+    "longField":"LONG",
     "encodedPathField": "",
     "oaField": "OA",
     "districtField": "DISTRICT",
@@ -37,6 +43,8 @@
     "statusField": "STATUS",
     "nameField": "NAME",
     "latLongField": "",
+    "latField":"LAT",
+    "longField":"LONG",
     "encodedPathField": "GOOGLE_ENCODED_POLYLINE",
     "oaField": "OA",
     "districtField": "",
@@ -48,6 +56,8 @@
     "table": "bts",
     "statusField": "STATUS",
     "nameField": "TSP_SITE_NAME",
+    "latField":"LAT",
+    "longField":"LONG",    
     "latLongField": "LOCATION_LATLONG",
     "encodedPathField": "",
     "oaField": "OA",
@@ -60,6 +70,8 @@
     "statusField": "STATUS",
     "nameField": "LOCATION",
     "latLongField": "LOCATION_LATLONG",
+    "latField":"LAT",
+    "longField":"LONG",    
     "encodedPathField": "",
     "oaField": "OA",
     "districtField": "",
@@ -70,33 +82,39 @@
     "table": "sas",
     "statusField": "SAS_STATUS",
     "nameField": "SAS_NAME",
-    "latLongField": "present_lat_long",
+    "latLongField": "LAT_LONG",
+    "latField":"LAT",
+    "longField":"LONG",
     "encodedPathField": "",
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["SAS_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SAS_STATUS", "present_lat_long"]
+    "metadataFields": ["SAS_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SAS_STATUS", "LAT_LONG"]
   },
   "SCH": {
     "table": "sch",
     "statusField": "SCH_STATUS",
     "nameField": "SCH_NAME",
-    "latLongField": "present_lat_long",
+    "latLongField": "LAT_LONG",
+    "latField":"LAT",
+    "longField":"LONG",
     "encodedPathField": "",
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["SCH_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SCH_STATUS", "present_lat_long"]
+    "metadataFields": ["SCH_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SCH_STATUS", "LAT_LONG"]
   },
   "PHC": {
     "table": "phc",
     "statusField": "PHC_STATUS",
     "nameField": "PHC_NAME",
-    "latLongField": "present_lat_long",
+    "latLongField": "LAT_LONG",
+    "latField":"LAT",
+    "longField":"LONG",
     "encodedPathField": "",
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["PHC_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "PHC_STATUS", "present_lat_long"]
+    "metadataFields": ["PHC_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "PHC_STATUS", "LAT_LONG"]
   }
 }
