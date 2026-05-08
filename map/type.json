@@ -10,7 +10,11 @@
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["GP_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "GP_STATUS", "LAT_LONG"]
+    "metadataFields": ["GP_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "GP_STATUS", "LAT_LONG"],
+    "chkstatus":false,
+    "subFields":["UP", "DN", "M90", "L90", "COV", "NCO"],
+    "subFieldsStatus":[true, false, true, false,true,false],
+    "sql":""
   },
   "VIL": {
     "table": "vil",
@@ -23,7 +27,12 @@
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["VIL_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "VIL_STATUS", "LAT_LONG"]
+    "metadataFields": ["VIL_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "VIL_STATUS", "LAT_LONG"],
+    "chkstatus":false,
+    "subFields":["COV", "NCO"],
+    "subFieldsStatus":[true, false],
+    "sql":""
+
   },
   "BHQ": {
     "table": "block",
@@ -36,7 +45,12 @@
     "oaField": "OA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["BLOCK","CODE", "DISTRICT", "OA", "PHASE", "BHQ_STATUS", "LAT_LONG","TE_NAME","ENTITY_CODE"]
+    "metadataFields": ["BLOCK","CODE", "DISTRICT", "OA", "PHASE", "BHQ_STATUS", "LAT_LONG","TE_NAME","ENTITY_CODE"],
+    "subFields":["PH1", "ABP"],
+    "subFieldsStatus":[true, false],
+    "sql":""  
+  
+  
   },
   "OFC": {
     "table": "ofc",
@@ -50,7 +64,11 @@
     "districtField": "",
     "blockField": "",
     "ownerField": "OWNER",
-    "metadataFields": ["ID","NAME", "OWNER", "START_LAT", "START_LNG", "END_LAT", "END_LNG", "STATUS"]
+    "metadataFields": ["ID","NAME", "OWNER", "START_LAT", "START_LNG", "END_LAT", "END_LNG", "STATUS"],
+    "subFields": ["BN", "CIR", "CNTX", "VTL"],
+    "subFieldsStatus":[true, false,true, false,false],
+    "sql":""  
+
   },
   "BTS": {
     "table": "bts",
@@ -63,7 +81,11 @@
     "oaField": "OA",
     "districtField": "DISTRICT",
     "blockField": "",
-    "metadataFields": ["TSP_SITE_NAME", "DISTRICT", "FULL_SITE_ADDRESS", "OA", "TSP_SITE_ID", "STATUS", "LOCATION_LATLONG","TOWER_HEIGHT"]
+    "metadataFields": ["TSP_SITE_NAME", "DISTRICT", "FULL_SITE_ADDRESS", "OA", "TSP_SITE_ID", "STATUS", "LOCATION_LATLONG","TOWER_HEIGHT"],
+    "subFields": ["2G", "3G", "4G", "UP", "DN", "ML", "OFC", "SAT"],
+    "subFieldsStatus":[true, false,true, false,false,true,true,true],
+    "sql":""  
+
   },
   "OLT": {
     "table": "olt",
@@ -76,7 +98,11 @@
     "oaField": "OA",
     "districtField": "",
     "blockField": "",
-    "metadataFields": ["LOCATION", "OA", "OLT_TYPE", "OLT_IP", "WKG_CONN", "BBC", "VENDOR","STATUS", "LOCATION_LATLONG","BNU_OLTE_YN"]
+    "metadataFields": ["LOCATION", "OA", "OLT_TYPE", "OLT_IP", "WKG_CONN", "BBC", "VENDOR","STATUS", "LOCATION_LATLONG","BNU_OLTE_YN"],
+    "subFields": ["TIP", "BNU", "BAF", "BBN", "BSN"],
+    "subFieldsStatus":[true, false,true, false,false],
+    "sql":"" 
+  
   },
   "SAS": {
     "table": "sas",
@@ -89,7 +115,11 @@
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["SAS_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SAS_STATUS", "LAT_LONG"]
+    "metadataFields": ["SAS_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SAS_STATUS", "LAT_LONG"],
+    "subFields": ["UP", "DN"],
+    "subFieldsStatus":[true, false],
+    "sql":"" 
+
   },
   "SCH": {
     "table": "sch",
@@ -102,7 +132,10 @@
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["SCH_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SCH_STATUS", "LAT_LONG"]
+    "metadataFields": ["SCH_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SCH_STATUS", "LAT_LONG"],
+    "subFields": ["WK", "NWK", "FES", "UP","DN"],
+    "subFieldsStatus":[true, false,true, false,false],
+    "sql":"" 
   },
   "PHC": {
     "table": "phc",
@@ -115,6 +148,9 @@
     "oaField": "SSA",
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
-    "metadataFields": ["PHC_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "PHC_STATUS", "LAT_LONG"]
+    "metadataFields": ["PHC_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "PHC_STATUS", "LAT_LONG"],
+    "subFields": ["WK", "NWK", "FES", "UP","DN"],
+    "subFieldsStatus":[true, false,true, false,false],
+    "sql":"" 
   }
 }

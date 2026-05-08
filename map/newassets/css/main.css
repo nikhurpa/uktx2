@@ -9,3 +9,35 @@ body {
     height: 100%;
     width: 100%;
 }
+
+#elementForm {
+    font-size: 12px;
+}
+
+#elementForm .jqx-widget {
+    font-size: 12px !important;
+}
+
+#elementForm input {
+    height: 24px !important;
+}
+
+#elementForm .jqx-form-table td {
+    padding: 2px 4px !important;
+}
+
+#elementSubForm {
+    font-size: 12px;
+}
+
+#elementSubForm .jqx-widget {
+    font-size: 12px !important;
+}
+
+#elementSubForm input {
+    height: 24px !important;
+}
+
+#elementSubForm .jqx-form-table td {
+    padding: 2px 4px !important;
+}
