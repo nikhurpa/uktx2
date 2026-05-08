@@ -37,17 +37,16 @@ Router.add("/main", () => {
         addDiv({ id: "map", parent: document.body });
         initRightPanel();
         await loadBottomDependencies();
-        loadHierarchy()
-        loadTypeMap()
+        await loadHierarchy()
+        await loadTypeMap()
+  
         // initForm();
         window.initMap();
         window.initForm();
+        await loadMapData({type:"BTS",block:"Hawalbag",oa:"Almora"});
 
 
-      //  loadMapData("GP","Hawalbag","Almora");
-      // loadMapData("OLT","Hawalbag","Almora");
-      loadMapData("BTS","Hawalbag","Almora");
-      // loadMapData("OFC","","Almora");
+   
 
       console.log("All resources loaded");
     } catch (err) {

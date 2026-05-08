@@ -3,15 +3,15 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
     // "https://code.jquery.com/jquery-3.6.4.min.js",
     "./newassets/js/jquery-3.6.4.min.js",
 
-    "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
-    //  "./newassets/js/xlsx.full.min.js",
+    // "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
+     "./newassets/js/xlsx.full.min.js",
     // "./assets/js/jqverticaltoolbar.js",
     "./newassets/js/jqrightpanel.js",
    
      // Leaflet Map
-     "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+    //  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
      "https://unpkg.com/@mapbox/polyline",
-    //  "./newassets/js/leaflet.js",
+     "./newassets/js/leaflet.js",
     //  "./editmap/js/kml_parser.js",
     //  "./editmap/js/editor.js",
     //  "./editmap/js/app.js",

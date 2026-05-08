@@ -1,9 +1,10 @@
 // map.js
 // Initialize map and base layers
 
-let map;
-let featureGroup; // Layer group to hold all drawn and loaded features
-let baseLayers = {};
+var map;
+var featureGroup; // Layer group to hold all drawn and loaded features
+var baseLayers = {};
+var bounds;
 
 window.initMap = function() {
     // Initialize map
@@ -43,6 +44,7 @@ window.initMap = function() {
     map.getContainer().addEventListener('contextmenu', (e) => {
         e.preventDefault();
     });
+    bounds = L.latLngBounds([]);
 }
 
 

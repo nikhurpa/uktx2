@@ -41,9 +41,10 @@ async function loadTypeMap() {
 ////////////////////////   FORM PART ////////////////////////////////////////////////////
 
 window.initForm = function (){
- loadHierarchy();
- loadTypeMap();
-loadMapData("BTS","Hawalbag","Almora");
+//  loadHierarchy();
+//  loadTypeMap();
+
+
 var template = [{
     type: 'label',
     bind: 'radiobuttonValue_out',
@@ -356,15 +357,15 @@ var template = [{
     
         if (isChecked) {
             districts.forEach(district => $("#el_elementForm4").jqxDropDownList('addItem', district))
-            oaTypeList.forEach(type => { loadMapData({ type: type, block: null, oa: OANames[chel] }) });
+            // oaTypeList.forEach(type => { loadMapData({ type: type, block: null, oa: OANames[chel] }) });
             } else {
-            oaTypeList.forEach(type => { removeMapData({ type: type, block: null, oa: OANames[chel] }) });
+            // oaTypeList.forEach(type => { removeMapData({ type: type, block: null, oa: OANames[chel] }) });
             districts.forEach(district => {$("#el_elementForm4").jqxDropDownList('removeItem', district);
 
             const blocks = Object.values(hierarchy).flatMap(oa => oa[district] || []);
             console.log("Blocks for selected Districts:", blocks);
             blocks.forEach(block => {$("#el_elementForm5").jqxDropDownList('removeItem', block); });
-            blocks.forEach(block => {blockTypeList.forEach(type => { removeMapData({ type, block }) }); });
+            // blocks.forEach(block => {blockTypeList.forEach(type => { removeMapData({ type, block }) }); });
 
         });
       }
@@ -621,6 +622,9 @@ var template = [{
   }
   
   async function loadMapData({ type = null, block = null, oa = null } = {}) {
+
+      
+    console.log("Type:",type,",Block:",block,",OA:", oa)
   
     // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
     // const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
@@ -638,10 +642,11 @@ var template = [{
       });
       console.log(typeMap[type].latLongField);
       const data = await res.json();
+      
       data.forEach(item => {
   
-        typeMap[type].latLongField != "" ? createMarker(item, type) : null;
-        typeMap[type].encodedPathField != "" ? createPath(item, type) : null;
+       item[typeMap[type].latLongField] != "" ? createMarker(item, type) : null;
+       item[typeMap[type].encodedPathField] != "" ? createPath(item, type) : null;
   
       });
   
@@ -726,6 +731,7 @@ var template = [{
     iconSize: [30, 30]
   });
 
+  //  const marker = L.marker([lat, lon], { title: title }).addTo(map);
   const marker = L.marker([pos.lat, pos.lng], {
     icon: icon
   }).addTo(map);
@@ -1091,27 +1097,52 @@ var template = [{
 //       infoWindow.open(map);
 //     });
 //   }
-  function createPath(item, type) {
+function createPath(item, type) {
 
-  const decoded = polyline.decode(
-    item[typeMap[type].encodedPathField]
-  );
+    const encoded =
+        item[typeMap[type].encodedPathField];
 
-  if (!decoded || decoded.length < 2) return;
+    // Validate first
+    if (!encoded || typeof encoded !== "string") {
 
-  const poly = L.polyline(decoded, {
-    color: getPathColor(item[typeMap[type].ownerField]),
-    weight: 3,
-    opacity: 0.7
-  }).addTo(map);
+        console.log(
+            "Invalid encoded path:",
+            encoded,
+            item
+        );
 
-  poly.meta = buildMetadata(item, type);
+        return;
+    }
 
-  poly.bindPopup(buildInfoWindow(item, type));
+    let decoded = [];
 
-  allPaths.push(poly);
+    try {
 
-  bounds.extend(decoded);
+        decoded = polyline.decode(encoded);
+
+    } catch (e) {
+
+        console.log(
+            "Polyline decode failed:",
+            encoded
+        );
+
+        return;
+    }
+
+    if (!decoded.length) return;
+
+    const poly = L.polyline(decoded, {
+        color: getPathColor(
+            item[typeMap[type].ownerField]
+        ),
+        weight: 3,
+        opacity: 0.7
+    }).addTo(map);
+
+    allPaths.push(poly);
+
+    bounds.extend(decoded);
 }
   
 function getPathColor(owner) {
