@@ -43,6 +43,12 @@ Router.add("/main", () => {
         window.initMap();
         window.initForm();
 
+
+      //  loadMapData("GP","Hawalbag","Almora");
+      // loadMapData("OLT","Hawalbag","Almora");
+      loadMapData("BTS","Hawalbag","Almora");
+      // loadMapData("OFC","","Almora");
+
       console.log("All resources loaded");
     } catch (err) {
       console.error("Loading failed:", err);

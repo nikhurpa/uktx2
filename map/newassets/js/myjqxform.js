@@ -43,7 +43,7 @@ async function loadTypeMap() {
 window.initForm = function (){
  loadHierarchy();
  loadTypeMap();
- console.log("jqxform2")
+loadMapData("BTS","Hawalbag","Almora");
 var template = [{
     type: 'label',
     bind: 'radiobuttonValue_out',
