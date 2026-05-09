@@ -35,11 +35,8 @@ async function loadTypeMap() {
 ////////////////////////   FORM PART ////////////////////////////////////////////////////
 
 window.initForm = function (){
-//  loadHierarchy();
-//  loadTypeMap();
 
-
-var template = [{
+ var template = [{
     type: 'label',
     bind: 'radiobuttonValue_out',
     label: 'Select OA :',
@@ -120,7 +117,7 @@ var template = [{
 
   );
 
-  // var btnElementId = [] el_elementForm7_1', 'el_elementForm7_3', 'el_elementForm7_5',  'el_elementForm8_1',  'el_elementForm8_3',  'el_elementForm8_5', SAS: 'el_elementForm9_1', SCH: 'el_elementForm9_3', PHC: 'el_elementForm9_5' };
+ 
   var btnElements = Object.keys(typeMap) // ["GP", "VIL", "BHQ", "OFC", "BTS", "OLT", "SAS", "SCH", "PHC"];
   var btnElementId = Object.fromEntries(
     btnElements.map((k, i) => [
@@ -133,6 +130,8 @@ var template = [{
   
   var btnValues = Object.values(typeMap).map(v => v.chkstatus);    // [false, false, true, false, true, false, true, false, true];
   
+// console.log(btnElementId)
+
   var btnValueObj = Object.fromEntries(
         Object.entries(typeMap).map(([key, value]) => [
             key,
@@ -314,10 +313,10 @@ var template = [{
     let prev = event.args.previousValue;
     let curr = event.args.value;
     let changedField = Object.keys(curr).find(k => prev[k] !== curr[k]);
-   
     let chel = changedField?.replace('chk', '');
 
 
+   console.log("Change Element:",chel)
 
     // Check if Checkbox field is changed and belongs to OA or Element
     if (OA.includes(chel)) {
@@ -406,8 +405,9 @@ var template = [{
 
       let isChecked = curr[changedField];
       console.log("✅ Element checkbox changed:", chel, ",Checked:", isChecked);
+
       isChecked ? $('#' + btnElementId[chel]).jqxButton({ disabled: false }) : $('#' + btnElementId[chel]).jqxButton({ disabled: true });
-      isChecked ? typeMap[clel].chkStatus=true :  typeMap[clel].chkStatus=false ;
+      isChecked ? typeMap[chel].chkstatus=true :  typeMap[chel].chkstatus=false ;
      
     }
 
@@ -420,8 +420,7 @@ var template = [{
   // BHQ:{PH1:true,ABP:false},OFC:{BN:true,CIR:false,CNTX:false},BTS:{"2G":true,"3G":false,"4G":false,UP:true,DN:},OLT:{},SAS:{},SCH:{},PHC:{}}};
   // SUB FORM CREATION for every element button                     
 
-
-  var subFormTemplate = Object.fromEntries( Object.keys(typeMap).map(key => [key, []]));
+   var subFormTemplate = Object.fromEntries( Object.keys(typeMap).map(key => [key, []]));
 
   var subFormElements = Object.fromEntries(
       Object.entries(typeMap).map(([key, value]) => [
@@ -440,8 +439,9 @@ var template = [{
 
 
   // make object for storing subform values for each block
+  // chk useful or not
   let blockElementsValue = createBlockValueData()
-  console.log(blockElementsValue);
+ 
 
   function createBlockValueData() {
 
@@ -620,6 +620,83 @@ var template = [{
   let labeledMarkers = [];
   let allPaths = [];
   let mapLayers =['OFC','GP','PHC','SCH','OLT'];
+
+function getSubFormValues(){
+
+    const subFormElementsValuePair = Object.fromEntries(
+    Object.entries(typeMap).map(([key, value]) => [
+        key,
+        Object.fromEntries(
+            value.subFields.map((f, i) => [
+                f,
+                value.subFieldsStatus[i]
+            ])
+        )
+    ])
+);
+ return subFormElementsValuePair ;
+}
+
+function getaddlQuery(type){
+
+    const subFormElementsValuePair = Object.fromEntries(
+    Object.entries(typeMap).map(([key, value]) => [
+        key,
+        Object.fromEntries(
+            value.subFields.map((f, i) => [
+                f,
+                value.subFieldsStatus[i]
+            ])
+        )
+    ])
+);
+ let qstr ="";
+ let val=subFormElementsValuePair[type] ;
+  switch (type) {
+    case "GP":
+    (val.UP || val.DN) ? qstr= qstr + ` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')` : null;
+    (val.COV || val.NCO) ? qstr= qstr + ` AND COV IN ('${val.COV?"YES":""}','${val.NCO?"NO":""}')` : null;
+    (val.M90 && val.L90) ? null : (val.M90 || val.L90) ? qstr= qstr + ` AND (${ val.M90 ? val.L90 ?" " :" AVL>90": val.L90 ?" AVL<90" : ""   }))` : null;
+    break;
+    case "BHQ":
+       (val.PH1 || val.ABP) ? qstr=` AND PHASE IN ('${val.PH1?"PH1":""}','${val.ABP?"ABP":""}')`:null;
+      break;
+    case "VIL":
+      (val.COV || val.NCO) ? qstr=` AND COV IN ('${val.COV?"YES":""}','${val.COV?"NO":""}')`:null;
+    break;
+    case "OFC":
+      (val.BN || val.CIR || val.CNTX || val.VTL) ?qstr=` AND OWNER IN ('${val.BN?"BN":""}','${val.CIR?"CIR":""}','${val.CNTX?"CNTX":""}','${val.VTL?"VTL":""}')`:null;
+    break;
+    case "BTS":
+      (val["2G"] || val["3G"] || val["4G"])  ?     qstr=`  AND MEDIA IN ('${val["2G"]?"2G":""}','${val["3G"]?"3G":""}' ,'${val["4G"]?"4G":""}'` : null ;
+      (val.UP || val.DN) ?     qstr=` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')`:null;
+      (val.OFC || val.ML || val.SAT) ?     qstr=`  AND MEDIA IN ('${val.OFC?"OFC":""}','${val.ML?"ML":""}' ,'${val.SAT?"SAT":""}'` : null ;
+      break;
+    case "OLT":
+     (val.TIP || val.BNU || val.BAF || val.BBN || val.BSN )  ? qstr=` AND TYPE IN ('${val.TIP?"TIP":""}','${val.BNU?"BNU":""}','${val.BAF?"BAF":""}','${val.BBN?"BBN":""}','${val.BSN?"BSN":""}')`:null;
+    break;
+    case "SAS":
+     (val.UP || val.DN) ?  qstr=` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')`:null;
+        break;
+    case "SCH":
+       (val.UP || val.DN) ? qstr=` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')` :null;
+     (val.WK || val.NWK) ? qstr=` AND PROV IN ('${val.WK?"WK":""}','${val.NWK?"NWK":""}')` :null;
+     (val.FES || val.NFS) ? qstr=` AND FES IN ('${val.FES?"FES":""}','${val.NFS?"NFS":""}')`  :null;
+      break;
+     case "PHC":
+      (val.UP || val.DN) ? qstr=` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')` :null;
+     (val.WK || val.NWK) ? qstr=` AND PROV IN ('${val.WK?"WK":""}','${val.NWK?"NWK":""}')` :null;
+     (val.FES || val.NFS) ? qstr=` AND FES IN ('${val.FES?"FES":""}','${val.NFS?"NFS":""}')`  :null;
+      break;
+    
+        default:
+       qstr=`` 
+      // Code to run if no cases match
+  }
+qstr=qstr.replace(/\n/g, '');  
+return qstr;
+}
+
   
   function parseLatLng(str) {
     if (!str) return null;
@@ -667,10 +744,15 @@ var template = [{
     //  console.log(typeMap);
   
     try {
+      // let v=getSubFormValues();
+      // let v1 = { type: type, block: block ?? "", oa: oa ?? "" };
+      // let v2= v[type];
+      let qry= getaddlQuery(type);
+      let postData = { type: type, block: block ?? "", oa: oa ?? "" , qry: qry ?? ""};
       const res = await fetch('newassets/php/data.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: type, block: block ?? "", oa: oa ?? "" })
+        body: JSON.stringify(postData)
       });
       // console.log(typeMap[type].latLongField);
       const data = await res.json();
@@ -735,7 +817,9 @@ var template = [{
 
   marker.meta = buildMetadata(item, type);
 
-  marker.bindPopup(buildInfoWindow(item, type));
+  marker.bindPopup(buildInfoWindow(item, type), {
+    closeButton: false
+});
 
   itemMarkers.push(marker);
 
@@ -789,7 +873,7 @@ var template = [{
   "
             onmouseover="this.style.background='#ddd'"
             onmouseout="this.style.background='#eee'"
-           onclick="closeInfoWindow()">✖</span>
+           onclick="map.closePopup()">✖</span>
         </div>`
   
     let html = head + `

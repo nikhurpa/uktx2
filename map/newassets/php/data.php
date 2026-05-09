@@ -8,6 +8,7 @@ $input = json_decode(file_get_contents("php://input"), true);
 $type = $input['type'] ?? '';
 $block = strtoupper($input['block']) ?? '';
 $oa = strtoupper($input['oa']) ?? '';
+$addlqry = strtoupper($input['qry']) ?? '';
 
 switch ($type) {
     case "GP":
@@ -26,7 +27,7 @@ switch ($type) {
         $qry= "SELECT * FROM gp where BLOCK='$block' ";
 }
 
-
+$qry= $qry . $addlqry ;
 $stmt = $conn->prepare($qry);
 $stmt->execute();
 $result = $stmt->get_result();

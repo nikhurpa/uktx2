@@ -13,7 +13,7 @@
     "metadataFields": ["GP_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "GP_STATUS", "LAT_LONG"],
     "chkstatus":true,
     "subFields":["UP", "DN", "M90", "L90", "COV", "NCO"],
-    "subFieldsStatus":[true, false, true, false,true,false],
+    "subFieldsStatus":[true, false, false, false,false,false],
     "sql":""
   },
   "VIL": {
@@ -66,9 +66,9 @@
     "blockField": "",
     "ownerField": "OWNER",
     "metadataFields": ["ID","NAME", "OWNER", "START_LAT", "START_LNG", "END_LAT", "END_LNG", "STATUS"],
-    "chkstatus":false,
+    "chkstatus":true,
     "subFields": ["BN", "CIR", "CNTX", "VTL"],
-    "subFieldsStatus":[true, false,true, false,false],
+    "subFieldsStatus":[true, true,true, false,false],
     "sql":""  
 
   },
@@ -84,9 +84,9 @@
     "districtField": "DISTRICT",
     "blockField": "",
     "metadataFields": ["TSP_SITE_NAME", "DISTRICT", "FULL_SITE_ADDRESS", "OA", "TSP_SITE_ID", "STATUS", "LOCATION_LATLONG","TOWER_HEIGHT"],
-    "chkstatus":false,
+    "chkstatus":true,
     "subFields": ["2G", "3G", "4G", "UP", "DN", "ML", "OFC", "SAT"],
-    "subFieldsStatus":[true, false,true, false,false,true,true,true],
+    "subFieldsStatus":[false, false,false, true,false,true,true,true],
     "sql":""  
 
   },
@@ -102,9 +102,9 @@
     "districtField": "",
     "blockField": "",
     "metadataFields": ["LOCATION", "OA", "OLT_TYPE", "OLT_IP", "WKG_CONN", "BBC", "VENDOR","STATUS", "LOCATION_LATLONG","BNU_OLTE_YN"],
-    "chkstatus":false,
+    "chkstatus":true,
     "subFields": ["TIP", "BNU", "BAF", "BBN", "BSN"],
-    "subFieldsStatus":[true, false,true, false,false],
+    "subFieldsStatus":[true, true,true, false,false],
     "sql":"" 
   
   },
@@ -138,9 +138,9 @@
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
     "metadataFields": ["SCH_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "SCH_STATUS", "LAT_LONG"],
-    "chkstatus":false,
-    "subFields": ["WK", "NWK", "FES", "UP","DN"],
-    "subFieldsStatus":[true, false,true, false,false],
+    "chkstatus":true,
+    "subFields": ["WK", "NWK", "FES","NFS", "UP","DN"],
+    "subFieldsStatus":[true, true,true, true,true,true],
     "sql":"" 
   },
   "PHC": {
@@ -156,8 +156,8 @@
     "blockField": "BLOCK",
     "metadataFields": ["PHC_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "PHC_STATUS", "LAT_LONG"],
     "chkstatus":false,
-    "subFields": ["WK", "NWK", "FES", "UP","DN"],
-    "subFieldsStatus":[true, false,true, false,false],
+    "subFields": ["WK", "NWK", "FES","NFS", "UP","DN"],
+    "subFieldsStatus":[true, true,true, true,true,true],
     "sql":"" 
   }
 }

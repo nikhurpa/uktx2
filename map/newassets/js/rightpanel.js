@@ -36,9 +36,11 @@ function initRightPanel() {
 
                               </div>`, });    
 
+
+
 addGeoDataMapperElements();
 
-  $("#right-panel").rightPullPanel({ width: 300, topOffset: 60 , contentSelector: "#main"});
+  $("#right-panel").rightPullPanel({ width: 300, topOffset: 20 , contentSelector: "#main"});
   $('#jqxtabs').jqxTabs({ width: 295, height: '100%' });
   $('#jqxtabs').on('tabclick', function (event) {
     var clickedItem = event.args.item;
@@ -72,6 +74,11 @@ addGeoDataMapperElements();
     }
   });   
   console.log("Right panel initialized");
+
+addDiv({ id: "right-panel1", parent: document.body,after: "#right-panel"});
+$("#right-panel1").rightPullPanel({ width: 300, topOffset: 80 , contentSelector: "#main"});
+
+
 }
 
 function addGeoDataMapperElements(){
