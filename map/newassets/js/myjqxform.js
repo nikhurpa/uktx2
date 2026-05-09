@@ -47,7 +47,7 @@ window.initForm = function (){
 
   OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
   OAValues = { DDN: false, HWR: false, NTL: false, NWT: false, SGR: false, ALM: true };
-  vOANames = { DDN: 'DEHRADUN', HWR: 'HARIDWAR', NTL: 'NAINITAL', NWT: 'NEW TEHRI', SGR: 'SRINAGAR', ALM: 'ALMORA' };
+  OANames = { DDN: 'DEHRADUN', HWR: 'HARIDWAR', NTL: 'NAINITAL', NWT: 'NEW TEHRI', SGR: 'SRINAGAR', ALM: 'ALMORA' };
   OAvalues1 = [false, false, false, true, false, true];
   OAelementId = { DDN: 'el_elementForm1_0', HWR: 'el_elementForm1_1', NTL: 'el_elementForm1_2', NWT: 'el_elementForm2_0', SGR: 'el_elementForm2_1', ALM: 'el_elementForm2_2' };
   districtValues = { ALMORA: true, DEHRADUN: false, HARIDWAR: false, NAINITAL: false, "U S NAGAR": false, SRINAGAR: false, "PAURI GARHWAL": false, PITHORAGARH: false, CHAMPAWAT: false, RUDRAPRAYAG: false, "NEW TEHRI": false, UTTARKASHI: false };
@@ -692,14 +692,13 @@ function getQryData(type){
    let selectedOAs =[]
         OA.forEach(item => {
           if ($("#" + OAelementId[item]).jqxCheckBox('checked')) {
-               selectedOAs.push(item) ;
+               selectedOAs.push(OANames[item]) ;
           }
         });
    
    let blockQry= ` BLOCK IN ('${selectedBlocks.join("','")}')`;
    let oaQry= ` OA IN ('${selectedOAs.join("','")}')`;
-   console.log(selectedBlocks)
-   console.log(oaQry)
+
 
    
  let qstr ="";
@@ -815,7 +814,7 @@ return postData;
 
       } else {
 
-          console.log("Bounds not valid");
+          console.log("Bounds not valid in type ", type);
       }
 
 
@@ -833,8 +832,7 @@ return postData;
   let lng=parseFloat(item[typeMap[type].longField])
 
   const pos = { lat:lat,lng:lng};
-  console.log(pos)
-
+  
   if (!isValidLatLng(pos)) return;
 
   const color = getStatusColor(item[typeMap[type].statusField]);
@@ -1285,7 +1283,7 @@ function removeMapData(type) {
   
 function loadMapLayers() {
   mapLayers.forEach(type=> {
-
+  console.log("adding map:",type)  ;
   typeMap[type].chkstatus?loadMapData(type):null;
   
   
@@ -1293,7 +1291,10 @@ function loadMapLayers() {
 }
   
 function removeMapLayers() {
-  mapLayers.forEach(type=> {removeMapData(type);});
+   
+  mapLayers.forEach(type=> {
+     console.log("removing map:",type)  ;
+    removeMapData(type);});
  
 }
 
