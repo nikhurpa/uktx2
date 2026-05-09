@@ -590,7 +590,7 @@ let bottomBtns= [
     if ($("#elementSubForm").data('jqxForm')) {
       $("#elementSubForm").jqxForm('destroy');
       $("#elementSubForm").remove();
-      $("#infoPanel").append('<div id="elementSubForm" style="width: 280px; height: auto;"></div>   ');
+      $("#elementForm").after('<div id="elementSubForm" style="width: 280px; height: auto;"></div>   ');
     }
     $('#elementSubForm').jqxForm({
       template: tmpl,
@@ -1252,7 +1252,7 @@ function removeMapData(type) {
     return true;
   }
 
-  console.log("After:", itemMarkers.length);
+  // console.log("After:", itemMarkers.length);
 
   // 🔵 Paths
   try {
