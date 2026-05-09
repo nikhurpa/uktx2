@@ -28,10 +28,12 @@ function initRightPanel() {
                                 <div id="infoPanel">
                                     <div id='elementForm' style="width: 280px; height: auto;"></div>   
                                     <div id='elementSubForm' style="width: 280px; height: auto;"></div>   
+                                    <div id='elementSubmitForm' style="width: 280px; height: auto;"></div>   
                                 </div>
                                 <div id="data" class="card">
                                     <div id='dataElementForm' style="width: 280px; height: auto;"></div>   
-                                    <div id='dataElementSubForm' style="width: 280px; height: auto;"></div>   
+                                    <div id='dataElementSubForm' style="width: 280px; height: auto;"></div>  
+                                    
                                 </div>
 
                               </div>`, });    

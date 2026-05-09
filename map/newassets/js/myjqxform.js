@@ -33,8 +33,10 @@ async function loadTypeMap() {
 
 
 ////////////////////////   FORM PART ////////////////////////////////////////////////////
+var checkedOAs =[],OA=[],OAValues={},OANames={},OAelementId=[],OAvalues1=[]
 
 window.initForm = function (){
+
 
  var template = [{
     type: 'label',
@@ -43,12 +45,12 @@ window.initForm = function (){
     rowHeight: '40px',
   }];
 
-  var OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
-  var OAValues = { DDN: false, HWR: false, NTL: false, NWT: false, SGR: false, ALM: true };
-  var OANames = { DDN: 'DEHRADUN', HWR: 'HARIDWAR', NTL: 'NAINITAL', NWT: 'NEW TEHRI', SGR: 'SRINAGAR', ALM: 'ALMORA' };
-  var OAvalues1 = [false, false, false, true, false, true];
-  var OAelementId = { DDN: 'el_elementForm1_0', HWR: 'el_elementForm1_1', NTL: 'el_elementForm1_2', NWT: 'el_elementForm2_0', SGR: 'el_elementForm2_1', ALM: 'el_elementForm2_2' };
-  var districtValues = { ALMORA: true, DEHRADUN: false, HARIDWAR: false, NAINITAL: false, "U S NAGAR": false, SRINAGAR: false, "PAURI GARHWAL": false, PITHORAGARH: false, CHAMPAWAT: false, RUDRAPRAYAG: false, "NEW TEHRI": false, UTTARKASHI: false };
+  OA = ["DDN", "HWR", "NTL", "NWT", "SGR", "ALM"];
+  OAValues = { DDN: false, HWR: false, NTL: false, NWT: false, SGR: false, ALM: true };
+  vOANames = { DDN: 'DEHRADUN', HWR: 'HARIDWAR', NTL: 'NAINITAL', NWT: 'NEW TEHRI', SGR: 'SRINAGAR', ALM: 'ALMORA' };
+  OAvalues1 = [false, false, false, true, false, true];
+  OAelementId = { DDN: 'el_elementForm1_0', HWR: 'el_elementForm1_1', NTL: 'el_elementForm1_2', NWT: 'el_elementForm2_0', SGR: 'el_elementForm2_1', ALM: 'el_elementForm2_2' };
+  districtValues = { ALMORA: true, DEHRADUN: false, HARIDWAR: false, NAINITAL: false, "U S NAGAR": false, SRINAGAR: false, "PAURI GARHWAL": false, PITHORAGARH: false, CHAMPAWAT: false, RUDRAPRAYAG: false, "NEW TEHRI": false, UTTARKASHI: false };
 
   let oaValueObj = OA.reduce((acc, key, index) => {
     acc["chk" + key] = OAValues[key];
@@ -270,7 +272,7 @@ window.initForm = function (){
       var checked = item.checked;
       var checkedItems = $("#el_elementForm4").jqxDropDownList('getCheckedItems');
 
-      checked ? loadMapLayers(label) : removeMapLayers(label);
+      // checked ? loadMapLayers(label) : removeMapLayers(label);
 
     }
 
@@ -323,7 +325,7 @@ window.initForm = function (){
         
        
 
-        let checkedOAs =[]
+        checkedOAs =[]
         OA.forEach(item => {
           if ($("#" + OAelementId[item]).jqxCheckBox('checked')) {
                checkedOAs.push(item) ;
@@ -420,7 +422,7 @@ window.initForm = function (){
   // BHQ:{PH1:true,ABP:false},OFC:{BN:true,CIR:false,CNTX:false},BTS:{"2G":true,"3G":false,"4G":false,UP:true,DN:},OLT:{},SAS:{},SCH:{},PHC:{}}};
   // SUB FORM CREATION for every element button                     
 
-   var subFormTemplate = Object.fromEntries( Object.keys(typeMap).map(key => [key, []]));
+  var subFormTemplate = Object.fromEntries( Object.keys(typeMap).map(key => [key, []]));
 
   var subFormElements = Object.fromEntries(
       Object.entries(typeMap).map(([key, value]) => [
@@ -531,9 +533,50 @@ window.initForm = function (){
     createSubForm(text);
 
   });
+/////////////////////////////  SUBMIT BUTTONS/////////////////
+let bottomBtns= [
+       {columns: [
+                        {
+                            type: 'button',
+                            text: 'Get Map',
+                            width: '90px',
+                            height: '30px',
+                            rowHeight: '40px',
+                            columnWidth: '50%',
+                            align: 'right'
+                        },
+                        {
+                            type: 'button',
+                            text: 'Clear Map',
+                            width: '90px',
+                            height: '30px',
+                            rowHeight: '40px',
+                            columnWidth: '50%'
+                        }                
+                    ]}
 
+      ]
 
+  $('#elementSubmitForm').jqxForm({
+    template: bottomBtns,
+    padding: { left: 4, top: 4, right: 4, bottom: 10 }
+  });
 
+   $('#elementSubmitForm').on('buttonClick', function (event) {
+    var args = event.args;
+    var text = args.text // clicked button's text.;
+    var name = args.name // clicked button's name.;
+    switch (text) {
+    case "Get Map":
+      loadMapLayers();
+    break;
+    case "Clear Map":
+      removeMapLayers();
+    break;  
+    }  
+  });
+
+/////////////////////////////////////////////////////
   function createSubForm(type) {
     // console.log(subFormTemplate[type]);
     // console.log(initialElementValue[type]);
@@ -568,11 +611,13 @@ window.initForm = function (){
       let indx = typeMap[formattedChanges.type].subFields.indexOf(formattedChanges.subField, 0);
       typeMap[formattedChanges.type].subFieldsStatus[indx]=formattedChanges.subFieldStatus;
       console.log(typeMap)
+
       // applyFilters(formattedChanges);
       // for (var i in newValue) {
       //   // var newInputValue = newValue[i]; // current input's value.
       //   // var previousInputValue = previousValue[i]; // previous input's value.
       // }
+
     });
     $('#elementSubForm').jqxForm('refresh');
 
@@ -621,7 +666,7 @@ window.initForm = function (){
   let allPaths = [];
   let mapLayers =['OFC','GP','PHC','SCH','OLT'];
 
-function getSubFormValues(){
+function getSubFormValues(type){
 
     const subFormElementsValuePair = Object.fromEntries(
     Object.entries(typeMap).map(([key, value]) => [
@@ -634,24 +679,31 @@ function getSubFormValues(){
         )
     ])
 );
- return subFormElementsValuePair ;
+
+ return subFormElementsValuePair[type] ;
 }
 
-function getaddlQuery(type){
+function getQryData(type){
 
-    const subFormElementsValuePair = Object.fromEntries(
-    Object.entries(typeMap).map(([key, value]) => [
-        key,
-        Object.fromEntries(
-            value.subFields.map((f, i) => [
-                f,
-                value.subFieldsStatus[i]
-            ])
-        )
-    ])
-);
+   let selectedBlocks = $("#el_elementForm5")
+    .jqxDropDownList('getCheckedItems')
+    .map(item => item.value);
+
+   let selectedOAs =[]
+        OA.forEach(item => {
+          if ($("#" + OAelementId[item]).jqxCheckBox('checked')) {
+               selectedOAs.push(item) ;
+          }
+        });
+   
+   let blockQry= ` BLOCK IN ('${selectedBlocks.join("','")}')`;
+   let oaQry= ` OA IN ('${selectedOAs.join("','")}')`;
+   console.log(selectedBlocks)
+   console.log(oaQry)
+
+   
  let qstr ="";
- let val=subFormElementsValuePair[type] ;
+ let val=getSubFormValues(type) ;
   switch (type) {
     case "GP":
     (val.UP || val.DN) ? qstr= qstr + ` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')` : null;
@@ -694,7 +746,8 @@ function getaddlQuery(type){
       // Code to run if no cases match
   }
 qstr=qstr.replace(/\n/g, '');  
-return qstr;
+let postData = {type:type,oa:oaQry,block:blockQry,qry:qstr}
+return postData;
 }
 
   
@@ -730,25 +783,13 @@ return qstr;
     return Object.keys(hierarchy[oa] || {});
   }
   
-  async function loadMapData({ type = null, block = null, oa = null } = {}) {
+  async function loadMapData(type) {
 
       
-    console.log("Type:",type,",Block:",block,",OA:", oa)
-  
-    // const blocks = hierarchy["Almora"]["Pithoragarh"]; // Example: Accessing blocks under a specific district and block
-    // const selectedOAs= ["Almora","New Tehri"]; // Example: Getting districts for a specific OA
-    // const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
-    // console.log(districts);
-    // const blocks = [...new Set(districts.flatMap(dist => Object.values(hierarchy).map(oa => oa[dist] || []).flat()  ))];
-    // console.log(blocks);
-    //  console.log(typeMap);
-  
-    try {
-      // let v=getSubFormValues();
-      // let v1 = { type: type, block: block ?? "", oa: oa ?? "" };
-      // let v2= v[type];
-      let qry= getaddlQuery(type);
-      let postData = { type: type, block: block ?? "", oa: oa ?? "" , qry: qry ?? ""};
+     try {
+     
+      let postData= getQryData(type);
+      // let postData = { type: type, block: block ?? "", oa: oa ?? "" , qry: qry ?? ""};
       const res = await fetch('newassets/php/data.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1180,10 +1221,7 @@ function getPathColor(owner) {
   }
   
   
-function removeMapData({ type = null, block = null, oa = null } = {}) {
-
-  console.log("Before:", itemMarkers.length, "Type:", type, "Block:", block, "OA:", oa);
-  //  console.log("Before:", itemMarkers.length, "Type:", type, "Block:", block, "OA:", oa);
+function removeMapData(type) {
 
   // 🔴 Markers
   try {
@@ -1197,11 +1235,12 @@ function removeMapData({ type = null, block = null, oa = null } = {}) {
 
       const matchType = !type || meta.TYPE === type;
 
-      const matchBlock = !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
+      // const matchBlock = !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
 
-      const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
+      // const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
 
-      if (matchType && (matchBlock || matchOa)) {
+      // if (matchType && (matchBlock || matchOa)) {
+      if (matchType ) {
       //   marker.map = null;
         map.removeLayer(marker);
         console.log("removing marker:", marker.meta);
@@ -1225,10 +1264,11 @@ function removeMapData({ type = null, block = null, oa = null } = {}) {
 
       const matchType = !type || meta.TYPE === type;
 
-      const matchBlock = !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
-      const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
+      // const matchBlock = !block || (meta.hasOwnProperty('BLOCK') && meta.BLOCK === block);
+      // const matchOa = !oa || (meta.hasOwnProperty('OA') && meta.OA === oa);
 
-      if (matchType && (matchBlock || matchOa)) {
+      // if (matchType && (matchBlock || matchOa)) {
+      if (matchType ) {
         path.setMap(null);
         console.log("removing path:", path.meta);
         return false;
@@ -1243,16 +1283,17 @@ function removeMapData({ type = null, block = null, oa = null } = {}) {
   }
 }
   
-function loadMapLayers(block) {
+function loadMapLayers() {
   mapLayers.forEach(type=> {
 
-  typeMap[type].chkstatus?loadMapData({type:type,block:block,oa:""}):null;
+  typeMap[type].chkstatus?loadMapData(type):null;
   
   
   });
 }
   
-function removeMapLayers(block) {
-  mapLayers.forEach(type=> {removeMapData({type:type,block:block,oa:""});});
-  
+function removeMapLayers() {
+  mapLayers.forEach(type=> {removeMapData(type);});
+ 
 }
+

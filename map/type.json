@@ -155,7 +155,7 @@
     "districtField": "DISTRICT",
     "blockField": "BLOCK",
     "metadataFields": ["PHC_NAME", "DISTRICT", "BLOCK", "SSA", "PHASE", "PHC_STATUS", "LAT_LONG"],
-    "chkstatus":false,
+    "chkstatus":true,
     "subFields": ["WK", "NWK", "FES","NFS", "UP","DN"],
     "subFieldsStatus":[true, true,true, true,true,true],
     "sql":"" 

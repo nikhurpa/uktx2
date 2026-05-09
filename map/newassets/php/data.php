@@ -12,19 +12,34 @@ $addlqry = strtoupper($input['qry']) ?? '';
 
 switch ($type) {
     case "GP":
-        $qry= "SELECT * FROM gp where BLOCK='$block' ";
+        $qry= "SELECT * FROM gp where $block ";
         break;
+    case "BHQ":
+         $qry= "SELECT * FROM bhq where $block ";
+        break;    
     case "OLT":
-        $qry= "SELECT * FROM olt where OA='$oa' ";
+        $qry= "SELECT * FROM olt where $oa ";
         break;
     case "BTS":
-        $qry= "SELECT * FROM bts where OA='$oa' ";
+        $qry= "SELECT * FROM bts where $oa ";
     break;
     case "OFC":
-        $qry= "SELECT * FROM ofc where OA='$oa' ";
+        $qry= "SELECT * FROM ofc where $oa ";
+    break;
+    case "VIL":
+        $qry= "SELECT * FROM vil where $block ";
     break;       
+    case "PHC":
+        $qry= "SELECT * FROM phc where $block ";
+    break;       
+    case "SCH":
+        $qry= "SELECT * FROM sch where $block ";
+    break;       
+    case "SAS":
+        $qry= "SELECT * FROM sas where $block ";
+    break;              
     default:
-        $qry= "SELECT * FROM gp where BLOCK='$block' ";
+        $qry= "SELECT * FROM gp where $block ";
 }
 
 $qry= $qry . $addlqry ;
