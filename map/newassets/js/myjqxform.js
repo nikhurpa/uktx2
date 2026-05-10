@@ -666,7 +666,7 @@ let bottomBtns= [
   let itemMarkers = [];
   let labeledMarkers = [];
   let allPaths = [];
-  let mapLayers =['GP','OFC','OLT','SCH'];
+  let mapLayers =['GP','OFC','OLT','SCH','PHC','BTS'];
   // let mapLayers =['OFC','GP','PHC','SCH','OLT'];
   let selectedLine = null;
 
