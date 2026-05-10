@@ -170,6 +170,24 @@ window.initMap = function() {
         e.preventDefault();
     });
     bounds = L.latLngBounds([]);
+
+
+    map.on("click", () => {
+
+    if (selectedLine) {
+
+        selectedLine.setStyle({
+            color: selectedLine.originalColor,
+            weight: 3,
+            opacity: 0.7
+        });
+
+        selectedLine.closePopup();
+
+        selectedLine = null;
+    }
+
+});
 }
 
 

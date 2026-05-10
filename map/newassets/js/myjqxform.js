@@ -9,7 +9,7 @@ async function loadHierarchy() {
     hierarchy = await res.json();
 
 
-    console.log("Hierarchy loaded:", hierarchy);
+    // console.log("Hierarchy loaded:", hierarchy);
 
   } catch (err) {
     console.error("Error loading hierarchy:", err);
@@ -23,7 +23,7 @@ async function loadTypeMap() {
     const res = await fetch('type.json?v=' + Date.now()); // path to your file
     typeMap = await res.json();
 
-    console.log("Type map loaded:", typeMap);
+    // console.log("Type map loaded:", typeMap);
 
   } catch (err) {
     console.error("Error loading type map:", err);
@@ -192,6 +192,8 @@ window.initForm = function (){
 
 
   const selectedOAs = ["ALMORA"]; // Example: Getting districts for a specific OA
+
+
   //et district and block from hierarchy
   const districts = [...new Set(selectedOAs.flatMap(oa => Object.keys(hierarchy[oa] || {})))];
   let selectedDistricts = Object.keys(districtValues).filter(key => districtValues[key] === true);
@@ -259,10 +261,10 @@ window.initForm = function (){
   $("#el_elementForm5").jqxDropDownList({ checkboxes: true });
   $("#el_elementForm5").jqxDropDownList("clear");
   $("#el_elementForm5").jqxDropDownList({ checkboxes: true, source: blocks });
-
-  // blockValues.forEach(val => {
-  //     $("#el_elementForm5").jqxDropDownList('checkItem', val);
-  // });
+  let blockValues =['TAKULA']
+  blockValues.forEach(val => {
+      $("#el_elementForm5").jqxDropDownList('checkItem', val);
+  });
 
   $("#el_elementForm5").on('checkChange', function (event) {
     if (event.args) {
@@ -664,7 +666,9 @@ let bottomBtns= [
   let itemMarkers = [];
   let labeledMarkers = [];
   let allPaths = [];
-  let mapLayers =['OFC','GP','PHC','SCH','OLT'];
+  let mapLayers =['GP','OFC','OLT','SCH'];
+  // let mapLayers =['OFC','GP','PHC','SCH','OLT'];
+  let selectedLine = null;
 
 function getSubFormValues(type){
 
@@ -683,6 +687,28 @@ function getSubFormValues(type){
  return subFormElementsValuePair[type] ;
 }
 
+// function getSelectedOAs(){
+//  let sOAs =[]
+//         OA.forEach(item => {
+//           if ($("#" + OAelementId[item]).jqxCheckBox('checked')) {
+//                sOAs.push(OANames[item]) ;
+//           }
+//         });
+//  return sOAs;        
+// }
+
+// function getSelectedDistricts(){
+// return $("#el_elementForm4")
+//     .jqxDropDownList('getCheckedItems')
+//     .map(item => item.value);
+// }
+
+// function getSelectedBlocks(){
+//   return ("#el_elementForm5")
+//     .jqxDropDownList('getCheckedItems')
+//     .map(item => item.value);
+// }
+
 function getQryData(type){
 
    let selectedBlocks = $("#el_elementForm5")
@@ -695,7 +721,8 @@ function getQryData(type){
                selectedOAs.push(OANames[item]) ;
           }
         });
-   
+  //  let selectedBlocks = getSelectedBlocks();
+  //  let selectedOAs = getSelectedOAs();
    let blockQry= ` BLOCK IN ('${selectedBlocks.join("','")}')`;
    let oaQry= ` OA IN ('${selectedOAs.join("','")}')`;
 
@@ -1199,17 +1226,53 @@ function createPath(item, type) {
             item[typeMap[type].ownerField]
         ),
         weight: 3,
-        opacity: 0.7
+        opacity: 0.7,
+        bubblingMouseEvents: false // IMPORTANT
     }).addTo(map);
+    poly.originalColor=getPathColor(
+            item[typeMap[type].ownerField]
+        );
+    poly.meta = buildMetadata(item, type);
+    poly.bindPopup(buildInfoWindow(item, type), {
+    closeButton: false
+    });
+    const lengthKm = calculateLength(poly.getLatLngs());
+    poly.bindTooltip("RouteLength:" + lengthKm );
 
     allPaths.push(poly);
 
     bounds.extend(decoded);
+
+   
+    poly.on("click", function(e) {
+          L.DomEvent.stopPropagation(e);
+           L.DomEvent.stop(e);
+            // Reset previous selected line
+            if (selectedLine && selectedLine !== poly) {
+                selectedLine.setStyle({
+                    color: selectedLine.originalColor,
+                    weight: 3,
+                    opacity: 0.7
+                });
+            }
+          // Save current selection
+            selectedLine = poly;
+
+            // Highlight selected line
+            poly.setStyle({
+                color: "yellow",
+                weight: 6,
+                opacity: 1
+            });
+
+
+          });
+
 }
   
 function getPathColor(owner) {
     switch (owner) {
-      case 'CIRCLE': return '#ebe014';   // green
+      case 'CIR': return '#ebe014';   // green
       case 'CNTX': return '#fc0808';   // green
       case 'VTL': return '#3564dc';   // red
       case 'BN': return '#ff07c1';  // yellow
@@ -1217,7 +1280,15 @@ function getPathColor(owner) {
       default: return '#6c757d';     // gray
     }
   }
-  
+function calculateLength(latlngs) {
+        let total = 0;
+
+        for (let i = 0; i < latlngs.length - 1; i++) {
+            total += latlngs[i].distanceTo(latlngs[i + 1]);
+        }
+
+        return (total / 1000).toFixed(2);
+}  
   
 function removeMapData(type) {
 
@@ -1267,7 +1338,8 @@ function removeMapData(type) {
 
       // if (matchType && (matchBlock || matchOa)) {
       if (matchType ) {
-        path.setMap(null);
+        // path.setMap(null);
+        map.removeLayer(path)
         console.log("removing path:", path.meta);
         return false;
 
@@ -1282,6 +1354,7 @@ function removeMapData(type) {
 }
   
 function loadMapLayers() {
+  removeMapLayers() 
   mapLayers.forEach(type=> {
   console.log("adding map:",type)  ;
   typeMap[type].chkstatus?loadMapData(type):null;

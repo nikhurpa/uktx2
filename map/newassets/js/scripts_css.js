@@ -7,6 +7,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
      "./newassets/js/xlsx.full.min.js",
     // "./assets/js/jqverticaltoolbar.js",
     "./newassets/js/jqrightpanel.js",
+    "./newassets/js/cookies.js",
    
      // Leaflet Map
     //  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
