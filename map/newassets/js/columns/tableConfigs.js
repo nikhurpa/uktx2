@@ -93,6 +93,7 @@ var BLOCKS ={
 const OA_OPTIONS = Object.values(OA).map(item => ({ value: item.code, label: item.name }));
 let OA_CODES =  Object.values(OA).map(item => item.code);
 let OA_NAMES=  Object.values(OA).map(item => item.name);
+
 TABLE_CONFIGS = {
 
     block: {

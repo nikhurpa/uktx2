@@ -967,6 +967,7 @@ return postData;
             padding:5px;
             border:1px solid #ddd;
             color:#333;
+            word-wrap: break-word;
           ">
             ${item[f] ?? ''}
           </td>

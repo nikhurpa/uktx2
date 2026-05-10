@@ -129,7 +129,7 @@
   "SCH": {
     "table": "sch",
     "statusField": "SCH_STATUS",
-    "nameField": "SCH_NAME",
+    "nameField": "CUSTOMER_NAME",
     "latLongField": "LAT_LNG",
     "latField":"LAT",
     "longField":"LNG",
@@ -146,7 +146,7 @@
   "PHC": {
     "table": "phc",
     "statusField": "PHC_STATUS",
-    "nameField": "PHC_NAME",
+    "nameField": "VILLAGE",
     "latLongField": "LAT_LNG",
     "latField":"LAT",
     "longField":"LNG",

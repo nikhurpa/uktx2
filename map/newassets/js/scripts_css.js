@@ -2,12 +2,14 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
   const scriptsT = [
     // "https://code.jquery.com/jquery-3.6.4.min.js",
     "./newassets/js/jquery-3.6.4.min.js",
+         "./newassets/js/cookies.js",   
+
 
     // "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
      "./newassets/js/xlsx.full.min.js",
     // "./assets/js/jqverticaltoolbar.js",
     "./newassets/js/jqrightpanel.js",
-    "./newassets/js/cookies.js",
+
    
      // Leaflet Map
     //  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
@@ -65,6 +67,8 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
      "./newassets/js/map.js",
      "./newassets/js/kml.js",
      "./newassets/js/myjqxform.js",
+ 
+         "./newassets/js/bulkupload.js",
 
   ]
 
