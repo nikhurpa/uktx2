@@ -1168,7 +1168,7 @@ function createPath(item, type) {
     if (!encoded || typeof encoded !== "string") {
 
         console.log(
-            "Invalid encoded path:",
+            "Invalid encoded path:",type,
             encoded,
             item
         );
