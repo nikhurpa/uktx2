@@ -23,6 +23,16 @@ function initRightPanel() {
                                       <input id="kmlFile" type="file" accept=".kml" />
                                       <div style="height:10px"></div>-->
                                       <div id="jqxTree" class="card-body"></div>
+                                   <div class="edit-map-panel">
+                                    <h3>Data Sources</h3>
+
+                                    <div class="edit-map-action-buttons">
+                                        <button id="btn-load-db" class="edit-map-btn d-none"><i class="fa-solid fa-database"></i> Load Database</button>
+                                        <input type="file" id="kml-upload" accept=".kml" style="display: none;" />
+                                        <button id="btn-upload-kml" class="edit-map-btn" onclick="document.getElementById('kml-upload').click();"><i class="fa-solid fa-file-import"></i> Upload KML</button>
+                                    </div>
+                                    </div>
+
                                 </div>
                                 <div id="kml" class="card"></div>
                                 <div id="infoPanel">

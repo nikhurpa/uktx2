@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>GeoData Export</name>
+    <description>Exported from GeoData Mapper</description>
+    <Style id="lineStyle">
+      <LineStyle>
+        <color>ff0000ff</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    <Placemark>
+      <name><![CDATA[San Francisco]]></name>
+      <description><![CDATA[LAT: 37.7749
+LON: -122.4194
+NAME: San Francisco
+STATUS: Active
+PATH: Route1
+]]></description>
+      <Point>
+        <coordinates>-122.4194,37.7749,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name><![CDATA[Oakland]]></name>
+      <description><![CDATA[LAT: 37.8044
+LON: -122.2712
+NAME: Oakland
+STATUS: Active
+PATH: Route1
+]]></description>
+      <Point>
+        <coordinates>-122.2712,37.8044,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name><![CDATA[San Jose]]></name>
+      <description><![CDATA[LAT: 37.3382
+LON: -121.8863
+NAME: San Jose
+STATUS: Pending
+PATH: Route1
+]]></description>
+      <Point>
+        <coordinates>-121.8863,37.3382,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name><![CDATA[Los Angeles]]></name>
+      <description><![CDATA[LAT: 34.0522
+LON: -118.2437
+NAME: Los Angeles
+STATUS: Active
+PATH: Route2
+]]></description>
+      <Point>
+        <coordinates>-118.2437,34.0522,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name><![CDATA[San Diego]]></name>
+      <description><![CDATA[LAT: 32.7157
+LON: -117.1611
+NAME: San Diego
+STATUS: Inactive
+PATH: Route2
+]]></description>
+      <Point>
+        <coordinates>-117.1611,32.7157,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name><![CDATA[Las Vegas]]></name>
+      <description><![CDATA[LAT: 36.1699
+LON: -115.1398
+NAME: Las Vegas
+STATUS: Active
+]]></description>
+      <Point>
+        <coordinates>-115.1398,36.1699,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name><![CDATA[Path Route1]]></name>
+      <styleUrl>#lineStyle</styleUrl>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>-122.4194,37.7749,0 -122.2712,37.8044,0 -121.8863,37.3382,0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name><![CDATA[Path Route2]]></name>
+      <styleUrl>#lineStyle</styleUrl>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>-118.2437,34.0522,0 -117.1611,32.7157,0</coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>

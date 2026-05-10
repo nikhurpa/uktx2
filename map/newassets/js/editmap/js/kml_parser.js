@@ -12,6 +12,10 @@ window.parseKML = function(kmlText, sourceName) {
     const rootNode = documents.length > 0 ? documents[0] : xmlDoc;
 
     const rootUl = document.getElementById('tree-root');
+    if (!rootUl) {
+        console.error('tree-root element not found in DOM');
+        return;
+    }
     
     // Create Root Node for this file
     const fileNodeId = `node-${layerIdCounter++}`;
@@ -27,6 +31,10 @@ window.parseKML = function(kmlText, sourceName) {
 
 window.loadGeoJSONFeatures = function(features, sourceName) {
     const rootUl = document.getElementById('tree-root');
+    if (!rootUl) {
+        console.error('tree-root element not found in DOM');
+        return;
+    }
     const folderId = `node-${layerIdCounter++}`;
     const folderLi = createTreeNode(sourceName, folderId, true);
     rootUl.appendChild(folderLi);

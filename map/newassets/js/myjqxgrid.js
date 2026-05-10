@@ -37,7 +37,7 @@ var customStyle = {
     $("#grid").jqxGrid({
         width: "100%",
         height: 480,
-        editable: true,
+        editable: false,
         pageable: true,
         sortable: true,
         filterable: true,
@@ -323,7 +323,7 @@ function loadTable(tableName) {
      $("#grid").jqxGrid({
                 width: "100%",
                 height:480,
-                editable: true,
+                editable: false,
                 pageable: true,
                 sortable: true,
                 filterable: true,
@@ -357,7 +357,7 @@ addDiv({ id: "gridmain", parent: mainDiv,
         <button type="button" class="btn btn-outline-primary btn-sm" id="btnsas" >SAS</button>
         <button type="button" class="btn btn-outline-primary btn-sm" id="btnbts" >BTS</button>
         <button type="button" class="btn btn-outline-primary btn-sm" id="btnsch" >School</button>
-        <button type="button" class="btn btn-outline-primary btn-sm" id="btnphv" >PHC</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" id="btnphc" >PHC</button>
         <button type="button" class="btn btn-outline-primary btn-sm" id="btnvil" >Village</button>
         <button type="button" class="btn btn-outline-primary btn-sm" id="btnolt" >OLT</button>
         <button type="button" class="btn btn-outline-primary btn-sm" id="btnofc" >OFC</button>
