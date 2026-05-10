@@ -2,14 +2,22 @@
   position: absolute;
   top: 10px;
   left: 200px;
+  display: -webkit-flex;
+  display: -moz-flex;
   display: flex;
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
   flex-direction: row;
+  -webkit-gap: 6px;
   gap: 6px;
   padding: 6px;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0,0,0,.15);
-  z-index: 1000; 
+  z-index: 1000;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .vt-mode-button {
@@ -19,18 +27,32 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  display: -webkit-flex;
+  display: -moz-flex;
   display: flex;
+  -webkit-align-items: center;
+  -moz-align-items: center;
   align-items: center;
+  -webkit-justify-content: center;
+  -moz-justify-content: center;
   justify-content: center;
+  visibility: visible;
+  opacity: 1;
 }
 
 .vt-mode-button img {
   width: 20px;
   height: 20px;
+  display: block;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .vt-mode-button.active {
   background: #007bff;
+  color: white;
 }
 
 

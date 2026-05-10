@@ -93,7 +93,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
 
     "./grid/bulkupload.css",
     "./newassets/css/kml.css",
-    "./newassets/css/jqverticaltoolbar.css",
+    "./newassets/css/jqverticaltoolbar.css?v=1.1",
 
     //leaflet map
     "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
