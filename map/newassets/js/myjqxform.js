@@ -748,7 +748,7 @@ function getQryData(type){
     case "BTS":
       (val["2G"] || val["3G"] || val["4G"])  ?     qstr=`  AND MEDIA IN ('${val["2G"]?"2G":""}','${val["3G"]?"3G":""}' ,'${val["4G"]?"4G":""}'` : null ;
       (val.UP || val.DN) ?     qstr=` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')`:null;
-      (val.OFC || val.ML || val.SAT) ?     qstr=`  AND MEDIA IN ('${val.OFC?"OFC":""}','${val.ML?"ML":""}' ,'${val.SAT?"SAT":""}'` : null ;
+      (val.OFC || val.ML || val.SAT) ?     qstr=`  AND MEDIA IN ('${val.OFC?"OFC":""}','${val.ML?"ML":""}' ,'${val.SAT?"SAT":""}')` : null ;
       break;
     case "OLT":
      (val.TIP || val.BNU || val.BAF || val.BBN || val.BSN )  ? qstr=` AND TYPE IN ('${val.TIP?"TIP":""}','${val.BNU?"BNU":""}','${val.BAF?"BAF":""}','${val.BBN?"BBN":""}','${val.BSN?"BSN":""}')`:null;
@@ -759,12 +759,12 @@ function getQryData(type){
     case "SCH":
        (val.UP || val.DN) ? qstr=` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')` :null;
      (val.WK || val.NWK) ? qstr=` AND PROV IN ('${val.WK?"WK":""}','${val.NWK?"NWK":""}')` :null;
-     (val.FES || val.NFS) ? qstr=` AND FES IN ('${val.FES?"FES":""}','${val.NFS?"NFS":""}')`  :null;
+     (val.FES || val.NFS) ? qstr=` AND FES IN ('${val.FES?"YES":""}','${val.NFS?"NO":""}')`  :null;
       break;
      case "PHC":
       (val.UP || val.DN) ? qstr=` AND STATUS IN ('${val.UP?"UP":""}','${val.DN?"DN":""}')` :null;
      (val.WK || val.NWK) ? qstr=` AND PROV IN ('${val.WK?"WK":""}','${val.NWK?"NWK":""}')` :null;
-     (val.FES || val.NFS) ? qstr=` AND FES IN ('${val.FES?"FES":""}','${val.NFS?"NFS":""}')`  :null;
+     (val.FES || val.NFS) ? qstr=` AND FES IN ('${val.FES?"YES":""}','${val.NFS?"NO":""}')`  :null;
       break;
     
         default:
