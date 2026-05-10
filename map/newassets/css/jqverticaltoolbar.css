@@ -1,0 +1,37 @@
+.vertical-toolbar {
+  position: absolute;
+  top: 10px;
+  left: 200px;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  padding: 6px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  z-index: 1000; 
+}
+
+.vt-mode-button {
+  width: 40px;
+  height: 40px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vt-mode-button img {
+  width: 20px;
+  height: 20px;
+}
+
+.vt-mode-button.active {
+  background: #007bff;
+}
+
+
+

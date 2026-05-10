@@ -945,7 +945,7 @@ return postData;
     let html = head + `
   
     
-      <table style="border-collapse: collapse; width: 100%;">
+      <table style="border-collapse: collapse; width: 100%; table-layout: fixed;">
         <tr style="background:#007bff;">
           <th style="padding:5px;">Field</th>
           <th style="padding:5px;">Value</th>
@@ -967,7 +967,9 @@ return postData;
             padding:5px;
             border:1px solid #ddd;
             color:#333;
-            word-wrap: break-word;
+            word-break: break-all; 
+            overflow-wrap: break-word; 
+           
           ">
             ${item[f] ?? ''}
           </td>

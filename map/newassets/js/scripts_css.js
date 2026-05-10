@@ -9,6 +9,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
      "./newassets/js/xlsx.full.min.js",
     // "./assets/js/jqverticaltoolbar.js",
     "./newassets/js/jqrightpanel.js",
+    "./newassets/js/jqverticaltoolbar.js",
 
    
      // Leaflet Map
@@ -63,12 +64,14 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
   ];
   
   const scriptsB = [
-     "./newassets/js/columns/tableConfigs.js" ,
+     "./newassets/js/columns/tableConfigs1.js" ,
      "./newassets/js/map.js",
      "./newassets/js/kml.js",
      "./newassets/js/myjqxform.js",
- 
-         "./newassets/js/bulkupload.js",
+     "./newassets/js/bulkupload.js",
+     "./newassets/js/editmap/js/app.js",
+     "./newassets/js/editmap/js/kml_parser.js",
+     "./newassets/js/editmap/js/editor.js",
 
   ]
 
@@ -90,6 +93,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
 
     "./grid/bulkupload.css",
     "./newassets/css/kml.css",
+    "./newassets/css/jqverticaltoolbar.css",
 
     //leaflet map
     "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
@@ -106,7 +110,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
     // Custom Assets
     "./newassets/css/main.css",
     "./newassets/css/jqrightpanel.css",
-    // "./newassets/css/jqadvanceTabs.css"
+    // "./newassets/js/editmap/css/style.css"
   ];
 
 
