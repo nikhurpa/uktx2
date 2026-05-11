@@ -69,7 +69,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
      "./newassets/js/kml.js",
      "./newassets/js/myjqxform.js",
      "./newassets/js/bulkupload.js",
-     "./newassets/js/editmap/js/loadkml.js",
+     "./newassets/js/editmap/js/load_kml.js",
     //  "./newassets/js/editmap/js/app.js",
     //  "./newassets/js/editmap/js/kml_parser.js",
     //  "./newassets/js/editmap/js/editor.js",
