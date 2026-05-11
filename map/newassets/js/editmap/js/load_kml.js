@@ -581,15 +581,15 @@ window.initMapEdit = function () {
             { id: "undo",    title: "Undo",    icon: "./img/undo.svg" },
             { id: "redo",    title: "Redo",    icon: "./img/redo.svg" },
             { id: "export",  title: "Export",  icon: "./img/download.svg" },
-            { id: "upload",  title: "Upload",  icon: "./img/upload.svg" },
-            { id: "maps",    title: "Maps",    html: '<i class="fas fa-globe"></i>',  href: "#/map" },
-            { id: "kml",     title: "KML",     html: '<i class="fas fa-map"></i>',   href: "#/kml" },
+            { id: "maps",    title: "Maps",    html: '<i class="fas fa-globe"></i>' },
+            { id: "upload",  title: "Upload KML layer",  icon: "./img/upload.svg" },
+            { id: "kml",     title: "Load KML",     html: '<i class="fas fa-map" ></i>' },
         ],
         onSelect: function ({ id }) {
             if (toolActions[id]) {
                 oldMode = mode;
                 mode    = id;
-                statusEl.textContent = `Mode: ${mode}`;
+                // statusEl.textContent = `Mode: ${mode}`;
                 toolActions[id]();
             } else {
                 console.warn("No action defined for:", id);
@@ -618,9 +618,9 @@ window.initMapEdit = function () {
         export()  { console.log("Export data"); },
         save()    { console.log("Save data");   if (mode === "route") ultraPolyManager.save("Route 1"); },
         load()    { console.log("Load data");   if (mode === "route") ultraPolyManager.load(1); },
-        upload()  { console.log("Upload data"); if (mode === "route") ultraPolyManager.save("Route 1"); },
+        upload()  { document.getElementById('kml-upload').click(); },
         maps()    { console.log("maps");  Router.go("uktx/map/#/maps"); },
-        kml()     { console.log("kml");   Router.go("uktx/map/#/kml"); },
+        kml()     { document.getElementById('kml-layer').click(); },
     };
 
     ctxMenu = document.getElementById("contextMenu");
