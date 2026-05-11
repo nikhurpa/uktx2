@@ -27,20 +27,362 @@ let   leafletPopup = L.popup();
 let   boundsLatLngs = [];      // array of [lat, lng] pairs collected during KML parse
 //______  KML Layer ____________________________________________________________
 
-document.getElementById('kml-layer').addEventListener('change', function (e) {
-  const file   = e.target.files[0];
-  const reader = new FileReader();
+// document.getElementById('kml-layer').addEventListener('change', function (e) {
+//   const file   = e.target.files[0];
+//   const reader = new FileReader();
 
-  reader.onload = function (evt) {
-    const kmlText = evt.target.result;
+//   reader.onload = function (evt) {
+//     const kmlText = evt.target.result;
 
-    // Use omnivore with a string
-    const layer = omnivore.kml.parse(kmlText).addTo(map);
-    map.fitBounds(layer.getBounds());
-  };
+//     // Use omnivore with a string
+//     const layer = omnivore.kml.parse(kmlText).addTo(map);
+//     map.fitBounds(layer.getBounds());
+//   };
 
-  reader.readAsText(file);
+//   reader.readAsText(file);
+// });
+
+let kmlLayer = null;
+let kmlLayers = {};
+let kmlLabelMarkers={};
+let labelMarkers = [];
+
+document.getElementById('kml-layer').addEventListener('change', async function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const fileName = file.name.toLowerCase();
+    labelMarkers = [];
+  try {
+    let kmlDom;
+
+    // ── KMZ: unzip and extract the .kml inside ──────────────────────────────
+    if (fileName.endsWith('.kmz')) {
+      const arrayBuffer = await file.arrayBuffer();
+      const zip         = await JSZip.loadAsync(arrayBuffer);
+
+      // Find the first .kml file inside the zip
+      const kmlFileName = Object.keys(zip.files).find(name =>
+        name.toLowerCase().endsWith('.kml')
+      );
+
+      if (!kmlFileName) {
+        alert('No KML file found inside the KMZ.');
+        return;
+      }
+
+      const kmlText = await zip.files[kmlFileName].async('text');
+      kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
+
+    // ── KML: read as plain text ─────────────────────────────────────────────
+    } else if (fileName.endsWith('.kml')) {
+      const kmlText = await file.text();
+      kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
+
+    } else {
+      alert('Unsupported file type. Please upload a .kml or .kmz file.');
+      return;
+    }
+
+    // ── Check for XML parse errors ──────────────────────────────────────────
+    const parseError = kmlDom.querySelector('parsererror');
+    if (parseError) {
+      console.error('XML parse error:', parseError.textContent);
+      alert('Failed to parse KML file. File may be corrupted.');
+      return;
+    }
+
+    // ── Remove existing layer ───────────────────────────────────────────────
+    // if (kmlLayer) {
+    //   map.removeLayer(kmlLayer);
+    //   kmlLayer = null;
+    // }
+
+    // ── Convert KML DOM → GeoJSON ───────────────────────────────────────────
+    const geojson = toGeoJSON.kml(kmlDom);
+    console.log('Features loaded:', geojson.features.length);
+
+    if (!geojson.features.length) {
+      alert('No features found in the KML file.');
+      return;
+    }
+
+    // ── Build Leaflet layer ─────────────────────────────────────────────────
+    // kmlLayer = L.geoJSON(geojson, {
+
+    //   // Style lines and polygons
+    //   style: function (feature) {
+    //     const p = feature.properties || {};
+    //     return {
+    //       color:       p.stroke              || '#3388ff',
+    //       weight:      p['stroke-width']     || 3,
+    //       opacity:     p['stroke-opacity']   || 1,
+    //       fillColor:   p.fill               || '#3388ff',
+    //       fillOpacity: p['fill-opacity']    || 0.2,
+    //     };
+    //   },
+
+    //   // Points → markers
+    //   pointToLayer: function (feature, latlng) {
+    //     const p       = feature.properties || {};
+    //     const iconUrl = p.icon || null;
+
+    //     if (iconUrl) {
+    //       return L.marker(latlng, {
+    //         icon: L.icon({
+    //           iconUrl:     iconUrl,
+    //           iconSize:    [20, 20],
+    //           iconAnchor:  [10, 10],
+    //           popupAnchor: [0, -10],
+    //         })
+    //       });
+    //     }
+    //     return L.marker(latlng);
+    //   },
+
+    //   // Bind popup to every feature
+    //     onEachFeature: function (feature, layer) {
+    //     const p = feature.properties || {};
+
+    //     // ── Keys to hide (style/internal KML properties) ──────────────────────────
+    //     const skipKeys = [
+    //         'name', 'description', 'styleUrl',
+    //         'stroke', 'stroke-width', 'stroke-opacity',
+    //         'fill', 'fill-opacity', 'icon',
+    //         'icon-opacity', 'icon-color', 'icon-scale',
+    //         'marker-color', 'marker-size', 'marker-symbol',
+    //     ];
+
+    //     // ── Name ──────────────────────────────────────────────────────────────────
+    //     let content = '';
+    //     if (p.name) {
+    //         content += `<strong style="font-size:14px;">${p.name}</strong><hr>`;
+    //     }
+
+    //     // ── Description ───────────────────────────────────────────────────────────
+    //     if (p.description) {
+    //         const desc = typeof p.description === 'object'
+    //         ? (p.description.value || '')
+    //         : p.description;
+    //         if (desc) content += `<div style="margin-bottom:6px;">${desc}</div>`;
+    //     }
+
+    //     // ── Extended Data (actual KML data fields) ────────────────────────────────
+    //     const dataEntries = Object.entries(p).filter(([key, val]) =>
+    //         !skipKeys.includes(key) && val !== null && val !== undefined && val !== ''
+    //     );
+
+    //     if (dataEntries.length) {
+    //         content += `
+    //         <table style="width:100%; font-size:12px; border-collapse:collapse;">
+    //             ${dataEntries.map(([key, val]) => `
+    //             <tr style="border-bottom:1px solid #eee;">
+    //                 <td style="padding:3px 6px; font-weight:bold; white-space:nowrap; color:#555;">${key}</td>
+    //                 <td style="padding:3px 6px;">${val}</td>
+    //             </tr>
+    //             `).join('')}
+    //         </table>`;
+    //     }
+
+    //     if (!content) content = '<em>No information available</em>';
+
+    //     layer.bindPopup(content, { maxWidth: 320, maxHeight: 250 });
+    //     }
+
+    // }).addTo(map);
+
+
+    kmlLayer = L.geoJSON(geojson, {
+
+        style: function (feature) {
+            const p = feature.properties || {};
+            return {
+            color:       p.stroke           || '#3388ff',
+            weight:      p['stroke-width']  || 3,
+            opacity:     p['stroke-opacity']|| 1,
+            fillColor:   p.fill             || '#3388ff',
+            fillOpacity: p['fill-opacity']  || 0.2,
+            };
+        },
+
+        pointToLayer: function (feature, latlng) {
+            const p       = feature.properties || {};
+            const iconUrl = p.icon || null;
+            const name    = p.name || '';
+
+            // Create label marker and store it
+            if (name) {
+            const label = createLabelMarker(latlng, name);
+            labelMarkers.push(label);
+            }
+
+            if (iconUrl) {
+            return L.marker(latlng, {
+                icon: L.icon({
+                iconUrl:     iconUrl,
+                iconSize:    [20, 20],
+                iconAnchor:  [10, 10],
+                popupAnchor: [0, -10],
+                })
+            });
+            }
+            return L.marker(latlng);
+        },
+
+        onEachFeature: function (feature, layer) {
+            const p = feature.properties || {};
+            const name = p.name || '';
+
+            // For lines and polygons, add label at center
+            if (feature.geometry.type !== 'Point' && name) {
+            let latlng;
+            if (layer.getBounds) {
+                latlng = layer.getBounds().getCenter();
+            }
+            if (latlng) {
+                const label = createLabelMarker(latlng, name);
+                labelMarkers.push(label);
+            }
+            }
+
+            // ── Popup content ───────────────────────────────────────────────────────
+            const skipKeys = [
+            'name', 'description', 'styleUrl',
+            'stroke', 'stroke-width', 'stroke-opacity',
+            'fill', 'fill-opacity', 'icon',
+            'icon-opacity', 'icon-color', 'icon-scale',
+            'marker-color', 'marker-size', 'marker-symbol',
+            ];
+
+            let content = '';
+            if (name) content += `<strong style="font-size:14px;">${name}</strong><hr>`;
+
+            if (p.description) {
+            const desc = typeof p.description === 'object'
+                ? (p.description.value || '')
+                : p.description;
+            if (desc) content += `<div style="margin-bottom:6px;">${desc}</div>`;
+            }
+
+            const dataEntries = Object.entries(p).filter(([key, val]) =>
+            !skipKeys.includes(key) && val !== null && val !== undefined && val !== ''
+            );
+
+            if (dataEntries.length) {
+            content += `
+                <table style="width:100%;font-size:12px;border-collapse:collapse;">
+                ${dataEntries.map(([key, val]) => `
+                    <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:3px 6px;font-weight:bold;white-space:nowrap;color:#555;">${key}</td>
+                    <td style="padding:3px 6px;">${val}</td>
+                    </tr>
+                `).join('')}
+                </table>`;
+            }
+
+            if (!content) content = '<em>No information available</em>';
+            layer.bindPopup(content, { maxWidth: 320, maxHeight: 250 });
+        }
+
+        }).addTo(map);
+    // Initial label visibility check after layer loads
+    updateLabels(12);
+    addLayerToTree(fileName,kmlLayer,labelMarkers)
+    // ── Zoom map to fit all features ────────────────────────────────────────
+    const bounds = kmlLayer.getBounds();
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }
+
+  } catch (err) {
+    console.error('KML/KMZ load error:', err);
+    alert('Error loading file: ' + err.message);
+  }
 });
+
+function addLayerToTree(fileName,layer,label){
+
+        const kmlFileNodeId = "kml" + (++idCounter);
+
+          kmlLayers[kmlFileNodeId] = {
+            layer: layer,
+            label: label
+        };
+        // kmlLayers[kmlFileNodeId].layer =layer;
+        // kmlLayers[kmlFileNodeId].labelMarkers = label;
+        
+        const kmlFileNode = {
+            id: kmlFileNodeId,
+            label: fileName,
+            icon: kmlIcon,
+            checked: true,
+            // items: source,
+            value:"kml_" + fileName
+        };
+
+        // {label: "Temporary Places"}
+        let elementByID = $('#jqxTree').find("#kmllayers")[0];
+        $("#jqxTree").jqxTree("addTo",  kmlFileNode,  elementByID);
+        $("#jqxTree").on("checkChange", (event) => {
+            if (suppressCheckChange) return;
+            const element = event.args.element;
+            const id = $(element).attr("id");
+            const checked = event.args.checked;
+            if (id) setVisibilityRecursively(id, checked);
+        });
+
+    
+
+}
+
+
+// ── Remove layer helper ─────────────────────────────────────────────────────
+function removeKmlLayer(kmlId) {
+    let layer = kmlLayers[kmlId].layer;
+    let label =kmlLayers[kmlId].label;
+  if (layer) {
+    map.removeLayer(layer);
+    kmlLayers[kmlId].layer=null;
+  }
+
+  // Remove all label markers
+  label.forEach(m => {
+    if (map.hasLayer(m)) map.removeLayer(m);
+  });
+  kmlLayers[kmlId].label = [];
+}
+
+
+// ── Helper: create a label marker at a position ───────────────────────────────
+function createLabelMarker(latlng, name) {
+  return L.marker(latlng, {
+    icon: L.divIcon({
+      className: 'kml-label',
+      html: `<span>${name}</span>`,
+      iconAnchor: [0, 0],
+    }),
+    interactive: false,   // don't intercept clicks
+    zIndexOffset: -1000,  // keep below regular markers
+  });
+}
+
+// ── Show or hide labels based on current zoom ─────────────────────────────────
+function updateLabels(showAtZoom = 12) {
+  const currentZoom = map.getZoom();
+
+  if (currentZoom >= showAtZoom) {
+    // Add labels if not already added
+    if (labelMarkers.length > 0 && !map.hasLayer(labelMarkers[0])) {
+      labelMarkers.forEach(m => m.addTo(map));
+    }
+  } else {
+    // Remove labels when zoomed out
+    labelMarkers.forEach(m => {
+      if (map.hasLayer(m)) map.removeLayer(m);
+    });
+  }
+}
+
 
 // ─── KML File Upload ─────────────────────────────────────────────────────────
 
@@ -86,28 +428,28 @@ let kml_upload = {
               console.log("Dragged", item, "→ dropped into", dropItem ? dropItem.label : "root");
             });
 
-            $("#jqxTree").on("itemClick", (event) => {
-              const element = event.args.element;
-              const id = $(element).attr("id");
-              if (!id) return;
-              const entry = featureLayers[id];
-              if (!entry) return;
-              const first = Array.isArray(entry) ? entry[0] : entry;
-              if (first instanceof google.maps.Marker) {
-                map.panTo(first.getPosition());
-                map.setZoom(Math.max(map.getZoom(), 10));
-              } else {
-                const shapeBounds = new google.maps.LatLngBounds();
-                if (first.getPath) first.getPath().forEach(p => shapeBounds.extend(p));
-                if (first.getPaths) first.getPaths().forEach(path => path.forEach(p => shapeBounds.extend(p)));
-                if (!shapeBounds.isEmpty()) map.fitBounds(shapeBounds);
-              }
-            });
+            // $("#jqxTree").on("itemClick", (event) => {
+            //   const element = event.args.element;
+            //   const id = $(element).attr("id");
+            //   if (!id) return;
+            //   const entry = featureLayers[id];
+            //   if (!entry) return;
+            //   const first = Array.isArray(entry) ? entry[0] : entry;
+            //   if (first instanceof google.maps.Marker) {
+            //     map.panTo(first.getPosition());
+            //     map.setZoom(Math.max(map.getZoom(), 10));
+            //   } else {
+            //     const shapeBounds = new google.maps.LatLngBounds();
+            //     if (first.getPath) first.getPath().forEach(p => shapeBounds.extend(p));
+            //     if (first.getPaths) first.getPaths().forEach(path => path.forEach(p => shapeBounds.extend(p)));
+            //     if (!shapeBounds.isEmpty()) map.fitBounds(shapeBounds);
+            //   }
+            // });
 
          
-                 if (boundsLatLngs.length > 0 && window.map) {
-                    window.map.fitBounds(L.latLngBounds(boundsLatLngs));
-                }
+            if (boundsLatLngs.length > 0 && window.map) {
+            window.map.fitBounds(L.latLngBounds(boundsLatLngs));
+             }
 
                 // Upload kml data to database
                 // this.uploadKml("file103")
@@ -215,13 +557,14 @@ let kml_upload = {
 
 
 // ─── Map / Toolbar Init ──────────────────────────────────────────────────────
+let treeSource = [
+    { label: "My Places",        expanded: true, checked: true, icon: "./img/earth.jpg",  id: "myplaces",   value: "main_folder" },
+    { label: "Temporary Places", expanded: true, checked: true, icon: "./img/folder.png", id: "tempplaces", value: "temp_folder" },
+    { label: "Loaded Layers", expanded: true, checked: true, icon: "./img/kml1.png", id: "kmllayers", value: "kml_layers" },
+];
 
 window.initMapEdit = function () {
 
-    let treeSource = [
-        { label: "My Places",        expanded: true, checked: true, icon: "./img/earth.jpg",  id: "myplaces",   value: "main_folder" },
-        { label: "Temporary Places", expanded: true, checked: true, icon: "./img/folder.png", id: "tempplaces", value: "temp_folder" },
-    ];
 
     $("#jqxTree").jqxTree({ source: treeSource, width: "95%", height: "300px", checkboxes: true, allowDrag: true, allowDrop: true });
 
@@ -495,6 +838,15 @@ function buildTreeDataFromKML(xmlDoc) {
 function setVisibilityRecursively(nodeId, visible) {
     const map   = window.map;
     const entry = featureLayers[nodeId];
+    const layer = kmlLayers[nodeId].layer;
+    console.log("node:",nodeId,", visible:",visible)
+     if (layer) {
+        if (visible) {
+                map.addLayer(layer);
+            } else {
+                map.removeLayer(layer);
+            }
+     }  
 
     if (entry) {
         const arr = Array.isArray(entry) ? entry : [entry];
@@ -795,16 +1147,27 @@ function treeEdit() {
 
     // ── Delete ──────────────────────────────────────────────────────────────
     $("#deleteItem").on("click", () => {
+
         if (!contextTargetId) return;
-        // Remove Leaflet layers from the map before removing tree node
-        applyToDescendants(contextTargetId, layer => {
-            if (window.map && window.map.hasLayer(layer)) window.map.removeLayer(layer);
-        });
-        delete featureLayers[contextTargetId];
-        $("#jqxTree").jqxTree("removeItem", $("#" + contextTargetId)[0]);
+        const ids = treeSource.map(item => item.id);
+        if (ids.includes(contextTargetId)) {
+
+            alert("Can't Delete");
+            return;
+        } 
+        
+            // Remove Leaflet layers from the map before removing tree node
+            applyToDescendants(contextTargetId, layer => {
+                if (window.map && window.map.hasLayer(layer)) window.map.removeLayer(layer);
+            });
+            delete  (featureLayers[contextTargetId]) ? featureLayers[contextTargetId]: null;
+            (kmlLayers[contextTargetId]) ? removeKmlLayer(contextTargetId):null;
+            delete  (kmlLayers[contextTargetId]) ? kmlLayers[contextTargetId]: null;
+            $("#jqxTree").jqxTree("removeItem", $("#" + contextTargetId)[0]);
+        
     });
-
-
+     
+   
     // ── Utility: walk a node and all its descendants, applying fn to each layer ──
     function applyToDescendants(nodeId, fn) {
         const li      = document.getElementById(nodeId);

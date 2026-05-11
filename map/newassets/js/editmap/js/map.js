@@ -43,4 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
     map.getContainer().addEventListener('contextmenu', (e) => {
         e.preventDefault();
     });
+
+    // ── Listen to zoom changes ────────────────────────────────────────────────────
+    map.on('zoomend', function () {
+    updateLabels(12); // change 12 to whatever zoom level you want
+    });
+
 });
+

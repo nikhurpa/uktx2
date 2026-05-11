@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<kml xmlns="http://earth.google.com/kml/2.0">
+<Folder>
+  <description><![CDATA[3052 Items from Layer Miptsite]]></description>
+<Style id="paddle-blu-blank"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/paddle/blu-blank.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="paddle-ylw-blank"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/paddle/ylw-blank.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="paddle-grn-blank"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/paddle/grn-blank.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="paddle-pink-blank"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/paddle/pink-blank.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="pushpin-blue-pushpin"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="pushpin-ylw-pushpin"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="pushpin-grn-pushpin"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/grn-pushpin.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="pushpin-pink-pushpin"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/pushpin/pink-pushpin.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="shapes-open-diamond"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/open-diamond.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="shapes-placemark_square"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_square.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="shapes-placemark_circle"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="shapes-star"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/star.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="paddle-wht-blank"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/paddle/wht-blank.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="shapes-donut"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/donut.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="shapes-triangle"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/triangle.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="shapes-square"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/square.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+<Style id="shapes-dot"><IconStyle><scale>.3</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png</href></Icon></IconStyle><ListStyle></ListStyle></Style>
+ 
+
+"<Placemark><name>Gothi</name><description><![CDATA[<br><br><br> <table border='1' padding='0'> <tr><td>PROP_BTS_ID</td><td>UVUTAMO00555</td></tr><tr><td>BSNL_PO Status</td><td>BOP_BIP_SSB</td></tr><tr><td>Hold/
+With Drawn/
+Clear for Survey/ 
+Clear For Execution (BSNL)</td><td>Clear For Execution</td></tr><tr><td>DISTRICT</td><td>PITHORAGARH</td></tr><tr><td>SUB DISTRICT</td><td>DHARCHULA</td></tr><tr><td>VILLAGE</td><td>Gothi</td></tr><tr><td>VILLAGE CODE</td><td>VCDM02556</td></tr><tr><td>Actual Lat.
+(As per Photos)</td><td>29.83083</td></tr><tr><td>Actual Long.
+(As per Photos)</td><td>80.51297</td></tr><tr><td>PROP_TOWER_HEIGHT_MTR</td><td>0M</td></tr><tr><td>Site Configuration</td><td>EB+DG</td></tr><tr><td>Tower Errection T1 Started</td><td></td></tr><tr><td>Tower Errection T1 Completed</td><td></td></tr><tr><td>Electrical Work Status</td><td>Complete</td></tr><tr><td>On Air sites</td><td>19-07-2024</td></tr><tr><td>Tower AT Date</td><td></td></tr> ]]></description><styleUrl>#pushpin-ylw-pushpin</styleUrl><Point><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><coordinates>80.51297,29.83083</coordinates></Point></Placemark>"
+"<Placemark><name>Simbalghat</name><description><![CDATA[<br><br><br> <table border='1' padding='0'> <tr><td>PROP_BTS_ID</td><td>UVUTNNT00069</td></tr><tr><td>BSNL_PO Status</td><td>BOP_BIP_SSB</td></tr><tr><td>Hold/
+With Drawn/
+Clear for Survey/ 
+Clear For Execution (BSNL)</td><td>Clear For Execution</td></tr><tr><td>DISTRICT</td><td>US Nagar</td></tr><tr><td>SUB DISTRICT</td><td>KHATIMA</td></tr><tr><td>VILLAGE</td><td>Simbalghat</td></tr><tr><td>VILLAGE CODE</td><td>VCDM02575</td></tr><tr><td>Actual Lat.
+(As per Photos)</td><td>28.92323</td></tr><tr><td>Actual Long.
+(As per Photos)</td><td>80.06172</td></tr><tr><td>PROP_TOWER_HEIGHT_MTR</td><td>40M</td></tr><tr><td>Site Configuration</td><td>Solar+DG</td></tr><tr><td>Tower Errection T1 Started</td><td>27-06-2024</td></tr><tr><td>Tower Errection T1 Completed</td><td>02-07-2024</td></tr><tr><td>Electrical Work Status</td><td>complete</td></tr><tr><td>On Air sites</td><td>17-09-2024</td></tr><tr><td>Tower AT Date</td><td>04-08-2024</td></tr> ]]></description><styleUrl>#pushpin-ylw-pushpin</styleUrl><Point><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><coordinates>80.06172,28.92323</coordinates></Point></Placemark>"
+"<Placemark><name>Sunder Nagar</name><description><![CDATA[<br><br><br> <table border='1' padding='0'> <tr><td>PROP_BTS_ID</td><td>UVUTNNT00070</td></tr><tr><td>BSNL_PO Status</td><td>BOP_BIP_SSB</td></tr><tr><td>Hold/
+With Drawn/
+Clear for Survey/ 
+Clear For Execution (BSNL)</td><td>Clear For Execution</td></tr><tr><td>DISTRICT</td><td>US Nagar</td></tr><tr><td>SUB DISTRICT</td><td>KHATIMA</td></tr><tr><td>VILLAGE</td><td>Sunder Nagar</td></tr><tr><td>VILLAGE CODE</td><td>VCDM02577</td></tr><tr><td>Actual Lat.
+(As per Photos)</td><td>28.83997</td></tr><tr><td>Actual Long.
+(As per Photos)</td><td>80.06325</td></tr><tr><td>PROP_TOWER_HEIGHT_MTR</td><td>40M</td></tr><tr><td>Site Configuration</td><td>Solar+EB</td></tr><tr><td>Tower Errection T1 Started</td><td>24-05-2024</td></tr><tr><td>Tower Errection T1 Completed</td><td>31-05-2024</td></tr><tr><td>Electrical Work Status</td><td>Complete</td></tr><tr><td>On Air sites</td><td>18-09-2024</td></tr><tr><td>Tower AT Date</td><td>16-06-2024</td></tr> ]]></description><styleUrl>#pushpin-ylw-pushpin</styleUrl><Point><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><coordinates>80.06325,28.83997</coordinates></Point></Placemark>"
+"<Placemark><name>BOP Srikund</name><description><![CDATA[<br><br><br> <table border='1' padding='0'> <tr><td>PROP_BTS_ID</td><td>UVUTAMO00517</td></tr><tr><td>BSNL_PO Status</td><td>BOP_BIP_SSB</td></tr><tr><td>Hold/
+With Drawn/
+Clear for Survey/ 
+Clear For Execution (BSNL)</td><td>Clear For Execution</td></tr><tr><td>DISTRICT</td><td>CHAMPAWAT</td></tr><tr><td>SUB DISTRICT</td><td>POORNAGIRI</td></tr><tr><td>VILLAGE</td><td>BOP Srikund</td></tr><tr><td>VILLAGE CODE</td><td>VCDM02569</td></tr><tr><td>Actual Lat.
+(As per Photos)</td><td>29.12464607</td></tr><tr><td>Actual Long.
+(As per Photos)</td><td>80.20760375</td></tr><tr><td>PROP_TOWER_HEIGHT_MTR</td><td>40M</td></tr><tr><td>Site Configuration</td><td>Solar+DG</td></tr><tr><td>Tower Errection T1 Started</td><td>27-06-2024</td></tr><tr><td>Tower Errection T1 Completed</td><td>05-07-2024</td></tr><tr><td>Electrical Work Status</td><td>Complete</td></tr><tr><td>On Air sites</td><td>24-09-2024</td></tr><tr><td>Tower AT Date</td><td>03-08-2024</td></tr> ]]></description><styleUrl>#pushpin-ylw-pushpin</styleUrl><Point><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><coordinates>80.20760375,29.12464607</coordinates></Point></Placemark>"
+"<Placemark><name>BOP Mountpurnagiri</name><description><![CDATA[<br><br><br> <table border='1' padding='0'> <tr><td>PROP_BTS_ID</td><td>UVUTAMO00518</td></tr><tr><td>BSNL_PO Status</td><td>BOP_BIP_SSB</td></tr><tr><td>Hold/
+With Drawn/
+Clear for Survey/ 
+Clear For Execution (BSNL)</td><td>Clear For Execution</td></tr><tr><td>DISTRICT</td><td>CHAMPAWAT</td></tr><tr><td>SUB DISTRICT</td><td>POORNAGIRI</td></tr><tr><td>VILLAGE</td><td>BOP Mountpurnagiri</td></tr><tr><td>VILLAGE CODE</td><td>VCDM02568</td></tr><tr><td>Actual Lat.
+(As per Photos)</td><td>29.126744</td></tr><tr><td>Actual Long.
+(As per Photos)</td><td>80.226237</td></tr><tr><td>PROP_TOWER_HEIGHT_MTR</td><td>40M</td></tr><tr><td>Site Configuration</td><td>Solar+DG</td></tr><tr><td>Tower Errection T1 Started</td><td>27-06-2024</td></tr><tr><td>Tower Errection T1 Completed</td><td>05-07-2024</td></tr><tr><td>Electrical Work Status</td><td>Complete</td></tr><tr><td>On Air sites</td><td>25-09-2024</td></tr><tr><td>Tower AT Date</td><td>02-08-2024</td></tr> ]]></description><styleUrl>#pushpin-ylw-pushpin</styleUrl><Point><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><coordinates>80.226237,29.126744</coordinates></Point></Placemark>"
+"<Placemark><name>Jhappujhala</name><description><![CDATA[<br><br><br> <table border='1' padding='0'> <tr><td>PROP_BTS_ID</td><td>UVUTNNT00068</td></tr><tr><td>BSNL_PO Status</td><td>BOP_BIP_SSB</td></tr><tr><td>Hold/
+With Drawn/
+Clear for Survey/ 
+Clear For Execution (BSNL)</td><td>Clear For Execution</td></tr><tr><td>DISTRICT</td><td>US Nagar</td></tr><tr><td>SUB DISTRICT</td><td>KHATIMA</td></tr><tr><td>VILLAGE</td><td>Jhappujhala</td></tr><tr><td>VILLAGE CODE</td><td>VCDM02576</td></tr><tr><td>Actual Lat.
+(As per Photos)</td><td>28.870259</td></tr><tr><td>Actual Long.
+(As per Photos)</td><td>80.059931</td></tr><tr><td>PROP_TOWER_HEIGHT_MTR</td><td>40M</td></tr><tr><td>Site Configuration</td><td>Solar+DG</td></tr><tr><td>Tower Errection T1 Started</td><td>06-06-2024</td></tr><tr><td>Tower Errection T1 Completed</td><td>17-06-2024</td></tr><tr><td>Electrical Work Status</td><td>complete</td></tr><tr><td>On Air sites</td><td>29-09-2024</td></tr><tr><td>Tower AT Date</td><td>07-08-2024</td></tr> ]]></description><styleUrl>#pushpin-ylw-pushpin</styleUrl><Point><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><coordinates>80.059931,28.870259</coordinates></Point></Placemark>"
+"<Placemark><name>CHQ Thuligad</name><description><![CDATA[<br><br><br> <table border='1' padding='0'> <tr><td>PROP_BTS_ID</td><td>UVUTAMO00516</td></tr><tr><td>BSNL_PO Status</td><td>BOP_BIP_SSB</td></tr><tr><td>Hold/
+With Drawn/
+Clear for Survey/ 
+Clear For Execution (BSNL)</td><td>Clear For Execution</td></tr><tr><td>DISTRICT</td><td>CHAMPAWAT</td></tr><tr><td>SUB DISTRICT</td><td>POORNAGIRI</td></tr><tr><td>VILLAGE</td><td>CHQ Thuligad</td></tr><tr><td>VILLAGE CODE</td><td>VCDM02570</td></tr><tr><td>Actual Lat.
+(As per Photos)</td><td>29.137078</td></tr><tr><td>Actual Long.
+(As per Photos)</td><td>80.175911</td></tr><tr><td>PROP_TOWER_HEIGHT_MTR</td><td>40M</td></tr><tr><td>Site Configuration</td><td>Solar+EB</td></tr><tr><td>Tower Errection T1 Started</td><td>21-09-2024</td></tr><tr><td>Tower Errection T1 Completed</td><td>30-09-2024</td></tr><tr><td>Electrical Work Status</td><td>complete</td></tr><tr><td>On Air sites</td><td>14-11-2024</td></tr><tr><td>Tower AT Date</td><td>11-10-2024</td></tr> ]]></description><styleUrl>#pushpin-ylw-pushpin</styleUrl><Point><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><coordinates>80.175911,29.137078</coordinates></Point></Placemark>"
+
+
+
+
+</Folder>
+</kml>

@@ -28,7 +28,8 @@ function initRightPanel() {
 
                                     <div class="edit-map-action-buttons">
                                          <input type="file" id="kml-layer" accept=".kml,.kmz" style="display: none;" />
-                                        <button id="btn-load-db" class="edit-map-btn" onclick="document.getElementById('kml-layer').click();"><i class="fa-solid fa-database"></i> Load kml Layer</button>
+                                        <button id="btn-load-kml" class="edit-map-btn" onclick="document.getElementById('kml-layer').click();"><i class="fa-solid fa-database"></i> Load kml Layer</button>
+                                        <button id="btn-remove-db"class="edit-map-btn" onclick="removeKmlLayer()"><i class="fa-solid fa-database"></i> Remove kml Layer</button>
                                         <input type="file" id="kml-upload" accept=".kml" style="display: none;" />
                                         <button id="btn-upload-kml" class="edit-map-btn" onclick="document.getElementById('kml-upload').click();"><i class="fa-solid fa-file-import"></i> Upload KML</button>
                                     </div>
