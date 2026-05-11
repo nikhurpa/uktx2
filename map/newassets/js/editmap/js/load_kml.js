@@ -838,13 +838,13 @@ function buildTreeDataFromKML(xmlDoc) {
 function setVisibilityRecursively(nodeId, visible) {
     const map   = window.map;
     const entry = featureLayers[nodeId];
-    const layer = kmlLayers[nodeId].layer;
+    const layer = kmlLayers[nodeId];
     console.log("node:",nodeId,", visible:",visible)
      if (layer) {
         if (visible) {
-                map.addLayer(layer);
+                map.addLayer(layer.layer);
             } else {
-                map.removeLayer(layer);
+                map.removeLayer(layer.layer);
             }
      }  
 
