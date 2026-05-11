@@ -27,7 +27,8 @@ function initRightPanel() {
                                     <h3>Data Sources</h3>
 
                                     <div class="edit-map-action-buttons">
-                                        <button id="btn-load-db" class="edit-map-btn d-none"><i class="fa-solid fa-database"></i> Load Database</button>
+                                         <input type="file" id="kml-layer" accept=".kml,.kmz" style="display: none;" />
+                                        <button id="btn-load-db" class="edit-map-btn" onclick="document.getElementById('kml-layer').click();"><i class="fa-solid fa-database"></i> Load kml Layer</button>
                                         <input type="file" id="kml-upload" accept=".kml" style="display: none;" />
                                         <button id="btn-upload-kml" class="edit-map-btn" onclick="document.getElementById('kml-upload').click();"><i class="fa-solid fa-file-import"></i> Upload KML</button>
                                     </div>

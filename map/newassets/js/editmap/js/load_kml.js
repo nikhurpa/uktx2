@@ -25,7 +25,22 @@ let   leafletPopup = L.popup();
 
 // Equivalent of google.maps.LatLngBounds – we accumulate points then fitBounds
 let   boundsLatLngs = [];      // array of [lat, lng] pairs collected during KML parse
+//______  KML Layer ____________________________________________________________
 
+document.getElementById('kml-layer').addEventListener('change', function (e) {
+  const file   = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function (evt) {
+    const kmlText = evt.target.result;
+
+    // Use omnivore with a string
+    const layer = omnivore.kml.parse(kmlText).addTo(map);
+    map.fitBounds(layer.getBounds());
+  };
+
+  reader.readAsText(file);
+});
 
 // ─── KML File Upload ─────────────────────────────────────────────────────────
 

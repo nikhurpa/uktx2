@@ -16,8 +16,8 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
     //  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
      "https://unpkg.com/@mapbox/polyline",
      "./newassets/js/leaflet.js",
-    //  "./editmap/js/kml_parser.js",
-    //  "./editmap/js/editor.js",
+     "https://cdn.jsdelivr.net/npm/leaflet-kml@1.0.0/L.KML.js",
+     "https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js",
     //  "./editmap/js/app.js",
 
     //  "./grid/bulkupload.js",
