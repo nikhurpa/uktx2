@@ -41,7 +41,7 @@ window.editorFinalizeFeature = function(name) {
             featureToSave.bindPopup(name);
         }
         clearSelection();
-        document.getElementById('tool-pan').click(); 
+        // document.getElementById('tool-pan').click(); 
     }
 };
 
@@ -146,7 +146,7 @@ window.initMapEeditor = function () {
             const marker = L.marker(e.latlng, { draggable: true });
             marker.addTo(map);
             selectFeature(marker, null);
-            document.getElementById('tool-save').click();
+            // document.getElementById('tool-save').click();
         }
     });
 
@@ -208,7 +208,7 @@ window.initMapEeditor = function () {
 
     map.on('dblclick', (e) => {
         if(currentTool === 'add-polyline' && drawingPolyline) {
-            document.getElementById('tool-save').click();
+            // document.getElementById('tool-save').click();
         }
     });
 

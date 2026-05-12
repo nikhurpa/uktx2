@@ -1,3 +1,7 @@
+let user,savedValues
+
+user={ id:"admin",rights:{level:"SU",map:"EDIT",tables:{}},metadata:{}}
+
 // Save a cookie
 function setCookie(name, value, days) {
     let expires = "";
@@ -122,3 +126,4 @@ console.log(user.darkMode);  // true
 console.log(user.tags);      // ["admin", "editor"]
 
 */
+

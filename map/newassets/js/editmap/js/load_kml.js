@@ -598,14 +598,17 @@ window.initMapEdit = function () {
     });
 
     const toolActions = {
-        point()   { console.log("Point mode activated");   currentTool =='add-point' ; },
-        route()   { console.log("Route mode activated");   currentTool =='add-polyline'; },
-        line()    { console.log("Line mode activated"); currentTool =='add-polyline'; },
+        point()   { console.log("Point mode activated");   currentTool ='add-point' ; window.editorToolChanged(currentTool)},
+        route()   { console.log("Route mode activated");   currentTool ='add-polyline';  ; window.editorToolChanged(currentTool)},
+        line()    { console.log("Line mode activated"); currentTool ='add-polyline';  ; window.editorToolChanged(currentTool)},
         polygon() { console.log("Polygon mode activated"); },
         scale()   { console.log("Scale tool activated"); },
         select()  {
             console.log("Select mode activated");
-            if (oldMode === "Route") ultraPolyManager.clearDrawing();
+            // if (oldMode === "Route") ultraPolyManager.clearDrawing();
+
+
+
         },
         resize()  { console.log("Resize tool activated"); },
         delete()  {
