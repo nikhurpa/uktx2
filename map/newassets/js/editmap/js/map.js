@@ -48,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
     map.on('zoomend', function () {
     updateLabels(12); // change 12 to whatever zoom level you want
     });
+    console.log("map init")
+    window.initMapEeditor();
 
 });
 

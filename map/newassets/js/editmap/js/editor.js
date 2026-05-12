@@ -137,9 +137,11 @@ function selectFeature(layer, clickLatlng) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    
+// document.addEventListener('DOMContentLoaded', () => {
+window.initMapEeditor = function () {    
+    console.log("map edit")
     map.on('click', (e) => {
+        console.log(currentTool);
         if(currentTool === 'add-point') {
             const marker = L.marker(e.latlng, { draggable: true });
             marker.addTo(map);
@@ -221,4 +223,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-});
+}

@@ -193,6 +193,9 @@ window.initMap = function() {
     map.on('zoomend', function () {
     updateLabels(12); // change 12 to whatever zoom level you want
     });
+
+    
+    window.initMapEeditor();
 }
 
 

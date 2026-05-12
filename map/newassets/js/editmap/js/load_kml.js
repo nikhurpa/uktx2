@@ -598,9 +598,9 @@ window.initMapEdit = function () {
     });
 
     const toolActions = {
-        point()   { console.log("Point mode activated");   editMarker.setMarker(); },
-        route()   { console.log("Route mode activated");   ultraPolyManager.enableDraw(); },
-        line()    { console.log("Line mode activated"); },
+        point()   { console.log("Point mode activated");   currentTool =='add-point' ; },
+        route()   { console.log("Route mode activated");   currentTool =='add-polyline'; },
+        line()    { console.log("Line mode activated"); currentTool =='add-polyline'; },
         polygon() { console.log("Polygon mode activated"); },
         scale()   { console.log("Scale tool activated"); },
         select()  {
