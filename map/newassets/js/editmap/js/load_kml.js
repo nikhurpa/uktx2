@@ -47,6 +47,9 @@ let kmlLayers = {};
 let kmlLabelMarkers={};
 let labelMarkers = [];
 
+let mapElements={element:null,id:null,type:null,metadata:null,node:null };
+let elementIdcounter=0;
+
 document.getElementById('kml-layer').addEventListener('change', async function (e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -728,6 +731,14 @@ function buildOverlaysFromPlacemark(node) {
         // Collect for fitBounds (replaces bounds.extend)
         boundsLatLngs.push(latLngs[0]);
         layers.push(marker);
+        
+        //----- extra code------
+        const elnode = nodeLabel(node);
+        const elid    = "el" + (++elementIdcounter);
+        marker.metadata = {id:elid,node:elnode}
+        mapElements[elid]={element:marker,id:elid,type:"marker",metadata:null,node:elnode };
+
+        
     }
 
     // ── LineString ─────────────────────────────────────────────────────────
@@ -749,6 +760,11 @@ function buildOverlaysFromPlacemark(node) {
 
         latLngs.forEach(ll => boundsLatLngs.push(ll));
         layers.push(polyline);
+                //----- extra code------
+        const elnode = nodeLabel(node);
+        const elid    = "el" + (++elementIdcounter);
+        polyline.metadata = {id:elid,node:elnode}
+        mapElements[elid]={element:polyline,id:elid,type:"polyline",metadata:null,node:elnode };
     }
 
     // ── Polygon ────────────────────────────────────────────────────────────
@@ -771,6 +787,11 @@ function buildOverlaysFromPlacemark(node) {
 
         latLngs.forEach(ll => boundsLatLngs.push(ll));
         layers.push(polygon);
+                //----- extra code------
+        const elnode = nodeLabel(node);
+        const elid    = "el" + (++elementIdcounter);
+        polygon.metadata = {id:elid,node:elnode}
+        mapElements[elid]={element:polygon,id:elid,type:"polygon",metadata:null,node:elnode };
     }
 
     return layers;
