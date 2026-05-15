@@ -84,10 +84,17 @@ function renderVertexMarkers() {
             L.DomEvent.stopPropagation(e);
             if(currentTool === 'add-polyline' || currentTool === 'edit') {
                 selectedVertexIndex = index;
-                renderVertexMarkers();
+                // Avoid rerendering here; it can interrupt the marker drag sequence.
             }
         });
         
+        marker.on('dragstart', (e) => {
+            L.DomEvent.stopPropagation(e);
+            if(currentTool === 'add-polyline' || currentTool === 'edit') {
+                selectedVertexIndex = index;
+            }
+        });
+
         marker.on('drag', (e) => {
             let newLatLngs = selectedFeature.getLatLngs();
             newLatLngs[index] = marker.getLatLng();
