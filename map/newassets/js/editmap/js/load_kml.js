@@ -568,6 +568,8 @@ let treeSource = [
 ];
 window.initMapEdit = function () {
 
+    // setupModals();
+    // setupUpload();
 
     $("#jqxTree").jqxTree({ source: treeSource, width: "95%", height: "300px", checkboxes: true, allowDrag: true, allowDrop: true });
 

@@ -1,9 +1,9 @@
 <?php
 // db.php
 $host = 'localhost';
-$user = 'root';
-$pass = ''; // Default WAMP password
-$dbname = 'gis_map';
+$user = 'uktx';
+$pass = 'uktx123'; // Default WAMP password
+$dbname = 'ukcfa';
 
 try {
     // First connect without dbname to ensure it exists
