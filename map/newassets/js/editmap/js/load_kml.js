@@ -560,12 +560,12 @@ let kml_upload = {
 
 
 // ─── Map / Toolbar Init ──────────────────────────────────────────────────────
+
 let treeSource = [
     { label: "My Places",        expanded: true, checked: true, icon: "./img/earth.jpg",  id: "myplaces",   value: "main_folder" },
     { label: "Temporary Places", expanded: true, checked: true, icon: "./img/folder.png", id: "tempplaces", value: "temp_folder" },
     { label: "Loaded Layers", expanded: true, checked: true, icon: "./img/kml1.png", id: "kmllayers", value: "kml_layers" },
 ];
-
 window.initMapEdit = function () {
 
 
@@ -573,27 +573,27 @@ window.initMapEdit = function () {
 
     $("#mode-ui").verticalToolbar({
         tools: [
-            { id: "point",   title: "Point",   icon: "./img/point.svg" },
-            { id: "route",   title: "Route",   html: '<i class="fas fa-route"></i>' },
-            { id: "line",    title: "Line",    icon: "./img/polyline.svg" },
-            { id: "polygon", title: "Polygon", icon: "./img/polygon.png" },
-            { id: "scale",   title: "Scale",   html: '<i class="fas fa-ruler-horizontal"></i>' },
-            { id: "select",  title: "Select",  icon: "./img/select.svg" },
-            { id: "resize",  title: "Resize",  icon: "./img/resize.svg" },
-            { id: "delete",  title: "Delete",  icon: "./img/delete.svg" },
-            { id: "undo",    title: "Undo",    icon: "./img/undo.svg" },
-            { id: "redo",    title: "Redo",    icon: "./img/redo.svg" },
-            { id: "export",  title: "Export",  icon: "./img/download.svg" },
-            { id: "maps",    title: "Maps",    html: '<i class="fas fa-globe"></i>' },
-            { id: "upload",  title: "Upload KML layer",  icon: "./img/upload.svg" },
-            { id: "kml",     title: "Load KML",     html: '<i class="fas fa-map" ></i>' },
+            { id: "tool-point",   title: "Point",   icon: "./img/point.svg" },
+            { id: "tool-direction",   title: "Direction",   html: '<i class="fas fa-route"></i>' },
+            { id: "tool-route",    title: "Polyline",    icon: "./img/polyline.svg" },
+            { id: "tool-polygon", title: "Polygon", icon: "./img/polygon.png" },
+            { id: "tool-scale",   title: "Scale",   html: '<i class="fas fa-ruler-horizontal"></i>' },
+            { id: "tool-select",  title: "Select",  icon: "./img/select.svg" },
+            { id: "tool-edit",  title: "Edit",   html: '<i class="fa-solid fa-pen-to-square"></i>' },  //icon: "./img/resize.svg",
+            { id: "tool-delete",  title: "Delete",  icon: "./img/delete.svg" },
+            { id: "tool-undo",    title: "Undo",    icon: "./img/undo.svg" },
+            { id: "tool-save",  title: "Save",   html: '<i class="fa-solid fa-save"></i>' },  //icon: "./img/resize.svg",
+            { id: "tool-export",  title: "Export",  icon: "./img/download.svg" },
+            { id: "tool-maps",    title: "Maps",    html: '<i class="fas fa-globe"></i>' },
+            { id: "tool-upload",  title: "Upload KML layer",  icon: "./img/upload.svg" },
+            { id: "tool-kml",     title: "Load KML",     html: '<i class="fas fa-map" ></i>' },
         ],
         onSelect: function ({ id }) {
-            if (toolActions[id]) {
+            if (toolActions[id.replace(/^tool-/, "")]) {
                 oldMode = mode;
-                mode    = id;
+                mode    = id.replace(/^tool-/, "");;
                 // statusEl.textContent = `Mode: ${mode}`;
-                toolActions[id]();
+                toolActions[id.replace(/^tool-/, "")]();
             } else {
                 console.warn("No action defined for:", id);
             }
@@ -603,27 +603,21 @@ window.initMapEdit = function () {
     const toolActions = {
         point()   { console.log("Point mode activated");   currentTool ='add-point' ; window.editorToolChanged(currentTool)},
         route()   { console.log("Route mode activated");   currentTool ='add-polyline';  ; window.editorToolChanged(currentTool)},
-        line()    { console.log("Line mode activated"); currentTool ='add-polyline';  ; window.editorToolChanged(currentTool)},
-        polygon() { console.log("Polygon mode activated"); },
-        scale()   { console.log("Scale tool activated"); },
-        select()  {
-            console.log("Select mode activated");
-            // if (oldMode === "Route") ultraPolyManager.clearDrawing();
-
-
-
-        },
-        resize()  { console.log("Resize tool activated"); },
+        direction()    { console.log("Direction mode activated"); currentTool ='add-direction';  ; window.editorToolChanged(currentTool)},
+        polygon() { console.log("Polygon mode activated"); currentTool ='add-polygon';  ; window.editorToolChanged(currentTool)},
+        scale()   { console.log("Scale tool activated"); currentTool ='add-scale';  ; window.editorToolChanged(currentTool)},
+        select()  { console.log("Pan tool activated"); currentTool ='pan';  ; window.editorToolChanged(currentTool)},
+        edit()  { console.log("Edit tool activated"); currentTool ='edit';  ; window.editorToolChanged(currentTool)},
         delete()  {
             console.log("Delete all");
             if (mode === "point") editMarker.remove();
             if (mode === "route") ultraPolyManager.delete(1);
         },
-        undo()    { console.log("Undo");  if (mode === "route") ultraPolyManager.undo(); },
-        redo()    { console.log("Redo");  if (mode === "route") ultraPolyManager.redo(); },
-        export()  { console.log("Export data"); },
-        save()    { console.log("Save data");   if (mode === "route") ultraPolyManager.save("Route 1"); },
-        load()    { console.log("Load data");   if (mode === "route") ultraPolyManager.load(1); },
+        undo()    { console.log("Undo");   },
+        redo()    { console.log("Redo");   },
+        export()  { console.log("Export data");  exportMapToKm();},
+        save()    { console.log("Save data"); openSaveModal(); },
+        load()    { console.log("Load data");   },
         upload()  { document.getElementById('kml-upload').click(); },
         maps()    { console.log("maps");  Router.go("uktx/map/#/maps"); },
         kml()     { document.getElementById('kml-layer').click(); },
