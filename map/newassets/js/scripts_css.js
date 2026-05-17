@@ -18,9 +18,8 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
      "./newassets/js/leaflet.js",
      "https://cdn.jsdelivr.net/npm/leaflet-kml@1.0.0/L.KML.js",
      "https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js",
-
      "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js",
-"https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.0/dist/togeojson.umd.js",
+     "https://cdn.jsdelivr.net/npm/@tmcw/togeojson@5.8.0/dist/togeojson.umd.js",
     //  "./editmap/js/app.js",
 
     //  "./grid/bulkupload.js",
@@ -76,8 +75,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
     //  "./newassets/js/editmap/js/app.js",
     //  "./newassets/js/editmap/js/kml_parser.js",
      "./newassets/js/editmap/js/editor.js",
-
-  ]
+  ];
 
 
   const modules =[

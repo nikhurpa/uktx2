@@ -50,184 +50,514 @@ let labelMarkers = [];
 let mapElements={element:null,id:null,type:null,metadata:null,node:null };
 let elementIdcounter=0;
 
-document.getElementById('kml-layer').addEventListener('change', async function (e) {
-  const file = e.target.files[0];
-  if (!file) return;
+// document.getElementById('kml-layer').addEventListener('change', async function (e) {
+//   const file = e.target.files[0];
+//   if (!file) return;
 
-  const fileName = file.name.toLowerCase();
-    labelMarkers = [];
-  try {
-    let kmlDom;
+//   const fileName = file.name.toLowerCase();
+//     labelMarkers = [];
+//   try {
+//     let kmlDom;
 
-    // ── KMZ: unzip and extract the .kml inside ──────────────────────────────
-    if (fileName.endsWith('.kmz')) {
-      const arrayBuffer = await file.arrayBuffer();
-      const zip         = await JSZip.loadAsync(arrayBuffer);
+//     // ── KMZ: unzip and extract the .kml inside ──────────────────────────────
+//     if (fileName.endsWith('.kmz')) {
+//       const arrayBuffer = await file.arrayBuffer();
+//       const zip         = await JSZip.loadAsync(arrayBuffer);
 
-      // Find the first .kml file inside the zip
-      const kmlFileName = Object.keys(zip.files).find(name =>
-        name.toLowerCase().endsWith('.kml')
-      );
+//       // Find the first .kml file inside the zip
+//       const kmlFileName = Object.keys(zip.files).find(name =>
+//         name.toLowerCase().endsWith('.kml')
+//       );
 
-      if (!kmlFileName) {
-        alert('No KML file found inside the KMZ.');
-        return;
-      }
+//       if (!kmlFileName) {
+//         alert('No KML file found inside the KMZ.');
+//         return;
+//       }
 
-      const kmlText = await zip.files[kmlFileName].async('text');
-      kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
+//       const kmlText = await zip.files[kmlFileName].async('text');
+//       kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
 
-    // ── KML: read as plain text ─────────────────────────────────────────────
-    } else if (fileName.endsWith('.kml')) {
-      const kmlText = await file.text();
-      kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
+//     // ── KML: read as plain text ─────────────────────────────────────────────
+//     } else if (fileName.endsWith('.kml')) {
+//       const kmlText = await file.text();
+//       kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
 
-    } else {
-      alert('Unsupported file type. Please upload a .kml or .kmz file.');
-      return;
-    }
+//     } else {
+//       alert('Unsupported file type. Please upload a .kml or .kmz file.');
+//       return;
+//     }
 
-    // ── Check for XML parse errors ──────────────────────────────────────────
-    const parseError = kmlDom.querySelector('parsererror');
-    if (parseError) {
-      console.error('XML parse error:', parseError.textContent);
-      alert('Failed to parse KML file. File may be corrupted.');
-      return;
-    }
+//     // ── Check for XML parse errors ──────────────────────────────────────────
+//     const parseError = kmlDom.querySelector('parsererror');
+//     if (parseError) {
+//       console.error('XML parse error:', parseError.textContent);
+//       alert('Failed to parse KML file. File may be corrupted.');
+//       return;
+//     }
 
-    // ── Remove existing layer ───────────────────────────────────────────────
-    // if (kmlLayer) {
-    //   map.removeLayer(kmlLayer);
-    //   kmlLayer = null;
-    // }
+//     // ── Remove existing layer ───────────────────────────────────────────────
+//     // if (kmlLayer) {
+//     //   map.removeLayer(kmlLayer);
+//     //   kmlLayer = null;
+//     // }
 
-    // ── Convert KML DOM → GeoJSON ───────────────────────────────────────────
-    const geojson = toGeoJSON.kml(kmlDom);
-    console.log('Features loaded:', geojson.features.length);
+//     // ── Convert KML DOM → GeoJSON ───────────────────────────────────────────
+//     const geojson = toGeoJSON.kml(kmlDom);
+//     console.log('Features loaded:', geojson.features.length);
 
-    if (!geojson.features.length) {
-      alert('No features found in the KML file.');
-      return;
-    }
+//     if (!geojson.features.length) {
+//       alert('No features found in the KML file.');
+//       return;
+//     }
 
    
-    kmlLayer = L.geoJSON(geojson, {
+//     kmlLayer = L.geoJSON(geojson, {
 
-        style: function (feature) {
-            const p = feature.properties || {};
-            return {
-            color:       p.stroke           || '#3388ff',
-            weight:      p['stroke-width']  || 3,
-            opacity:     p['stroke-opacity']|| 1,
-            fillColor:   p.fill             || '#3388ff',
-            fillOpacity: p['fill-opacity']  || 0.2,
-            };
-        },
+//         style: function (feature) {
+//             const p = feature.properties || {};
+//             return {
+//             color:       p.stroke           || '#3388ff',
+//             weight:      p['stroke-width']  || 3,
+//             opacity:     p['stroke-opacity']|| 1,
+//             fillColor:   p.fill             || '#3388ff',
+//             fillOpacity: p['fill-opacity']  || 0.2,
+//             };
+//         },
 
-        pointToLayer: function (feature, latlng) {
-            const p       = feature.properties || {};
-            const iconUrl = p.icon || null;
-            const name    = p.name || '';
+//         pointToLayer: function (feature, latlng) {
+//             const p       = feature.properties || {};
+//             const iconUrl = p.icon || null;
+//             const name    = p.name || '';
 
-            // Create label marker and store it
-            if (name) {
-            const label = createLabelMarker(latlng, name);
-            labelMarkers.push(label);
-            }
+//             // Create label marker and store it
+//             if (name) {
+//             const label = createLabelMarker(latlng, name);
+//             labelMarkers.push(label);
+//             }
 
-            if (iconUrl) {
-            return L.marker(latlng, {
-                icon: L.icon({
-                iconUrl:     iconUrl,
-                iconSize:    [20, 20],
-                iconAnchor:  [10, 10],
-                popupAnchor: [0, -10],
-                })
-            });
-            }
-            return L.marker(latlng);
-        },
+//             if (iconUrl) {
+//             return L.marker(latlng, {
+//                 icon: L.icon({
+//                 iconUrl:     iconUrl,
+//                 iconSize:    [20, 20],
+//                 iconAnchor:  [10, 10],
+//                 popupAnchor: [0, -10],
+//                 })
+//             });
+//             }
+//             return L.marker(latlng);
+//         },
 
-        onEachFeature: function (feature, layer) {
-            const p = feature.properties || {};
-            const name = p.name || '';
+//         onEachFeature: function (feature, layer) {
+//             const p = feature.properties || {};
+//             const name = p.name || '';
 
-            // For lines and polygons, add label at center
-            if (feature.geometry.type !== 'Point' && name) {
-            let latlng;
-            if (layer.getBounds) {
-                latlng = layer.getBounds().getCenter();
-            }
-            if (latlng) {
-                const label = createLabelMarker(latlng, name);
-                labelMarkers.push(label);
-            }
-            }
+//             // For lines and polygons, add label at center
+//             if (feature.geometry.type !== 'Point' && name) {
+//             let latlng;
+//             if (layer.getBounds) {
+//                 latlng = layer.getBounds().getCenter();
+//             }
+//             if (latlng) {
+//                 const label = createLabelMarker(latlng, name);
+//                 labelMarkers.push(label);
+//             }
+//             }
 
-            // ── Popup content ───────────────────────────────────────────────────────
-            const skipKeys = [
-            'name', 'description', 'styleUrl',
-            'stroke', 'stroke-width', 'stroke-opacity',
-            'fill', 'fill-opacity', 'icon',
-            'icon-opacity', 'icon-color', 'icon-scale',
-            'marker-color', 'marker-size', 'marker-symbol',
-            ];
+//             // ── Popup content ───────────────────────────────────────────────────────
+//             const skipKeys = [
+//             'name', 'description', 'styleUrl',
+//             'stroke', 'stroke-width', 'stroke-opacity',
+//             'fill', 'fill-opacity', 'icon',
+//             'icon-opacity', 'icon-color', 'icon-scale',
+//             'marker-color', 'marker-size', 'marker-symbol',
+//             ];
 
-            let content = '';
-            if (name) content += `<strong style="font-size:14px;">${name}</strong><hr>`;
+//             let content = '';
+//             if (name) content += `<strong style="font-size:14px;">${name}</strong><hr>`;
 
-            if (p.description) {
-            const desc = typeof p.description === 'object'
-                ? (p.description.value || '')
-                : p.description;
-            if (desc) content += `<div style="margin-bottom:6px;">${desc}</div>`;
-            }
+//             if (p.description) {
+//             const desc = typeof p.description === 'object'
+//                 ? (p.description.value || '')
+//                 : p.description;
+//             if (desc) content += `<div style="margin-bottom:6px;">${desc}</div>`;
+//             }
 
-            const dataEntries = Object.entries(p).filter(([key, val]) =>
-            !skipKeys.includes(key) && val !== null && val !== undefined && val !== ''
+//             const dataEntries = Object.entries(p).filter(([key, val]) =>
+//             !skipKeys.includes(key) && val !== null && val !== undefined && val !== ''
+//             );
+
+//             if (dataEntries.length) {
+//             content += `
+//                 <table style="width:100%;font-size:12px;border-collapse:collapse;">
+//                 ${dataEntries.map(([key, val]) => `
+//                     <tr style="border-bottom:1px solid #eee;">
+//                     <td style="padding:3px 6px;font-weight:bold;white-space:nowrap;color:#555;">${key}</td>
+//                     <td style="padding:3px 6px;">${val}</td>
+//                     </tr>
+//                 `).join('')}
+//                 </table>`;
+//             }
+
+//             if (!content) content = '<em>No information available</em>';
+//             layer.bindPopup(content, { maxWidth: 320, maxHeight: 250 });
+
+//             // Make loaded features selectable for editing when clicked
+//             layer.on('click', (e) => {
+//                 try {
+//                     L.DomEvent.stopPropagation(e);
+//                     if (window.selectFeature) window.selectFeature(layer, e.latlng);
+//                     currentTool = 'edit';
+//                     if (window.editorToolChanged) window.editorToolChanged('edit');
+//                 } catch (err) { console.warn('Select feature failed', err); }
+//             });
+//         }
+
+//         }).addTo(map);
+//     // Initial label visibility check after layer loads
+//     updateLabels(12);
+//     addLayerToTree(fileName,kmlLayer,labelMarkers)
+//     // ── Zoom map to fit all features ────────────────────────────────────────
+//     const bounds = kmlLayer.getBounds();
+//     if (bounds.isValid()) {
+//       map.fitBounds(bounds, { padding: [20, 20] });
+//     }
+
+//   } catch (err) {
+//     console.error('KML/KMZ load error:', err);
+//     alert('Error loading file: ' + err.message);
+//   }
+// });
+
+
+document.getElementById('kml-layer').addEventListener('change', async function (e) {
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+
+    labelMarkers = [];
+
+    try {
+
+        let kmlText = '';
+
+        // ─────────────────────────────────────────────────────────────
+        // KMZ FILE
+        // ─────────────────────────────────────────────────────────────
+        if (fileName.endsWith('.kmz')) {
+
+            const arrayBuffer = await file.arrayBuffer();
+            const zip = await JSZip.loadAsync(arrayBuffer);
+
+            // Find first .kml file
+            const kmlFileName = Object.keys(zip.files).find(name =>
+                name.toLowerCase().endsWith('.kml')
             );
 
-            if (dataEntries.length) {
-            content += `
-                <table style="width:100%;font-size:12px;border-collapse:collapse;">
-                ${dataEntries.map(([key, val]) => `
-                    <tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:3px 6px;font-weight:bold;white-space:nowrap;color:#555;">${key}</td>
-                    <td style="padding:3px 6px;">${val}</td>
-                    </tr>
-                `).join('')}
-                </table>`;
+            if (!kmlFileName) {
+                alert('No KML file found inside the KMZ.');
+                return;
             }
 
-            if (!content) content = '<em>No information available</em>';
-            layer.bindPopup(content, { maxWidth: 320, maxHeight: 250 });
+            kmlText = await zip.files[kmlFileName].async('text');
 
-            // Make loaded features selectable for editing when clicked
-            layer.on('click', (e) => {
-                try {
-                    L.DomEvent.stopPropagation(e);
-                    if (window.selectFeature) window.selectFeature(layer, e.latlng);
-                    currentTool = 'edit';
-                    if (window.editorToolChanged) window.editorToolChanged('edit');
-                } catch (err) { console.warn('Select feature failed', err); }
+        // ─────────────────────────────────────────────────────────────
+        // KML FILE
+        // ─────────────────────────────────────────────────────────────
+        } else if (fileName.endsWith('.kml')) {
+
+            kmlText = await file.text();
+
+        } else {
+
+            alert('Unsupported file type. Please upload a .kml or .kmz file.');
+            return;
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // FIX INVALID xsi NAMESPACE
+        // Some KMZ/KML exports contain:
+        // xsi:schemaLocation
+        // but forget:
+        // xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        // ─────────────────────────────────────────────────────────────
+        if (
+            kmlText.includes('xsi:schemaLocation') &&
+            !kmlText.includes('xmlns:xsi=')
+        ) {
+
+            kmlText = kmlText.replace(
+                /<kml([^>]*)>/i,
+                '<kml$1 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+            );
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // PARSE XML
+        // ─────────────────────────────────────────────────────────────
+        const kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
+
+        // ─────────────────────────────────────────────────────────────
+        // CHECK XML ERRORS
+        // ─────────────────────────────────────────────────────────────
+        const parseError = kmlDom.querySelector('parsererror');
+
+        if (parseError) {
+            console.error('XML parse error:', parseError.textContent);
+            alert('Failed to parse KML/KMZ file. File may be corrupted.');
+            return;
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // CONVERT KML → GEOJSON
+        // ─────────────────────────────────────────────────────────────
+        const geojson = toGeoJSON.kml(kmlDom);
+
+        console.log('Features loaded:', geojson.features.length);
+
+        if (!geojson.features.length) {
+            alert('No features found in the KML file.');
+            return;
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // CREATE LEAFLET LAYER
+        // ─────────────────────────────────────────────────────────────
+        kmlLayer = L.geoJSON(geojson, {
+
+            style: function (feature) {
+
+                const p = feature.properties || {};
+
+                return {
+                    color: p.stroke || '#3388ff',
+                    weight: p['stroke-width'] || 3,
+                    opacity: p['stroke-opacity'] || 1,
+                    fillColor: p.fill || '#3388ff',
+                    fillOpacity: p['fill-opacity'] || 0.2,
+                };
+            },
+
+            // pointToLayer: function (feature, latlng) {
+
+            //     const p = feature.properties || {};
+            //     const iconUrl = p.icon || null;
+            //     const name = p.name || '';
+
+            //     // Add label marker
+            //     if (name) {
+            //         const label = createLabelMarker(latlng, name);
+            //         labelMarkers.push(label);
+            //     }
+
+            //     // Custom icon
+            //     if (iconUrl) {
+
+            //         return L.marker(latlng, {
+            //             icon: L.icon({
+            //                 iconUrl: iconUrl,
+            //                 iconSize: [20, 20],
+            //                 iconAnchor: [10, 10],
+            //                 popupAnchor: [0, -10],
+            //             })
+            //         });
+            //     }
+
+            //     return L.marker(latlng);
+            // },
+                pointToLayer: function (feature, latlng) {
+
+                    const p = feature.properties || {};
+                    const iconUrl = p.icon || null;
+                    const name = p.name || '';
+
+                    // Add label marker
+                    if (name) {
+                        const label = createLabelMarker(latlng, name);
+                        labelMarkers.push(label);
+                    }
+
+                    // Default Leaflet icon
+                    const defaultIcon = L.icon({
+                        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                        iconSize: [16, 26],
+                        iconAnchor: [8, 26],
+                        popupAnchor: [1, -20],
+                        shadowSize: [26, 26]
+                    });
+
+                    // If no icon in KML
+                    if (!iconUrl) {
+                        return L.marker(latlng, {
+                            icon: defaultIcon
+                        });
+                    }
+
+                    // Create custom icon
+                    const customIcon = L.icon({
+                        iconUrl: iconUrl,
+                        iconSize: [14, 14],      // smaller size
+                        iconAnchor: [7, 7],      // half of size
+                        popupAnchor: [0, -7]
+                    });
+
+                    const marker = L.marker(latlng, {
+                        icon: customIcon
+                    });
+
+                    // Fallback if icon fails to load
+                    const testImg = new Image();
+
+                    testImg.onload = function () {
+                        // icon exists → do nothing
+                    };
+
+                    testImg.onerror = function () {
+
+                        console.warn('Icon not found:', iconUrl);
+
+                        marker.setIcon(defaultIcon);
+                    };
+
+                    testImg.src = iconUrl;
+
+                    return marker;
+                },
+            onEachFeature: function (feature, layer) {
+
+                const p = feature.properties || {};
+                const name = p.name || '';
+
+                // Labels for polygons/lines
+                if (feature.geometry.type !== 'Point' && name) {
+
+                    let latlng;
+
+                    if (layer.getBounds) {
+                        latlng = layer.getBounds().getCenter();
+                    }
+
+                    if (latlng) {
+                        const label = createLabelMarker(latlng, name);
+                        labelMarkers.push(label);
+                    }
+                }
+
+                // Popup
+                const skipKeys = [
+                    'name', 'description', 'styleUrl',
+                    'stroke', 'stroke-width', 'stroke-opacity',
+                    'fill', 'fill-opacity', 'icon',
+                    'icon-opacity', 'icon-color', 'icon-scale',
+                    'marker-color', 'marker-size', 'marker-symbol',
+                ];
+
+                let content = '';
+
+                if (name) {
+                    content += `<strong style="font-size:14px;">${name}</strong><hr>`;
+                }
+
+                if (p.description) {
+
+                    const desc = typeof p.description === 'object'
+                        ? (p.description.value || '')
+                        : p.description;
+
+                    if (desc) {
+                        content += `<div style="margin-bottom:6px;">${desc}</div>`;
+                    }
+                }
+
+                const dataEntries = Object.entries(p).filter(([key, val]) =>
+                    !skipKeys.includes(key) &&
+                    val !== null &&
+                    val !== undefined &&
+                    val !== ''
+                );
+
+                if (dataEntries.length) {
+
+                    content += `
+                        <table style="width:100%;font-size:12px;border-collapse:collapse;">
+                            ${dataEntries.map(([key, val]) => `
+                                <tr style="border-bottom:1px solid #eee;">
+                                    <td style="padding:3px 6px;font-weight:bold;white-space:nowrap;color:#555;">
+                                        ${key}
+                                    </td>
+                                    <td style="padding:3px 6px;">
+                                        ${val}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                    `;
+                }
+
+                if (!content) {
+                    content = '<em>No information available</em>';
+                }
+
+                layer.bindPopup(content, {
+                    maxWidth: 320,
+                    maxHeight: 250
+                });
+
+                // Feature selection
+                layer.on('click', (e) => {
+
+                    try {
+
+                        L.DomEvent.stopPropagation(e);
+
+                        if (window.selectFeature) {
+                            window.selectFeature(layer, e.latlng);
+                        }
+
+                        currentTool = 'edit';
+
+                        if (window.editorToolChanged) {
+                            window.editorToolChanged('edit');
+                        }
+
+                    } catch (err) {
+
+                        console.warn('Select feature failed', err);
+                    }
+                });
+            }
+
+        }).addTo(map);
+
+        // ─────────────────────────────────────────────────────────────
+        // LABELS + LAYER TREE
+        // ─────────────────────────────────────────────────────────────
+        updateLabels(12);
+
+        addLayerToTree(fileName, kmlLayer, labelMarkers);
+
+        // ─────────────────────────────────────────────────────────────
+        // FIT MAP TO FEATURES
+        // ─────────────────────────────────────────────────────────────
+        const bounds = kmlLayer.getBounds();
+
+        if (bounds.isValid()) {
+            map.fitBounds(bounds, {
+                padding: [20, 20]
             });
         }
 
-        }).addTo(map);
-    // Initial label visibility check after layer loads
-    updateLabels(12);
-    addLayerToTree(fileName,kmlLayer,labelMarkers)
-    // ── Zoom map to fit all features ────────────────────────────────────────
-    const bounds = kmlLayer.getBounds();
-    if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [20, 20] });
-    }
+    } catch (err) {
 
-  } catch (err) {
-    console.error('KML/KMZ load error:', err);
-    alert('Error loading file: ' + err.message);
-  }
+        console.error('KML/KMZ load error:', err);
+
+        alert('Error loading file: ' + err.message);
+    }
 });
+
 
 function addLayerToTree(fileName,layer,label){
 
@@ -324,6 +654,7 @@ let kml_upload = {
 
         try {
           const xmlDoc = await parseFile(file);
+          console.log("KML file parsed successfully:", xmlDoc);
           const source = buildTreeDataFromKML(xmlDoc);
 
               // Wrap inside a root node named after the file
@@ -546,9 +877,9 @@ window.initMapEdit = function () {
         export()  { console.log("Export data");  exportMapToKm();},
         save()    { console.log("Save data"); openSaveModal(); },
         load()    { console.log("Load data");   },
-        upload()  { document.getElementById('kml-upload').click(); },
+        upload()  { document.getElementById('kml-layer').click(); },
         maps()    { console.log("maps");  Router.go("uktx/map/#/maps"); },
-        kml()     { document.getElementById('kml-layer').click(); },
+        kml()     { document.getElementById('kml-upload').click(); },
     };
 
     ctxMenu = document.getElementById("contextMenu");
@@ -563,22 +894,74 @@ window.initMapEdit = function () {
 /**
  * Read a KML or KMZ File object and return a parsed XML Document.
  */
+// async function parseFile(file) {
+//     const name = file.name.toLowerCase();
+//     if (name.endsWith(".kml")) {
+//         const text = await file.text();
+//         return new DOMParser().parseFromString(text, "text/xml");
+//     } else if (name.endsWith(".kmz")) {
+//         const buffer = await file.arrayBuffer();
+//         const zip    = await JSZip.loadAsync(buffer);
+//         const kmlFileName = Object.keys(zip.files).find(n => n.toLowerCase().endsWith(".kml"));
+//         if (!kmlFileName) throw new Error("No KML found inside KMZ");
+//         const kmlText = await zip.files[kmlFileName].async("text");
+//         return new DOMParser().parseFromString(kmlText, "text/xml");
+//     } else {
+//         throw new Error("Unsupported file type");
+//     }
+// }
+
+
 async function parseFile(file) {
     const name = file.name.toLowerCase();
+
+    let kmlText;
+
     if (name.endsWith(".kml")) {
-        const text = await file.text();
-        return new DOMParser().parseFromString(text, "text/xml");
+        kmlText = await file.text();
+
     } else if (name.endsWith(".kmz")) {
         const buffer = await file.arrayBuffer();
-        const zip    = await JSZip.loadAsync(buffer);
-        const kmlFileName = Object.keys(zip.files).find(n => n.toLowerCase().endsWith(".kml"));
-        if (!kmlFileName) throw new Error("No KML found inside KMZ");
-        const kmlText = await zip.files[kmlFileName].async("text");
-        return new DOMParser().parseFromString(kmlText, "text/xml");
+        const zip = await JSZip.loadAsync(buffer);
+
+        // Find first KML file
+        const kmlFileName = Object.keys(zip.files)
+            .find(n => n.toLowerCase().endsWith(".kml"));
+
+        if (!kmlFileName) {
+            throw new Error("No KML found inside KMZ");
+        }
+
+        kmlText = await zip.files[kmlFileName].async("text");
+
     } else {
         throw new Error("Unsupported file type");
     }
+
+    // Fix missing xsi namespace
+    if (
+        kmlText.includes("xsi:schemaLocation") &&
+        !kmlText.includes('xmlns:xsi=')
+    ) {
+        kmlText = kmlText.replace(
+            /<kml([^>]*)>/i,
+            '<kml$1 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+        );
+    }
+
+    const xml = new DOMParser().parseFromString(kmlText, "text/xml");
+
+    // Detect actual parse errors
+    const parserError = xml.querySelector("parsererror");
+
+    if (parserError) {
+        console.error(parserError.textContent);
+        throw new Error("Invalid XML/KML");
+    }
+
+    return xml;
 }
+
 
 /** Return the <name> text of a KML node, or fall back to tag name. */
 function nodeLabel(node) {
@@ -683,21 +1066,12 @@ function buildOverlaysFromPlacemark(node) {
         latLngs.forEach(ll => boundsLatLngs.push(ll));
         layers.push(polyline);
         // Allow selecting this polyline in the editor
+       
         polyline.on('click', (e) => {
             try {
                 L.DomEvent.stopPropagation(e);
                 if (window.selectFeature) window.selectFeature(polyline, e.latlng);
-                // Optionally switch editor into edit mode so vertices show
-                if (window.editorToolChanged) window.editorToolChanged('edit');
-            } catch (err) { console.warn('polyline select failed', err); }
-        });
-        // Make the polyline selectable for editing
-        polyline.on('click', (e) => {
-            try {
-                L.DomEvent.stopPropagation(e);
-                if (window.selectFeature) window.selectFeature(polyline, e.latlng);
-                currentTool = 'edit';
-                if (window.editorToolChanged) window.editorToolChanged('edit');
+                document.getElementById('tool-route').click();
             } catch (err) { console.warn('Select polyline failed', err); }
         });
       
