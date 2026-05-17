@@ -110,91 +110,7 @@ document.getElementById('kml-layer').addEventListener('change', async function (
       return;
     }
 
-    // ── Build Leaflet layer ─────────────────────────────────────────────────
-    // kmlLayer = L.geoJSON(geojson, {
-
-    //   // Style lines and polygons
-    //   style: function (feature) {
-    //     const p = feature.properties || {};
-    //     return {
-    //       color:       p.stroke              || '#3388ff',
-    //       weight:      p['stroke-width']     || 3,
-    //       opacity:     p['stroke-opacity']   || 1,
-    //       fillColor:   p.fill               || '#3388ff',
-    //       fillOpacity: p['fill-opacity']    || 0.2,
-    //     };
-    //   },
-
-    //   // Points → markers
-    //   pointToLayer: function (feature, latlng) {
-    //     const p       = feature.properties || {};
-    //     const iconUrl = p.icon || null;
-
-    //     if (iconUrl) {
-    //       return L.marker(latlng, {
-    //         icon: L.icon({
-    //           iconUrl:     iconUrl,
-    //           iconSize:    [20, 20],
-    //           iconAnchor:  [10, 10],
-    //           popupAnchor: [0, -10],
-    //         })
-    //       });
-    //     }
-    //     return L.marker(latlng);
-    //   },
-
-    //   // Bind popup to every feature
-    //     onEachFeature: function (feature, layer) {
-    //     const p = feature.properties || {};
-
-    //     // ── Keys to hide (style/internal KML properties) ──────────────────────────
-    //     const skipKeys = [
-    //         'name', 'description', 'styleUrl',
-    //         'stroke', 'stroke-width', 'stroke-opacity',
-    //         'fill', 'fill-opacity', 'icon',
-    //         'icon-opacity', 'icon-color', 'icon-scale',
-    //         'marker-color', 'marker-size', 'marker-symbol',
-    //     ];
-
-    //     // ── Name ──────────────────────────────────────────────────────────────────
-    //     let content = '';
-    //     if (p.name) {
-    //         content += `<strong style="font-size:14px;">${p.name}</strong><hr>`;
-    //     }
-
-    //     // ── Description ───────────────────────────────────────────────────────────
-    //     if (p.description) {
-    //         const desc = typeof p.description === 'object'
-    //         ? (p.description.value || '')
-    //         : p.description;
-    //         if (desc) content += `<div style="margin-bottom:6px;">${desc}</div>`;
-    //     }
-
-    //     // ── Extended Data (actual KML data fields) ────────────────────────────────
-    //     const dataEntries = Object.entries(p).filter(([key, val]) =>
-    //         !skipKeys.includes(key) && val !== null && val !== undefined && val !== ''
-    //     );
-
-    //     if (dataEntries.length) {
-    //         content += `
-    //         <table style="width:100%; font-size:12px; border-collapse:collapse;">
-    //             ${dataEntries.map(([key, val]) => `
-    //             <tr style="border-bottom:1px solid #eee;">
-    //                 <td style="padding:3px 6px; font-weight:bold; white-space:nowrap; color:#555;">${key}</td>
-    //                 <td style="padding:3px 6px;">${val}</td>
-    //             </tr>
-    //             `).join('')}
-    //         </table>`;
-    //     }
-
-    //     if (!content) content = '<em>No information available</em>';
-
-    //     layer.bindPopup(content, { maxWidth: 320, maxHeight: 250 });
-    //     }
-
-    // }).addTo(map);
-
-
+   
     kmlLayer = L.geoJSON(geojson, {
 
         style: function (feature) {
@@ -285,6 +201,16 @@ document.getElementById('kml-layer').addEventListener('change', async function (
 
             if (!content) content = '<em>No information available</em>';
             layer.bindPopup(content, { maxWidth: 320, maxHeight: 250 });
+
+            // Make loaded features selectable for editing when clicked
+            layer.on('click', (e) => {
+                try {
+                    L.DomEvent.stopPropagation(e);
+                    if (window.selectFeature) window.selectFeature(layer, e.latlng);
+                    currentTool = 'edit';
+                    if (window.editorToolChanged) window.editorToolChanged('edit');
+                } catch (err) { console.warn('Select feature failed', err); }
+            });
         }
 
         }).addTo(map);
@@ -756,6 +682,24 @@ function buildOverlaysFromPlacemark(node) {
 
         latLngs.forEach(ll => boundsLatLngs.push(ll));
         layers.push(polyline);
+        // Allow selecting this polyline in the editor
+        polyline.on('click', (e) => {
+            try {
+                L.DomEvent.stopPropagation(e);
+                if (window.selectFeature) window.selectFeature(polyline, e.latlng);
+                // Optionally switch editor into edit mode so vertices show
+                if (window.editorToolChanged) window.editorToolChanged('edit');
+            } catch (err) { console.warn('polyline select failed', err); }
+        });
+        // Make the polyline selectable for editing
+        polyline.on('click', (e) => {
+            try {
+                L.DomEvent.stopPropagation(e);
+                if (window.selectFeature) window.selectFeature(polyline, e.latlng);
+                currentTool = 'edit';
+                if (window.editorToolChanged) window.editorToolChanged('edit');
+            } catch (err) { console.warn('Select polyline failed', err); }
+        });
       
         // //----- extra code------
         // const elnode = nodeLabel(node);
@@ -784,6 +728,23 @@ function buildOverlaysFromPlacemark(node) {
 
         latLngs.forEach(ll => boundsLatLngs.push(ll));
         layers.push(polygon);
+        // Allow selecting this polygon in the editor
+        polygon.on('click', (e) => {
+            try {
+                L.DomEvent.stopPropagation(e);
+                if (window.selectFeature) window.selectFeature(polygon, e.latlng);
+                if (window.editorToolChanged) window.editorToolChanged('edit');
+            } catch (err) { console.warn('polygon select failed', err); }
+        });
+        // Make the polygon selectable for editing
+        polygon.on('click', (e) => {
+            try {
+                L.DomEvent.stopPropagation(e);
+                if (window.selectFeature) window.selectFeature(polygon, e.latlng);
+                currentTool = 'edit';
+                if (window.editorToolChanged) window.editorToolChanged('edit');
+            } catch (err) { console.warn('Select polygon failed', err); }
+        });
         //         //----- extra code------
         // const elnode = nodeLabel(node);
         // const elid    = "el" + (++elementIdcounter);
@@ -1328,31 +1289,33 @@ function setupToolbar() {
 
 // ─── Modals ───────────────────────────────────────────────────────────────────
 
-function setupModals() {
-    const modal    = document.getElementById('save-modal');
-    if (!modal) return;
-    const closeBtn = document.querySelector('.close-modal');
-    if (closeBtn) closeBtn.onclick = () => modal.style.display = "none";
-    window.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
-    const form = document.getElementById('save-form');
-    if (form) form.addEventListener('submit', e => { e.preventDefault(); saveFeature(); });
-}
+// function setupModals() {
+//       // it is a popup form to enter feature name and description before saving to DB
+//     const modal    = document.getElementById('save-modal');
+//     if (!modal) return;
+//     const closeBtn = document.querySelector('.close-modal');
+//     if (closeBtn) closeBtn.onclick = () => modal.style.display = "none";
+//     window.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
+//     const form = document.getElementById('save-form');
+//     if (form) form.addEventListener('submit', e => { e.preventDefault(); saveFeature(); });
+// }
 
-function openSaveModal() {
-    const modal = document.getElementById('save-modal');
-    if (!modal) return;
-    modal.style.display = 'block';
-    document.getElementById('feature-name').value = '';
-    document.getElementById('feature-desc').value = '';
-}
+// function openSaveModal() {
+//     // it is a popup form to enter feature name and description before saving to DB
+//     const modal = document.getElementById('save-modal');
+//     if (!modal) return;
+//     modal.style.display = 'block';
+//     document.getElementById('feature-name').value = '';
+//     document.getElementById('feature-desc').value = '';
+// }
 
 
 // ─── Save Feature ─────────────────────────────────────────────────────────────
 
 function saveFeature() {
-    const name = document.getElementById('feature-name').value;
-    const desc = document.getElementById('feature-desc').value;
-    const dest = document.getElementById('save-destination').value;
+    // const name = document.getElementById('feature-name').value;
+    // const desc = document.getElementById('feature-desc').value;
+    // const dest = document.getElementById('save-destination').value;
 
     const fg = window.featureGroup;
     let layer = null;
@@ -1363,10 +1326,10 @@ function saveFeature() {
 
     let geojson = layer.toGeoJSON();
     geojson.properties             = geojson.properties || {};
-    geojson.properties.name        = name;
+    geojson.properties.name        = "untitled"+ Math.floor(Math.random()*1000) ;
     geojson.properties.description = desc;
 
-    fetch('./php/api.php?action=save_feature', {
+    fetch('./php/api.php?action=save_feature&user=' + encodeURIComponent(window.currentUser.id), {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ destination: dest, feature: geojson }),
@@ -1385,3 +1348,40 @@ function saveFeature() {
         alert('Server error while saving: ' + err.message);
     });
 }
+
+// function saveFeature() {
+//     const name = document.getElementById('feature-name').value;
+//     const desc = document.getElementById('feature-desc').value;
+//     const dest = document.getElementById('save-destination').value;
+
+//     const fg = window.featureGroup;
+//     let layer = null;
+//     for (let layerId in fg._layers) {
+//         layer = fg._layers[layerId];
+//     }
+//     if (!layer) { alert('No feature to save'); return; }
+
+//     let geojson = layer.toGeoJSON();
+//     geojson.properties             = geojson.properties || {};
+//     geojson.properties.name        = name;
+//     geojson.properties.description = desc;
+
+//     fetch('./php/api.php?action=save_feature', {
+//         method:  'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body:    JSON.stringify({ destination: dest, feature: geojson }),
+//     })
+//     .then(res => res.json())
+//     .then(data => {
+//         if (data.success) {
+//             alert('Saved successfully!');
+//             document.getElementById('save-modal').style.display = 'none';
+//         } else {
+//             alert('Error saving: ' + (data.message || 'Unknown error'));
+//         }
+//     })
+//     .catch(err => {
+//         console.error(err);
+//         alert('Server error while saving: ' + err.message);
+//     });
+// }

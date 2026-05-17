@@ -17,6 +17,7 @@ try {
     // Create Table if not exists
     $sql = "CREATE TABLE IF NOT EXISTS features (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        user VARCHAR(50) NOT NULL,
         name VARCHAR(255) NOT NULL,
         description TEXT,
         type ENUM('Point', 'LineString') NOT NULL,

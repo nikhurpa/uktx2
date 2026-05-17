@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 require_once 'db.php';
 
 $action = $_GET['action'] ?? '';
+$user = $_GET['user'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -12,7 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 switch ($action) {
     case 'load_db_features':
         try {
-            $stmt = $pdo->query("SELECT * FROM features");
+            $stmt = $pdo->prepare("SELECT * FROM features WHERE user = '$user'");
+          
             $features = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $features[] = [
@@ -50,8 +52,8 @@ switch ($action) {
 
         if ($dest === 'db') {
             try {
-                $stmt = $pdo->prepare("INSERT INTO features (name, description, type, coordinates) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$name, $desc, $type, $coords]);
+                $stmt = $pdo->prepare("INSERT INTO features (name,user, description, type, coordinates) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$name, $user, $desc, $type, $coords]);
                 echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
             } catch(PDOException $e) {
                 echo json_encode(['success' => false, 'message' => $e->getMessage()]);

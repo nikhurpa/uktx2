@@ -151,6 +151,9 @@ window.initMapEeditor = function () {
         console.log(currentTool);
         if(currentTool === 'add-point') {
             const marker = L.marker(e.latlng, { draggable: true });
+            marker.meta = { name: 'New Point', id: 'point_' + (++idCounter) };
+            addElementToTree(marker);
+
             marker.addTo(map);
             selectFeature(marker, null);
             // document.getElementById('tool-save').click();
@@ -162,7 +165,16 @@ window.initMapEeditor = function () {
             isDrawingDrag = true;
             if(!drawingPolyline) {
                 let pl = L.polyline([e.latlng], {color: 'cyan', weight: 4}).addTo(map);
+                pl.meta = { name: 'New Polyline', id: 'polyline_' + (++idCounter) };
+                addElementToTree(pl);
                 selectFeature(pl, e.latlng);
+                pl.on('click', function(e2) {
+                    document.getElementById('tool-route').click();
+                    L.DomEvent.stopPropagation(e2);
+                    // selectPolyline(pl);
+                    selectFeature(pl, e2.latlng);
+                });
+
             } else {
                 let latlngs = drawingPolyline.getLatLngs();
                 latlngs.splice(selectedVertexIndex + 1, 0, e.latlng);
@@ -216,6 +228,8 @@ window.initMapEeditor = function () {
     map.on('dblclick', (e) => {
         if(currentTool === 'add-polyline' && drawingPolyline) {
             // document.getElementById('tool-save').click();
+           
+           
         }
     });
 
@@ -231,3 +245,42 @@ window.initMapEeditor = function () {
         }
     });
 }
+
+function addElementToTree(element){
+
+        const elementNodeId = element.meta.id;
+
+          kmlLayers[elementNodeId]   = {
+            layer: element,
+            label: element.meta.name
+        };
+        // kmlLayers[kmlFileNodeId].layer =layer;
+        // kmlLayers[kmlFileNodeId].labelMarkers = label;
+        
+        const elementNode = {
+            id: element.meta.id,
+            label: element.meta.name,
+            icon: kmlIcon,
+            checked: true,
+            // items: source,
+            value:element.meta.name
+        };
+
+        let elementByID = $('#jqxTree').find("#tempplaces")[0];
+        $("#jqxTree").jqxTree("addTo",  elementNode,  elementByID);
+        $("#jqxTree").on("checkChange", (event) => {
+            if (suppressCheckChange) return;
+            const element = event.args.element;
+            const id = $(element).attr("id");
+            const checked = event.args.checked;
+            if (id) setVisibilityRecursively(id, checked);
+        });
+
+    
+
+}
+
+// Expose selection API for other modules (e.g. KML loader)
+window.selectFeature = selectFeature;
+window.renderVertexMarkers = renderVertexMarkers;
+window.clearSelection = clearSelection;

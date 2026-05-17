@@ -1,6 +1,7 @@
-let user,savedValues
+let savedValues
 
-user={ id:"admin",rights:{level:"SU",map:"EDIT",tables:{}},metadata:{}}
+window.currentUser={ id:"admin",rights:{level:"SU",map:"EDIT",tables:{}},metadata:{}}
+
 
 // Save a cookie
 function setCookie(name, value, days) {
