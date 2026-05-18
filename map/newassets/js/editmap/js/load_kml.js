@@ -1362,6 +1362,12 @@ function treeEdit() {
     // ── Rename ──────────────────────────────────────────────────────────────
     $("#renameItem").on("click", () => {
         if (!contextTargetId) return;
+         const ids = treeSource.map(item => item.id);
+         if (ids.includes(contextTargetId)) {
+
+            alert("Can't Rename");
+            return;
+        } 
         const newName = prompt("Enter new name:");
         if (newName) {
             const item = $("#jqxTree").jqxTree("getItem", $("#" + contextTargetId)[0]);
