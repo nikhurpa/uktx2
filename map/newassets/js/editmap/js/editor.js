@@ -45,10 +45,11 @@ window.editorFinalizeFeature = function(name) {
     }
 };
 
-function clearSelection() {
+window.clearSelection=function() {
     if(selectedFeature instanceof L.Polyline) {
         selectedFeature.setStyle({ color: 'blue', weight: 3 }); 
     }
+   console.log("clear selection:",vertexMarkers.length)
     vertexMarkers.forEach(m => map.removeLayer(m));
     vertexMarkers = [];
     selectedFeature = null;
@@ -56,7 +57,7 @@ function clearSelection() {
     selectedVertexIndex = -1;
 }
 
-function createVertexIcon(isSelected) {
+window.createVertexIcon= function(isSelected) {
     return L.divIcon({
         className: 'vertex-marker',
         html: `<div style="width:12px;height:12px;background:${isSelected?'#00d2ff':'#ff0000'};border:2px solid white;border-radius:50%;box-shadow:0 0 3px rgba(0,0,0,0.5);"></div>`,
@@ -65,7 +66,7 @@ function createVertexIcon(isSelected) {
     });
 }
 
-function renderVertexMarkers() {
+window.renderVertexMarkers = function() {
     vertexMarkers.forEach(m => map.removeLayer(m));
     vertexMarkers = [];
     
@@ -273,6 +274,8 @@ function addElementToTree(element){
             const element = event.args.element;
             const id = $(element).attr("id");
             const checked = event.args.checked;
+            // (checked)? renderVertexMarkers() : clearSelection();
+            document.getElementById('tool-pan').click();
             if (id) setVisibilityRecursively(id, checked);
         });
 

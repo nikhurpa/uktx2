@@ -54,7 +54,7 @@ window.initMapEdit = function () {
             { id: "tool-route",    title: "Polyline",    icon: "./img/polyline.svg" },
             { id: "tool-polygon", title: "Polygon", icon: "./img/polygon.png" },
             { id: "tool-scale",   title: "Scale",   html: '<i class="fas fa-ruler-horizontal"></i>' },
-            { id: "tool-select",  title: "Select",  icon: "./img/select.svg" },
+            { id: "tool-pan",  title: "Pan",  icon: "./img/select.svg" },
             { id: "tool-edit",  title: "Edit",   html: '<i class="fa-solid fa-pen-to-square"></i>' },  //icon: "./img/resize.svg",
             { id: "tool-delete",  title: "Delete",  icon: "./img/delete.svg" },
             { id: "tool-undo",    title: "Undo",    icon: "./img/undo.svg" },
@@ -82,7 +82,7 @@ window.initMapEdit = function () {
         direction()    { console.log("Direction mode activated"); currentTool ='add-direction';  ; window.editorToolChanged(currentTool)},
         polygon() { console.log("Polygon mode activated"); currentTool ='add-polygon';  ; window.editorToolChanged(currentTool)},
         scale()   { console.log("Scale tool activated"); currentTool ='add-scale';  ; window.editorToolChanged(currentTool)},
-        select()  { console.log("Pan tool activated"); currentTool ='pan';  ; window.editorToolChanged(currentTool)},
+        pan()  { console.log("Pan tool activated"); currentTool ='pan';  ; window.editorToolChanged(currentTool)},
         edit()  { console.log("Edit tool activated"); currentTool ='edit';  ; window.editorToolChanged(currentTool)},
         delete()  {
             console.log("Delete all");
@@ -436,7 +436,9 @@ function addLayerToTree(fileName,layer,label){
             const element = event.args.element;
             const id = $(element).attr("id");
             const checked = event.args.checked;
+           
             if (id) setVisibilityRecursively(id, checked);
+           
         });
 
     
@@ -1280,11 +1282,13 @@ function setVisibilityRecursively(nodeId, visible) {
  */
 function bindTreeCheckboxes() {
     $("#jqxTree").on("checkChange", function (event) {
+      
         if (suppressCheckChange) return;
         const item    = event.args;
         const checked = item.checked;           // true / false / indeterminate
         const nodeId  = item.element ? item.element.id : null;
         if (!nodeId) return;
+       
         setVisibilityRecursively(nodeId, !!checked);
     });
 }
@@ -1756,4 +1760,3 @@ function saveFeature() {
         alert('Server error while saving: ' + err.message);
     });
 }
-
