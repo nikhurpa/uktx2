@@ -120,7 +120,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
     "./newassets/css/main.css",
     "./newassets/css/jqrightpanel.css",
     "./newassets/js/editmap/css/editmap.css",
-    "./newassets/js/editmap/css/kml-label.css"
+    "./newassets/js/editmap/css/kml-label.css?v=1.3",
 
   ];
 

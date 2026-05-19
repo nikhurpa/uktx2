@@ -25,23 +25,6 @@ let   leafletPopup = L.popup();
 
 // Equivalent of google.maps.LatLngBounds – we accumulate points then fitBounds
 let   boundsLatLngs = [];      // array of [lat, lng] pairs collected during KML parse
-//______  KML Layer ____________________________________________________________
-
-// document.getElementById('kml-layer').addEventListener('change', function (e) {
-//   const file   = e.target.files[0];
-//   const reader = new FileReader();
-
-//   reader.onload = function (evt) {
-//     const kmlText = evt.target.result;
-
-//     // Use omnivore with a string
-//     const layer = omnivore.kml.parse(kmlText).addTo(map);
-//     map.fitBounds(layer.getBounds());
-//   };
-
-//   reader.readAsText(file);
-// });
-
 let kmlLayer = null;
 let kmlLayers = {};
 let kmlLabelMarkers={};
@@ -50,6 +33,77 @@ let labelMarkers = [];
 let mapElements={element:null,id:null,type:null,metadata:null,node:null };
 let elementIdcounter=0;
 
+// ─── Map / Toolbar Init ──────────────────────────────────────────────────────
+
+let treeSource = [
+    { label: "My Places",        expanded: true, checked: true, icon: "./img/earth.jpg",  id: "myplaces",   value: "main_folder" },
+    { label: "Temporary Places", expanded: true, checked: true, icon: "./img/folder.png", id: "tempplaces", value: "temp_folder" },
+    { label: "Loaded Layers", expanded: true, checked: true, icon: "./img/kml1.png", id: "kmllayers", value: "kml_layers" },
+];
+window.initMapEdit = function () {
+
+    // setupModals();
+    // setupUpload();
+
+    $("#jqxTree").jqxTree({ source: treeSource, width: "95%", height: "300px", checkboxes: true, allowDrag: true, allowDrop: true });
+
+    $("#mode-ui").verticalToolbar({
+        tools: [
+            { id: "tool-point",   title: "Point",   icon: "./img/point.svg" },
+            { id: "tool-direction",   title: "Direction",   html: '<i class="fas fa-route"></i>' },
+            { id: "tool-route",    title: "Polyline",    icon: "./img/polyline.svg" },
+            { id: "tool-polygon", title: "Polygon", icon: "./img/polygon.png" },
+            { id: "tool-scale",   title: "Scale",   html: '<i class="fas fa-ruler-horizontal"></i>' },
+            { id: "tool-select",  title: "Select",  icon: "./img/select.svg" },
+            { id: "tool-edit",  title: "Edit",   html: '<i class="fa-solid fa-pen-to-square"></i>' },  //icon: "./img/resize.svg",
+            { id: "tool-delete",  title: "Delete",  icon: "./img/delete.svg" },
+            { id: "tool-undo",    title: "Undo",    icon: "./img/undo.svg" },
+            { id: "tool-save",  title: "Save",   html: '<i class="fa-solid fa-save"></i>' },  //icon: "./img/resize.svg",
+            { id: "tool-export",  title: "Export",  icon: "./img/download.svg" },
+            { id: "tool-maps",    title: "Maps",    html: '<i class="fas fa-globe"></i>' },
+            { id: "tool-upload",  title: "Upload KML layer",  icon: "./img/upload.svg" },
+            { id: "tool-kml",     title: "Load KML",     html: '<i class="fas fa-map" ></i>' },
+        ],
+        onSelect: function ({ id }) {
+            if (toolActions[id.replace(/^tool-/, "")]) {
+                oldMode = mode;
+                mode    = id.replace(/^tool-/, "");;
+                // statusEl.textContent = `Mode: ${mode}`;
+                toolActions[id.replace(/^tool-/, "")]();
+            } else {
+                console.warn("No action defined for:", id);
+            }
+        }
+    });
+
+    const toolActions = {
+        point()   { console.log("Point mode activated");   currentTool ='add-point' ; window.editorToolChanged(currentTool)},
+        route()   { console.log("Route mode activated");   currentTool ='add-polyline';  ; window.editorToolChanged(currentTool)},
+        direction()    { console.log("Direction mode activated"); currentTool ='add-direction';  ; window.editorToolChanged(currentTool)},
+        polygon() { console.log("Polygon mode activated"); currentTool ='add-polygon';  ; window.editorToolChanged(currentTool)},
+        scale()   { console.log("Scale tool activated"); currentTool ='add-scale';  ; window.editorToolChanged(currentTool)},
+        select()  { console.log("Pan tool activated"); currentTool ='pan';  ; window.editorToolChanged(currentTool)},
+        edit()  { console.log("Edit tool activated"); currentTool ='edit';  ; window.editorToolChanged(currentTool)},
+        delete()  {
+            console.log("Delete all");
+            if (mode === "point") editMarker.remove();
+            if (mode === "route") ultraPolyManager.delete(1);
+        },
+        undo()    { console.log("Undo");   },
+        redo()    { console.log("Redo");   },
+        export()  { console.log("Export data");  exportMapToKm();},
+        save()    { console.log("Save data"); openSaveModal(); },
+        load()    { console.log("Load data");   },
+        upload()  { document.getElementById('kml-layer').click(); },
+        maps()    { console.log("maps");  Router.go("uktx/map/#/maps"); },
+        kml()     { document.getElementById('kml-upload').click(); },
+    };
+
+    ctxMenu = document.getElementById("contextMenu");
+
+    kml_upload.loadKml();
+
+};
 
 document.getElementById('kml-layer').addEventListener('change', async function (e) {
 
@@ -162,65 +216,65 @@ document.getElementById('kml-layer').addEventListener('change', async function (
             },
 
             
-                pointToLayer: function (feature, latlng) {
+            pointToLayer: function (feature, latlng) {
 
-                    const p = feature.properties || {};
-                    const iconUrl = p.icon || null;
-                    const name = p.name || '';
+                const p = feature.properties || {};
+                const iconUrl = p.icon || null;
+                const name = p.name || '';
 
-                    // Add label marker
-                    if (name) {
-                        const label = createLabelMarker(latlng, name);
-                        labelMarkers.push(label);
-                    }
+                // Add label marker
+                if (name) {
+                    const label = createLabelMarker(latlng, name);
+                    labelMarkers.push(label);
+                }
 
-                    // Default Leaflet icon
-                    const defaultIcon = L.icon({
-                        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-                        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-                        iconSize: [16, 26],
-                        iconAnchor: [8, 26],
-                        popupAnchor: [1, -20],
-                        shadowSize: [26, 26]
+                // Default Leaflet icon
+                const defaultIcon = L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    iconSize: [16, 26],
+                    iconAnchor: [8, 26],
+                    popupAnchor: [1, -20],
+                    shadowSize: [26, 26]
+                });
+
+                // If no icon in KML
+                if (!iconUrl) {
+                    return L.marker(latlng, {
+                        icon: defaultIcon
                     });
+                }
 
-                    // If no icon in KML
-                    if (!iconUrl) {
-                        return L.marker(latlng, {
-                            icon: defaultIcon
-                        });
-                    }
+                // Create custom icon
+                const customIcon = L.icon({
+                    iconUrl: iconUrl,
+                    iconSize: [14, 14],      // smaller size
+                    iconAnchor: [7, 7],      // half of size
+                    popupAnchor: [0, -7]
+                });
 
-                    // Create custom icon
-                    const customIcon = L.icon({
-                        iconUrl: iconUrl,
-                        iconSize: [14, 14],      // smaller size
-                        iconAnchor: [7, 7],      // half of size
-                        popupAnchor: [0, -7]
-                    });
+                const marker = L.marker(latlng, {
+                    icon: customIcon
+                });
 
-                    const marker = L.marker(latlng, {
-                        icon: customIcon
-                    });
+                // Fallback if icon fails to load
+                const testImg = new Image();
 
-                    // Fallback if icon fails to load
-                    const testImg = new Image();
+                testImg.onload = function () {
+                    // icon exists → do nothing
+                };
 
-                    testImg.onload = function () {
-                        // icon exists → do nothing
-                    };
+                testImg.onerror = function () {
 
-                    testImg.onerror = function () {
+                    console.warn('Icon not found:', iconUrl);
 
-                        console.warn('Icon not found:', iconUrl);
+                    marker.setIcon(defaultIcon);
+                };
 
-                        marker.setIcon(defaultIcon);
-                    };
+                testImg.src = iconUrl;
 
-                    testImg.src = iconUrl;
-
-                    return marker;
-                },
+                return marker;
+            },
             onEachFeature: function (feature, layer) {
 
                 const p = feature.properties || {};
@@ -389,7 +443,6 @@ function addLayerToTree(fileName,layer,label){
 
 }
 
-
 // ── Remove layer helper ─────────────────────────────────────────────────────
 function removeKmlLayer(kmlId) {
     let layer = kmlLayers[kmlId].layer;
@@ -405,7 +458,6 @@ function removeKmlLayer(kmlId) {
   });
   kmlLayers[kmlId].label = [];
 }
-
 
 // ── Helper: create a label marker at a position ───────────────────────────────
 function createLabelMarker(latlng, name) {
@@ -450,8 +502,11 @@ let kml_upload = {
         try {
           const xmlDoc = await parseFile(file);
           console.log("KML file parsed successfully:", xmlDoc);
-          const source = buildTreeDataFromKML(xmlDoc);
-
+          const styleMap = extractStyles(xmlDoc);
+          console.log("Styles extracted from KML:", styleMap);
+          const source = buildTreeDataFromKML(xmlDoc, styleMap);
+          
+          console.log("Tree data built from KML:", source);   
               // Wrap inside a root node named after the file
             const fileNodeId = "file" + (++idCounter);
             const fileNode = {
@@ -611,101 +666,6 @@ let kml_upload = {
 }
 
 
-// ─── Map / Toolbar Init ──────────────────────────────────────────────────────
-
-let treeSource = [
-    { label: "My Places",        expanded: true, checked: true, icon: "./img/earth.jpg",  id: "myplaces",   value: "main_folder" },
-    { label: "Temporary Places", expanded: true, checked: true, icon: "./img/folder.png", id: "tempplaces", value: "temp_folder" },
-    { label: "Loaded Layers", expanded: true, checked: true, icon: "./img/kml1.png", id: "kmllayers", value: "kml_layers" },
-];
-window.initMapEdit = function () {
-
-    // setupModals();
-    // setupUpload();
-
-    $("#jqxTree").jqxTree({ source: treeSource, width: "95%", height: "300px", checkboxes: true, allowDrag: true, allowDrop: true });
-
-    $("#mode-ui").verticalToolbar({
-        tools: [
-            { id: "tool-point",   title: "Point",   icon: "./img/point.svg" },
-            { id: "tool-direction",   title: "Direction",   html: '<i class="fas fa-route"></i>' },
-            { id: "tool-route",    title: "Polyline",    icon: "./img/polyline.svg" },
-            { id: "tool-polygon", title: "Polygon", icon: "./img/polygon.png" },
-            { id: "tool-scale",   title: "Scale",   html: '<i class="fas fa-ruler-horizontal"></i>' },
-            { id: "tool-select",  title: "Select",  icon: "./img/select.svg" },
-            { id: "tool-edit",  title: "Edit",   html: '<i class="fa-solid fa-pen-to-square"></i>' },  //icon: "./img/resize.svg",
-            { id: "tool-delete",  title: "Delete",  icon: "./img/delete.svg" },
-            { id: "tool-undo",    title: "Undo",    icon: "./img/undo.svg" },
-            { id: "tool-save",  title: "Save",   html: '<i class="fa-solid fa-save"></i>' },  //icon: "./img/resize.svg",
-            { id: "tool-export",  title: "Export",  icon: "./img/download.svg" },
-            { id: "tool-maps",    title: "Maps",    html: '<i class="fas fa-globe"></i>' },
-            { id: "tool-upload",  title: "Upload KML layer",  icon: "./img/upload.svg" },
-            { id: "tool-kml",     title: "Load KML",     html: '<i class="fas fa-map" ></i>' },
-        ],
-        onSelect: function ({ id }) {
-            if (toolActions[id.replace(/^tool-/, "")]) {
-                oldMode = mode;
-                mode    = id.replace(/^tool-/, "");;
-                // statusEl.textContent = `Mode: ${mode}`;
-                toolActions[id.replace(/^tool-/, "")]();
-            } else {
-                console.warn("No action defined for:", id);
-            }
-        }
-    });
-
-    const toolActions = {
-        point()   { console.log("Point mode activated");   currentTool ='add-point' ; window.editorToolChanged(currentTool)},
-        route()   { console.log("Route mode activated");   currentTool ='add-polyline';  ; window.editorToolChanged(currentTool)},
-        direction()    { console.log("Direction mode activated"); currentTool ='add-direction';  ; window.editorToolChanged(currentTool)},
-        polygon() { console.log("Polygon mode activated"); currentTool ='add-polygon';  ; window.editorToolChanged(currentTool)},
-        scale()   { console.log("Scale tool activated"); currentTool ='add-scale';  ; window.editorToolChanged(currentTool)},
-        select()  { console.log("Pan tool activated"); currentTool ='pan';  ; window.editorToolChanged(currentTool)},
-        edit()  { console.log("Edit tool activated"); currentTool ='edit';  ; window.editorToolChanged(currentTool)},
-        delete()  {
-            console.log("Delete all");
-            if (mode === "point") editMarker.remove();
-            if (mode === "route") ultraPolyManager.delete(1);
-        },
-        undo()    { console.log("Undo");   },
-        redo()    { console.log("Redo");   },
-        export()  { console.log("Export data");  exportMapToKm();},
-        save()    { console.log("Save data"); openSaveModal(); },
-        load()    { console.log("Load data");   },
-        upload()  { document.getElementById('kml-layer').click(); },
-        maps()    { console.log("maps");  Router.go("uktx/map/#/maps"); },
-        kml()     { document.getElementById('kml-upload').click(); },
-    };
-
-    ctxMenu = document.getElementById("contextMenu");
-
-    kml_upload.loadKml();
-
-};
-
-
-// ─── KML / KMZ Parsing ───────────────────────────────────────────────────────
-
-/**
- * Read a KML or KMZ File object and return a parsed XML Document.
- */
-// async function parseFile(file) {
-//     const name = file.name.toLowerCase();
-//     if (name.endsWith(".kml")) {
-//         const text = await file.text();
-//         return new DOMParser().parseFromString(text, "text/xml");
-//     } else if (name.endsWith(".kmz")) {
-//         const buffer = await file.arrayBuffer();
-//         const zip    = await JSZip.loadAsync(buffer);
-//         const kmlFileName = Object.keys(zip.files).find(n => n.toLowerCase().endsWith(".kml"));
-//         if (!kmlFileName) throw new Error("No KML found inside KMZ");
-//         const kmlText = await zip.files[kmlFileName].async("text");
-//         return new DOMParser().parseFromString(kmlText, "text/xml");
-//     } else {
-//         throw new Error("Unsupported file type");
-//     }
-// }
-
 
 async function parseFile(file) {
     const name = file.name.toLowerCase();
@@ -788,9 +748,14 @@ function getIconHrefFromPlacemark(placemarkNode) {
  *   bounds.extend(latLng)                     →  boundsLatLngs.push([lat, lng])
  *   ov.setMap(map) / ov.setMap(null)          →  layer.addTo(map) / map.removeLayer(layer)
  */
-function buildOverlaysFromPlacemark(node) {
+function buildOverlaysFromPlacemark(node,style) {
     const layers = [];
+   
     const coordsNode = node.getElementsByTagName("coordinates")[0];
+    const nameNode =  node.getElementsByTagName("name")[0];
+
+    const name = nameNode ? nameNode.textContent.trim() : "";
+    
     if (!coordsNode) return layers;
 
     // KML coordinates are  lon,lat[,alt]  whitespace-separated
@@ -820,6 +785,11 @@ function buildOverlaysFromPlacemark(node) {
         });
 
         const marker = L.marker(latLngs[0], { icon: leafletIcon }).addTo(map);
+        // Add label marker
+            if (name) {
+                const label = createLabelMarker(latLngs[0], name).addTo(map);
+                layers.push(label);
+            }
 
         if (description) {
             marker.on("click", () => {
@@ -844,8 +814,8 @@ function buildOverlaysFromPlacemark(node) {
     // ── LineString ─────────────────────────────────────────────────────────
     if (node.getElementsByTagName("LineString").length > 0) {
         const polyline = L.polyline(latLngs, {
-            color:  "#0000FF",
-            weight: 3,
+            color:  style.stroke || "#0000FF",
+            weight: style.strokeWidth || 3,
         }).addTo(map);
 
         if (description) {
@@ -870,11 +840,7 @@ function buildOverlaysFromPlacemark(node) {
             } catch (err) { console.warn('Select polyline failed', err); }
         });
       
-        // //----- extra code------
-        // const elnode = nodeLabel(node);
-        // const elid    = "el" + (++elementIdcounter);
-        // polyline.metadata = {id:elid,node:elnode}
-        // mapElements[elid]={element:polyline,id:elid,type:"polyline",metadata:null,node:elnode };
+        
     }
 
     // ── Polygon ────────────────────────────────────────────────────────────
@@ -905,78 +871,344 @@ function buildOverlaysFromPlacemark(node) {
                 if (window.editorToolChanged) window.editorToolChanged('edit');
             } catch (err) { console.warn('polygon select failed', err); }
         });
-        // Make the polygon selectable for editing
-        polygon.on('click', (e) => {
-            try {
-                L.DomEvent.stopPropagation(e);
-                if (window.selectFeature) window.selectFeature(polygon, e.latlng);
-                currentTool = 'edit';
-                if (window.editorToolChanged) window.editorToolChanged('edit');
-            } catch (err) { console.warn('Select polygon failed', err); }
-        });
-        //         //----- extra code------
-        // const elnode = nodeLabel(node);
-        // const elid    = "el" + (++elementIdcounter);
-        // polygon.metadata = {id:elid,node:elnode}
-        // mapElements[elid]={element:polygon,id:elid,type:"polygon",metadata:null,node:elnode };
+        
+       
     }
 
     return layers;
 }
 
 
-// ─── Build jqxTree structure from KML XML ────────────────────────────────────
-
 /**
  * Recursively builds a jqxTree item (and its Leaflet overlays) from a KML node.
  * featureLayers[id] is always set to an ARRAY of Leaflet layers.
  */
-function buildTreeFromNode(node) {
-    const label = nodeLabel(node);
-    const id    = "item" + (++idCounter);
-    const item  = { id, label, items: [] };
+function buildTreeDataFromKML(xmlDoc, styleMap = {}) {
+    const docNode =
+        xmlDoc.getElementsByTagName("Document")[0] ||
+        xmlDoc.getElementsByTagName("Folder")[0]   ||
+        xmlDoc.documentElement;
 
-    if (node.tagName === "Folder" || node.tagName === "Document") {
-        item.icon    = node.tagName === "Folder" ? folderIcon : documentIcon;
-        item.value   = node.tagName === "Folder" ? "folder"   : "document";
+    return [buildTreeFromNode(docNode, styleMap)];
+}
+
+function buildTreeFromNode(node, styleMap = {}) {
+
+    const label = nodeLabel(node);
+
+    const id = "item" + (++idCounter);
+
+    const item = {
+        id,
+        label,
+        items: []
+    };
+
+    // =====================================================
+    // FOLDER / DOCUMENT
+    // =====================================================
+    if (
+        node.tagName === "Folder" ||
+        node.tagName === "Document"
+    ) {
+
+        item.icon =
+            node.tagName === "Folder"
+                ? folderIcon
+                : documentIcon;
+
+        item.value =
+            node.tagName === "Folder"
+                ? "folder"
+                : "document";
+
         item.checked = true;
 
+        // Extract styles defined inside this folder/document
+        const styles =
+            extractStyles(node);
+
+        // Merge into global style map
+        Object.assign(styleMap, styles);
+
+        // Children
         for (const child of node.children) {
-            if (["Folder", "Document", "Placemark"].includes(child.tagName)) {
-                item.items.push(buildTreeFromNode(child));
+
+            if (
+                ["Folder", "Document", "Placemark"]
+                    .includes(child.tagName)
+            ) {
+
+                item.items.push(
+                    buildTreeFromNode(child, styleMap)
+                );
             }
         }
+
+    // =====================================================
+    // PLACEMARK
+    // =====================================================
     } else if (node.tagName === "Placemark") {
+
         const geom =
             node.getElementsByTagName("Point")[0] ??
             node.getElementsByTagName("LineString")[0] ??
             node.getElementsByTagName("Polygon")[0];
 
+        // ==========================================
+        // GEOMETRY ICON
+        // ==========================================
         if (geom) {
-            if      (geom.tagName === "Point")      { item.icon = "./img/point_icon.png"; item.value = "point"; }
-            else if (geom.tagName === "LineString")  { item.icon = "./img/polyline.svg";   item.value = "polyline"; }
-            else if (geom.tagName === "Polygon")     { item.icon = "./img/polygon.png";    item.value = "polygon"; }
+
+            if (geom.tagName === "Point") {
+
+                item.icon = "./img/point_icon.png";
+                item.value = "point";
+
+            } else if (geom.tagName === "LineString") {
+
+                item.icon = "./img/polyline.svg";
+                item.value = "polyline";
+
+            } else if (geom.tagName === "Polygon") {
+
+                item.icon = "./img/polygon.png";
+                item.value = "polygon";
+            }
         }
 
-        const overlays = buildOverlaysFromPlacemark(node);
+        // ==========================================
+        // STYLE EXTRACTION
+        // ==========================================
+        item.style = extractPlacemarkStyle(
+            node,
+            styleMap
+        );
+        console.log("Extracted style for", item.label, ":", item.style);
+        // ==========================================
+        // OVERLAYS
+        // ==========================================
+        const overlays =
+            buildOverlaysFromPlacemark(node, item.style);
+
         if (overlays.length) {
+
             featureLayers[id] = overlays;
-            item.checked      = true;
-            item.overlay      = overlays;
+
+            item.checked = true;
+
+            item.overlay = overlays;
         }
     }
+
     return item;
 }
 
-function buildTreeDataFromKML(xmlDoc) {
-    const docNode =
-        xmlDoc.getElementsByTagName("Document")[0] ||
-        xmlDoc.getElementsByTagName("Folder")[0]   ||
-        xmlDoc.documentElement;
-    return [buildTreeFromNode(docNode)];
+function extractStyles(root) {
+
+    const styles = {};
+
+    // ======================================
+    // STYLE
+    // ======================================
+    root.querySelectorAll("Style").forEach(styleNode => {
+
+        const id = styleNode.getAttribute("id");
+
+        if (!id) return;
+
+        styles["#" + id] = parseStyle(styleNode);
+    });
+
+    // ======================================
+    // STYLEMAP
+    // ======================================
+    root.querySelectorAll("StyleMap").forEach(styleMapNode => {
+
+        const id =
+            styleMapNode.getAttribute("id");
+
+        if (!id) return;
+
+        const pair =
+            styleMapNode.querySelector("Pair key");
+
+        const styleUrl =
+            styleMapNode.querySelector("styleUrl");
+
+        if (styleUrl) {
+
+            styles["#" + id] = {
+                styleUrl:
+                    styleUrl.textContent.trim()
+            };
+        }
+    });
+
+    return styles;
 }
 
+function parseStyle(styleNode) {
 
+    const style = {};
+
+    // ==========================================
+    // LINE STYLE
+    // ==========================================
+    const line =
+        styleNode.querySelector('LineStyle');
+
+    if (line) {
+
+        const colorNode =
+            line.querySelector('color');
+
+        if (colorNode) {
+
+            const parsed =
+                parseKmlColor(
+                    colorNode.textContent
+                );
+
+            style.stroke =
+                parsed.color;
+
+            style.strokeOpacity =
+                parsed.opacity;
+        }
+
+        style.strokeWidth =
+            Number(
+                line.querySelector('width')
+                    ?.textContent
+            ) || 3;
+    }
+
+    // ==========================================
+    // POLY STYLE
+    // ==========================================
+    const poly =
+        styleNode.querySelector('PolyStyle');
+
+    if (poly) {
+
+        const colorNode =
+            poly.querySelector('color');
+
+        if (colorNode) {
+
+            const parsed =
+                parseKmlColor(
+                    colorNode.textContent
+                );
+
+            style.fill =
+                parsed.color;
+
+            style.fillOpacity =
+                parsed.opacity;
+        }
+    }
+
+    // ==========================================
+    // ICON STYLE
+    // ==========================================
+    const icon =
+        styleNode.querySelector('IconStyle');
+
+    if (icon) {
+
+        style.iconScale =
+            Number(
+                icon.querySelector('scale')
+                    ?.textContent
+            ) || 1;
+
+        style.iconHref =
+            icon.querySelector('href')
+                ?.textContent
+                ?.trim();
+    }
+
+    return style;
+}
+
+function parseKmlColor(kmlColor) {
+
+    if (!kmlColor) {
+
+        return {
+            color: '#000000',
+            opacity: 1
+        };
+    }
+
+    // Remove spaces
+    kmlColor = kmlColor.trim();
+
+    // KML format:
+    // aabbggrr
+
+    // Ensure length
+    while (kmlColor.length < 8) {
+        kmlColor = 'f' + kmlColor;
+    }
+
+    const aa = kmlColor.substring(0, 2);
+    const bb = kmlColor.substring(2, 4);
+    const gg = kmlColor.substring(4, 6);
+    const rr = kmlColor.substring(6, 8);
+
+    return {
+
+        color: `#${rr}${gg}${bb}`,
+
+        opacity:
+            parseInt(aa, 16) / 255
+    };
+}
+function extractPlacemarkStyle( placemark,styleMap) {
+
+    // ======================================
+    // INLINE STYLE
+    // ======================================
+    const inlineStyle =
+        placemark.querySelector(":scope > Style");
+
+    if (inlineStyle) {
+
+        return parseStyle(inlineStyle);
+    }
+
+    // ======================================
+    // STYLE URL
+    // ======================================
+    const styleUrlNode =
+        placemark.querySelector(":scope > styleUrl");
+
+    if (styleUrlNode) {
+
+        const styleUrl =
+            styleUrlNode.textContent.trim();
+
+        let style =
+            styleMap[styleUrl];
+
+        // Resolve StyleMap
+        if (
+            style &&
+            style.styleUrl
+        ) {
+
+            style =
+                styleMap[style.styleUrl];
+        }
+
+        return style || {};
+    }
+
+    return {};
+}
 // ─── Visibility (show / hide layers) ─────────────────────────────────────────
 
 /**
@@ -1078,7 +1310,147 @@ function getFirstOverlay(itemId) {
     return Array.isArray(e) ? e[0] : e;
 }
 
+// ─── Context menu (treeEdit) ──────────────────────────────────────────────────
 
+/**
+ * Right-click context menu for the jqxTree.
+ *
+ * GOOGLE → LEAFLET
+ *   ov instanceof google.maps.Marker    →  layer instanceof L.Marker
+ *   ov instanceof google.maps.Polyline  →  layer instanceof L.Polyline
+ *   ov instanceof google.maps.Polygon   →  layer instanceof L.Polygon
+ *   ov.setIcon(url)                     →  layer.setIcon(L.icon({iconUrl: url, iconSize:[20,20]}))
+ *   ov.setOptions({strokeColor})        →  layer.setStyle({color})
+ *   ov.setOptions({fillColor})          →  layer.setStyle({fillColor})
+ */
+
+function treeEdit() {
+    const menuHtml = `
+        <div id="treeMenu" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:5px; z-index:9999;">
+          <div class="hover-box" id="addFolder">➕ Add Folder</div>
+          <div class="hover-box" id="renameItem">✏️ Rename</div>
+          <div class="hover-box" id="deleteItem">🗑️ Delete</div>
+          <div class="hover-box" id="saveItem">💾 Save</div>
+          <hr>
+          <div class="hover-box" id="changeMarkerIcon">📍 Change Marker Icon</div>
+          <div class="hover-box" id="changePolylineColor">〰️ Change Line Color</div>
+          <div class="hover-box" id="changePolygonColor">⬛ Change Polygon Color</div>
+        </div>`;
+    $("body").append(menuHtml);
+
+    let contextTargetId = null;
+
+    // Right-click opens the menu
+    $("#jqxTree").on("contextmenu", e => {
+        const li = $(e.target).closest("li");
+        if (!li.length) return true;
+        contextTargetId = li.attr("id");
+        $("#treeMenu").css({ top: e.pageY, left: e.pageX }).show();
+        return false;
+    });
+
+    $(document).on("click", () => $("#treeMenu").hide());
+
+    // ── Add Folder ──────────────────────────────────────────────────────────
+    $("#addFolder").on("click", () => {
+        if (!contextTargetId) return;
+        const newId   = "item" + (++idCounter);
+        const newNode = { id: newId, label: "New Folder", icon: folderIcon, items: [], checked: true };
+        $("#jqxTree").jqxTree("addTo", newNode, $("#" + contextTargetId)[0]);
+    });
+
+    // ── Rename ──────────────────────────────────────────────────────────────
+    $("#renameItem").on("click", () => {
+        if (!contextTargetId) return;
+         const ids = treeSource.map(item => item.id);
+         if (ids.includes(contextTargetId)) {
+
+            alert("Can't Rename");
+            return;
+        } 
+        const newName = prompt("Enter new name:");
+        if (newName) {
+            const item = $("#jqxTree").jqxTree("getItem", $("#" + contextTargetId)[0]);
+            $("#jqxTree").jqxTree("updateItem", item, { label: newName });
+        }
+    });
+
+    // ── Delete ──────────────────────────────────────────────────────────────
+    $("#deleteItem").on("click", () => {
+
+        if (!contextTargetId) return;
+        const ids = treeSource.map(item => item.id);
+        if (ids.includes(contextTargetId)) {
+
+            alert("Can't Delete");
+            return;
+        } 
+        
+            // Remove Leaflet layers from the map before removing tree node
+            applyToDescendants(contextTargetId, layer => {
+                if (window.map && window.map.hasLayer(layer)) window.map.removeLayer(layer);
+            });
+            delete  (featureLayers[contextTargetId]) ? featureLayers[contextTargetId]: null;
+            (kmlLayers[contextTargetId]) ? removeKmlLayer(contextTargetId):null;
+            delete  (kmlLayers[contextTargetId]) ? kmlLayers[contextTargetId]: null;
+            $("#jqxTree").jqxTree("removeItem", $("#" + contextTargetId)[0]);
+        
+    });
+     
+   
+    // ── Utility: walk a node and all its descendants, applying fn to each layer ──
+    function applyToDescendants(nodeId, fn) {
+        const li      = document.getElementById(nodeId);
+        if (!li) return;
+        const overlays = featureLayers[nodeId];
+        if (overlays) {
+            (Array.isArray(overlays) ? overlays : [overlays]).forEach(fn);
+        }
+        li.querySelectorAll("li").forEach(child => applyToDescendants(child.id, fn));
+    }
+
+
+    // ── Change Marker Icon ──────────────────────────────────────────────────
+    $("#changeMarkerIcon").on("click", () => {
+        const url = prompt("Enter marker icon URL:");
+        if (!url) return;
+        applyToDescendants(contextTargetId, layer => {
+            if (layer instanceof L.Marker) {
+                // Replaces ov.setIcon(url) from Google Maps
+                layer.setIcon(L.icon({
+                    iconUrl:    url,
+                    iconSize:   [20, 20],
+                    iconAnchor: [10, 10],
+                }));
+            }
+        });
+    });
+
+    // ── Change Polyline Colour ──────────────────────────────────────────────
+    $("#changePolylineColor").on("click", () => {
+        const color = prompt("Enter line color (e.g. #ff0000):");
+        if (!color) return;
+        applyToDescendants(contextTargetId, layer => {
+            // Check Polygon first because L.Polygon extends L.Polyline
+            if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+                // Replaces ov.setOptions({ strokeColor: color })
+                layer.setStyle({ color });
+            }
+        });
+    });
+
+    // ── Change Polygon Fill Colour ──────────────────────────────────────────
+    $("#changePolygonColor").on("click", () => {
+        const color = prompt("Enter polygon fill color (e.g. #00ff00):");
+        if (!color) return;
+        applyToDescendants(contextTargetId, layer => {
+            if (layer instanceof L.Polygon) {
+                // Replaces ov.setOptions({ fillColor: color })
+                layer.setStyle({ fillColor: color, fillOpacity: 0.5 });
+            }
+        });
+    });
+}
 // ─── Export Tree to Server ────────────────────────────────────────────────────
 
 /**
@@ -1238,140 +1610,7 @@ window.parseKML = function (kmlContent, fileName) {
 };
 
 
-// ─── Context menu (treeEdit) ──────────────────────────────────────────────────
 
-/**
- * Right-click context menu for the jqxTree.
- *
- * GOOGLE → LEAFLET
- *   ov instanceof google.maps.Marker    →  layer instanceof L.Marker
- *   ov instanceof google.maps.Polyline  →  layer instanceof L.Polyline
- *   ov instanceof google.maps.Polygon   →  layer instanceof L.Polygon
- *   ov.setIcon(url)                     →  layer.setIcon(L.icon({iconUrl: url, iconSize:[20,20]}))
- *   ov.setOptions({strokeColor})        →  layer.setStyle({color})
- *   ov.setOptions({fillColor})          →  layer.setStyle({fillColor})
- */
-
-function treeEdit() {
-    const menuHtml = `
-        <div id="treeMenu" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:5px; z-index:9999;">
-          <div class="hover-box" id="addFolder">➕ Add Folder</div>
-          <div class="hover-box" id="renameItem">✏️ Rename</div>
-          <div class="hover-box" id="deleteItem">🗑️ Delete</div>
-          <hr>
-          <div class="hover-box" id="changeMarkerIcon">📍 Change Marker Icon</div>
-          <div class="hover-box" id="changePolylineColor">〰️ Change Line Color</div>
-          <div class="hover-box" id="changePolygonColor">⬛ Change Polygon Color</div>
-        </div>`;
-    $("body").append(menuHtml);
-
-    let contextTargetId = null;
-
-    // Right-click opens the menu
-    $("#jqxTree").on("contextmenu", e => {
-        const li = $(e.target).closest("li");
-        if (!li.length) return true;
-        contextTargetId = li.attr("id");
-        $("#treeMenu").css({ top: e.pageY, left: e.pageX }).show();
-        return false;
-    });
-
-    $(document).on("click", () => $("#treeMenu").hide());
-
-    // ── Add Folder ──────────────────────────────────────────────────────────
-    $("#addFolder").on("click", () => {
-        if (!contextTargetId) return;
-        const newId   = "item" + (++idCounter);
-        const newNode = { id: newId, label: "New Folder", icon: folderIcon, items: [], checked: true };
-        $("#jqxTree").jqxTree("addTo", newNode, $("#" + contextTargetId)[0]);
-    });
-
-    // ── Rename ──────────────────────────────────────────────────────────────
-    $("#renameItem").on("click", () => {
-        if (!contextTargetId) return;
-        const newName = prompt("Enter new name:");
-        if (newName) {
-            const item = $("#jqxTree").jqxTree("getItem", $("#" + contextTargetId)[0]);
-            $("#jqxTree").jqxTree("updateItem", item, { label: newName });
-        }
-    });
-
-    // ── Delete ──────────────────────────────────────────────────────────────
-    $("#deleteItem").on("click", () => {
-
-        if (!contextTargetId) return;
-        const ids = treeSource.map(item => item.id);
-        if (ids.includes(contextTargetId)) {
-
-            alert("Can't Delete");
-            return;
-        } 
-        
-            // Remove Leaflet layers from the map before removing tree node
-            applyToDescendants(contextTargetId, layer => {
-                if (window.map && window.map.hasLayer(layer)) window.map.removeLayer(layer);
-            });
-            delete  (featureLayers[contextTargetId]) ? featureLayers[contextTargetId]: null;
-            (kmlLayers[contextTargetId]) ? removeKmlLayer(contextTargetId):null;
-            delete  (kmlLayers[contextTargetId]) ? kmlLayers[contextTargetId]: null;
-            $("#jqxTree").jqxTree("removeItem", $("#" + contextTargetId)[0]);
-        
-    });
-     
-   
-    // ── Utility: walk a node and all its descendants, applying fn to each layer ──
-    function applyToDescendants(nodeId, fn) {
-        const li      = document.getElementById(nodeId);
-        if (!li) return;
-        const overlays = featureLayers[nodeId];
-        if (overlays) {
-            (Array.isArray(overlays) ? overlays : [overlays]).forEach(fn);
-        }
-        li.querySelectorAll("li").forEach(child => applyToDescendants(child.id, fn));
-    }
-
-
-    // ── Change Marker Icon ──────────────────────────────────────────────────
-    $("#changeMarkerIcon").on("click", () => {
-        const url = prompt("Enter marker icon URL:");
-        if (!url) return;
-        applyToDescendants(contextTargetId, layer => {
-            if (layer instanceof L.Marker) {
-                // Replaces ov.setIcon(url) from Google Maps
-                layer.setIcon(L.icon({
-                    iconUrl:    url,
-                    iconSize:   [20, 20],
-                    iconAnchor: [10, 10],
-                }));
-            }
-        });
-    });
-
-    // ── Change Polyline Colour ──────────────────────────────────────────────
-    $("#changePolylineColor").on("click", () => {
-        const color = prompt("Enter line color (e.g. #ff0000):");
-        if (!color) return;
-        applyToDescendants(contextTargetId, layer => {
-            // Check Polygon first because L.Polygon extends L.Polyline
-            if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
-                // Replaces ov.setOptions({ strokeColor: color })
-                layer.setStyle({ color });
-            }
-        });
-    });
-
-    // ── Change Polygon Fill Colour ──────────────────────────────────────────
-    $("#changePolygonColor").on("click", () => {
-        const color = prompt("Enter polygon fill color (e.g. #00ff00):");
-        if (!color) return;
-        applyToDescendants(contextTargetId, layer => {
-            if (layer instanceof L.Polygon) {
-                // Replaces ov.setOptions({ fillColor: color })
-                layer.setStyle({ fillColor: color, fillOpacity: 0.5 });
-            }
-        });
-    });
-}
 
 ///////////////////////////   to be deleted ////////////////////////////////////////////////////////////
 
@@ -1518,39 +1757,3 @@ function saveFeature() {
     });
 }
 
-// function saveFeature() {
-//     const name = document.getElementById('feature-name').value;
-//     const desc = document.getElementById('feature-desc').value;
-//     const dest = document.getElementById('save-destination').value;
-
-//     const fg = window.featureGroup;
-//     let layer = null;
-//     for (let layerId in fg._layers) {
-//         layer = fg._layers[layerId];
-//     }
-//     if (!layer) { alert('No feature to save'); return; }
-
-//     let geojson = layer.toGeoJSON();
-//     geojson.properties             = geojson.properties || {};
-//     geojson.properties.name        = name;
-//     geojson.properties.description = desc;
-
-//     fetch('./php/api.php?action=save_feature', {
-//         method:  'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body:    JSON.stringify({ destination: dest, feature: geojson }),
-//     })
-//     .then(res => res.json())
-//     .then(data => {
-//         if (data.success) {
-//             alert('Saved successfully!');
-//             document.getElementById('save-modal').style.display = 'none';
-//         } else {
-//             alert('Error saving: ' + (data.message || 'Unknown error'));
-//         }
-//     })
-//     .catch(err => {
-//         console.error(err);
-//         alert('Server error while saving: ' + err.message);
-//     });
-// }
