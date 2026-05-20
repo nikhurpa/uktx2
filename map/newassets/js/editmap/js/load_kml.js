@@ -44,6 +44,7 @@ window.initMapEdit = function () {
 
     // setupModals();
     // setupUpload();
+    if (window.initDbUploadTreeMenu) window.initDbUploadTreeMenu();
 
     $("#jqxTree").jqxTree({ source: treeSource, width: "95%", height: "300px", checkboxes: true, allowDrag: true, allowDrop: true });
 
@@ -803,6 +804,7 @@ function buildOverlaysFromPlacemark(node,style) {
         // Collect for fitBounds (replaces bounds.extend)
         boundsLatLngs.push(latLngs[0]);
         layers.push(marker);
+        if (window.attachContextMenu) window.attachContextMenu(marker);
         
         // //----- extra code------
         // const elnode = nodeLabel(node);
@@ -832,6 +834,7 @@ function buildOverlaysFromPlacemark(node,style) {
 
         latLngs.forEach(ll => boundsLatLngs.push(ll));
         layers.push(polyline);
+         if (window.attachContextMenu) window.attachContextMenu(polyline);
         // Allow selecting this polyline in the editor
        
         polyline.on('click', (e) => {

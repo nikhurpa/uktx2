@@ -18,8 +18,8 @@
 //   window.DB_UPLOAD_ENDPOINT = '/your/custom/endpoint';
 // ─────────────────────────────────────────────────────────────────────────────
 
-window.DB_UPLOAD_ENDPOINT = window.DB_UPLOAD_ENDPOINT || '/api/features/save';
-
+// window.DB_UPLOAD_ENDPOINT = window.DB_UPLOAD_ENDPOINT || '/api/features/save';
+window.DB_UPLOAD_ENDPOINT = '/map/newassets/js/editmap/js/php/api.php?action=save_features';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Inject Upload button into the tree right-click context menu

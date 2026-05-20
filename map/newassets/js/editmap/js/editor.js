@@ -156,6 +156,7 @@ window.initMapEeditor = function () {
             addElementToTree(marker);
 
             marker.addTo(map);
+            if (window.attachContextMenu) window.attachContextMenu(marker);
             selectFeature(marker, null);
             // document.getElementById('tool-save').click();
         }
@@ -168,6 +169,7 @@ window.initMapEeditor = function () {
                 let pl = L.polyline([e.latlng], {color: 'cyan', weight: 4}).addTo(map);
                 pl.meta = { name: 'New Polyline', id: 'polyline_' + (++idCounter) };
                 addElementToTree(pl);
+                if (window.attachContextMenu) window.attachContextMenu(pl);
                 selectFeature(pl, e.latlng);
                 pl.on('click', function(e2) {
                     document.getElementById('tool-route').click();
@@ -245,6 +247,14 @@ window.initMapEeditor = function () {
             }
         }
     });
+}
+
+
+function addContextMenu(element){
+    // element.on('contextmenu', (e) => {
+    //     L.DomEvent.stopPropagation(e);  }
+
+    // );
 }
 
 function addElementToTree(element){

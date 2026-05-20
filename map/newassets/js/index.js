@@ -42,6 +42,10 @@ Router.add("/main", () => {
         id: "contextMenu", className: "context-menu d-none", parent: document.body,
         innerHTML: ` <div id="menuView">View details</div>
         <div id="menuEdit">Edit details</div>`});
+      addDiv({ id: "feature-ctx-menu", parent: document.body });
+      addDiv({ id: "elevation-modal", parent: document.body });
+      addDiv({ id: "tree-ctx-menu", parent: document.body });
+      addDiv({ id: "dir-info-bar", parent: document.body });
 
       // addDiv({
       //   id: "contextMenu1", className: "context-menu", parent: document.body,

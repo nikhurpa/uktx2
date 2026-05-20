@@ -82,6 +82,15 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
     //  "./newassets/js/editmap/js/app.js",
     //  "./newassets/js/editmap/js/kml_parser.js",
      "./newassets/js/editmap/js/editor.js",
+
+  // <!-- new scripts — order matters -->
+  "https://cdn.jsdelivr.net/npm/chart.js", //  <!-- for elevation chart -->
+   "/newassets/js/editmap/js/files/context_menu.js",
+  "/newassets/js/editmap/js/files/db_upload.js",
+  "/newassets/js/editmap/js/files/directions_tool.js"
+
+
+
   ];
 
 
