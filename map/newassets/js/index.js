@@ -33,19 +33,21 @@ Router.add("/main", () => {
         await loadTopDependencies();
         await loadAllModules();
 
-        addDiv({ id: "main", parent: document.body });
-        addDiv({ id: "map", parent: document.body });
-        addDiv({ id: "mode-ui", parent: document.body, });
+        await addDiv({ id: "main", parent: document.body });
+        await addDiv({ id: "map", parent: document.body });
+        await addDiv({ id: "mode-ui", parent: document.body, });
         //  addDiv({ id: "status", className: "status", parent: document.body, text: "Select a mode…" });
 
-      addDiv({
+      await addDiv({
         id: "contextMenu", className: "context-menu d-none", parent: document.body,
         innerHTML: ` <div id="menuView">View details</div>
         <div id="menuEdit">Edit details</div>`});
-      addDiv({ id: "feature-ctx-menu", parent: document.body });
-      addDiv({ id: "elevation-modal", parent: document.body });
-      addDiv({ id: "tree-ctx-menu", parent: document.body });
-      addDiv({ id: "dir-info-bar", parent: document.body });
+      // await addDiv({ id: "feature-ctx-menu", parent: document.body });
+      // await addDiv({ id: "elevation-modal", parent: document.body });
+      // await addDiv({ id: "tree-ctx-menu", parent: document.body });
+      // await addDiv({ id: "dir-info-bar", parent: document.body });
+
+
 
       // addDiv({
       //   id: "contextMenu1", className: "context-menu", parent: document.body,

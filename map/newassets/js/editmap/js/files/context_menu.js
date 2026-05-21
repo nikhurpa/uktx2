@@ -511,6 +511,7 @@ document.getElementById('directions-panel-close').addEventListener('click', () =
  */
 window.attachContextMenu = function (layer) {
     layer.on('contextmenu', (e) => {
+        console.log('Right-clicked layer:', layer);
         L.DomEvent.stopPropagation(e);
         L.DomEvent.preventDefault(e);
         _ctxLatlng = e.latlng;

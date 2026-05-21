@@ -40,9 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     featureGroup = L.featureGroup().addTo(map);
 
     // Context menu prevention (to allow custom right-click drawing)
-    map.getContainer().addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-    });
+    // map.getContainer().addEventListener('contextmenu', (e) => {
+       
+    //     e.preventDefault();
+        
+    // });
 
     // ── Listen to zoom changes ────────────────────────────────────────────────────
     map.on('zoomend', function () {
