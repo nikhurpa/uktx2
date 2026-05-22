@@ -29,8 +29,17 @@
             <div class="ctx-item" data-action="elevation">
                 <span>⛰️</span> Elevation Profile
             </div>
-            <div class="ctx-item" data-action="directions">
-                <span>🗺️</span> Get Directions (OSRM)
+            <!-- <div class="ctx-item" data-action="directions">
+            //     <span>🗺️</span> Get Directions (OSRM)
+            // </div> -->
+            <div class="ctx-item" data-action="directionsFromHere">
+                <span>🗺️</span> Direction from here
+            </div>
+                        <div class="ctx-item" data-action="directionsToHere">
+                <span>🗺️</span> Direction to Here
+            </div>
+                        <div class="ctx-item" data-action="directionsWaypoint">
+                <span>🗺️</span> Set Direction way point
             </div>
             <hr style="margin:4px 0;">
             <div class="ctx-item" data-action="zoom-to">
@@ -122,6 +131,9 @@ let _ctxLayer        = null;   // the layer the user right-clicked
 let _ctxLatlng       = null;   // click latlng (for markers)
 let _directionsRoute = null;   // current OSRM route polyline on map
 let _elevationChart  = null;   // Chart.js instance
+let _directionFrom       =null;
+let _directionTo        =null;
+let _directionWaypoint  =[];
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -357,6 +369,103 @@ async function actionDirections(layer) {
     }
 }
 
+async function actionDirectionsFromHere(layer) {
+    if (layer instanceof L.Marker) {
+      _directionFrom = layer.getLatLng();
+       
+    } else {
+        alert('Right-click a marker to set it as the starting point for directions.');
+    }       
+}
+
+async function actionDirectionsToHere(layer) {
+
+    if(!_directionFrom){
+       alert('Select Starting Point.');
+       return;
+    }
+    if (layer instanceof L.Marker) {
+      _directionTo = layer.getLatLng(); 
+      waypoints = [_directionFrom, ..._directionWaypoint, _directionTo];
+  
+    const panel   = document.getElementById('directions-panel');
+    const summary = document.getElementById('directions-summary');
+    const steps   = document.getElementById('directions-steps');
+    panel.style.display = 'block';
+    summary.innerHTML   = '<em>Calculating route…</em>';
+    steps.innerHTML     = '';
+
+    // Remove old route
+    if (_directionsRoute) { window.map.removeLayer(_directionsRoute); _directionsRoute = null; }
+
+    try {
+        const coords = waypoints.map(ll => `${ll.lng},${ll.lat}`).join(';');
+        const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson&steps=true`;
+
+        const res  = await fetch(url);
+        const data = await res.json();
+
+        if (data.code !== 'Ok' || !data.routes.length) {
+            throw new Error(data.message || 'No route found');
+        }
+
+        const route    = data.routes[0];
+        const distKm   = (route.distance / 1000).toFixed(1);
+        const durMins  = Math.round(route.duration / 60);
+
+        summary.innerHTML = `
+            <strong>${distKm} km</strong> &nbsp;·&nbsp; approx <strong>${durMins} min</strong>
+            (driving, via OSRM)`;
+
+        // Draw route on map
+        const geom = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        _directionsRoute = L.polyline(geom, {
+            color: '#1a73e8', weight: 5, opacity: 0.8, dashArray: '8 4'
+        }).addTo(window.map);
+        window.map.fitBounds(_directionsRoute.getBounds(), { padding: [30, 30] });
+
+        // Step-by-step instructions
+        const allSteps = route.legs.flatMap(leg => leg.steps);
+        steps.innerHTML = allSteps.map(step => {
+            const d = step.distance >= 1000
+                ? (step.distance / 1000).toFixed(1) + ' km'
+                : Math.round(step.distance) + ' m';
+            return `<li style="margin-bottom:6px;">
+                        ${step.maneuver.instruction || step.name || '—'}
+                        <span style="color:#888;font-size:11px;">(${d})</span>
+                    </li>`;
+        }).join('');
+
+        _directionFrom = null;
+        _directionTo = null;
+        _directionWaypoint = [];
+
+    } catch (err) {
+        summary.innerHTML = `<span style="color:red;">⚠️ ${err.message}</span>`;
+        console.error('OSRM directions error:', err);
+    }
+
+  } else {
+
+
+
+
+
+
+   
+        alert('Right-click a marker to set it as the destination for directions.');
+    }       
+}       
+async function actionDirectionsWaypoint(layer) {
+    if (layer instanceof L.Marker) {
+        _directionWaypoint.push(layer.getLatLng()); 
+     
+    } else {
+        alert('Right-click a marker to set it as a waypoint for directions.');
+    }   
+}          
+
+
 
 /* ── 4. Zoom To ─────────────────────────────────────────────────────────────── */
 function actionZoomTo(layer) {
@@ -445,8 +554,12 @@ function showContextMenu(x, y, layer) {
 
     // Hide items that don't apply to markers
     const isPolyline = layer instanceof L.Polyline;
-    menu.querySelectorAll('[data-action="length"],[data-action="elevation"],[data-action="directions"]')
+    const isMarker = layer instanceof L.Marker;
+    
+    menu.querySelectorAll('[data-action="length"],[data-action="elevation"]')
         .forEach(el => { el.style.display = isPolyline ? '' : 'none'; });
+    menu.querySelectorAll('[data-action="directionsFromHere"],[data-action="directionsToHere"],[data-action="directionsWaypoint"]')
+    .forEach(el => { el.style.display = isMarker ? '' : 'none'; });    
 
     menu.style.display = 'block';
     menu.style.left    = x + 'px';
@@ -471,9 +584,16 @@ document.getElementById('feature-ctx-menu').addEventListener('click', async (e) 
         case 'length':     actionLength(_ctxLayer);           break;
         case 'elevation':  await actionElevation(_ctxLayer);  break;
         case 'directions': await actionDirections(_ctxLayer); break;
+        case 'directionsFromHere': await actionDirectionsFromHere(_ctxLayer); break;
+        case 'directionsToHere': await actionDirectionsToHere(_ctxLayer); break;
+        case 'directionsWaypoint': await actionDirectionsWaypoint(_ctxLayer); break;
         case 'zoom-to':    actionZoomTo(_ctxLayer);           break;
         case 'copy-coords': actionCopyCoords(_ctxLayer);      break;
         case 'delete':     actionDelete(_ctxLayer);           break;
+
+
+
+
     }
 });
 
