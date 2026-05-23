@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BSNL Node Status Map (UP/DOWN)</title>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bsnl-green: #00c853;
+    --bsnl-red: #ff3d00;
+    --bsnl-blue: #0d47a1;
+    --bsnl-dark: #0a0f1e;
+    --bsnl-panel: rgba(10,15,30,0.92);
+    --bsnl-border: rgba(0,200,83,0.35);
+    --bsnl-gold: #ffd600;
+    --ctrl-bg: rgba(13,71,161,0.85);
+    --font-main: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-main);
+    background: var(--bsnl-dark);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1100;
+    height: 48px;
+    background: linear-gradient(90deg, #0d47a1 0%, #1565c0 50%, #0d47a1 100%);
+    border-bottom: 2px solid var(--bsnl-green);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 14px;
+    box-shadow: 0 2px 18px rgba(0,200,83,0.18);
+  }
+
+  #topbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  #topbar .logo-badge {
+    background: #fff;
+    color: var(--bsnl-blue);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  #topbar .title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  #topbar .last-updated {
+    color: var(--bsnl-gold);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-left: 4px;
+    flex-shrink: 0;
+  }
+
+  .topbar-spacer { flex: 1; }
+
+  /* Map type selector */
+  #mapType {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    font-family: var(--font-main);
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  #mapType option { color: #222; background: #fff; }
+
+  /* Search */
+  #searchSite {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    font-family: var(--font-main);
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    width: 170px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  #searchSite::placeholder { color: rgba(255,255,255,0.5); }
+  #searchSite:focus { border-color: var(--bsnl-green); }
+
+  .btn-ctrl {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: #fff;
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .btn-ctrl:hover, .btn-ctrl.active {
+    background: var(--bsnl-green);
+    color: var(--bsnl-dark);
+    border-color: var(--bsnl-green);
+  }
+
+  /* ── FILTER DROPDOWNS ── */
+  .dropdown-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 180px;
+    background: var(--bsnl-panel);
+    border: 1px solid var(--bsnl-border);
+    border-radius: 6px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 2000;
+    padding: 6px 0;
+    margin-top: 4px;
+  }
+  .dropdown-menu.open { display: block; }
+
+  .dropdown-menu label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    color: #e0e0e0;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .dropdown-menu label:hover { background: rgba(0,200,83,0.12); color: #fff; }
+  .dropdown-menu input[type="checkbox"] { accent-color: var(--bsnl-green); }
+
+  .dropdown-menu .dd-title {
+    padding: 4px 14px 6px;
+    color: var(--bsnl-gold);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--bsnl-border);
+    margin-bottom: 4px;
+  }
+
+  /* ── MAP ── */
+  #map {
+    position: fixed;
+    top: 48px; left: 0; right: 0; bottom: 0;
+    z-index: 1;
+  }
+
+  /* ── OA SUMMARY PANEL ── */
+  #summary-panel {
+    position: fixed;
+    bottom: 24px;
+    left: 14px;
+    z-index: 1050;
+    background: var(--bsnl-panel);
+    border: 1px solid var(--bsnl-border);
+    border-radius: 8px;
+    min-width: 260px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.55);
+    overflow: hidden;
+    font-family: var(--font-main);
+  }
+
+  #summary-panel .sp-header {
+    background: linear-gradient(90deg, #0d47a1, #1565c0);
+    padding: 7px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--bsnl-border);
+  }
+  #summary-panel .sp-header span {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  #summary-panel .sp-header .sp-toggle {
+    color: var(--bsnl-gold);
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    background: none;
+    line-height: 1;
+  }
+
+  #summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  #summary-table th {
+    background: rgba(13,71,161,0.7);
+    color: var(--bsnl-gold);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    text-align: left;
+  }
+  #summary-table td {
+    padding: 5px 10px;
+    color: #e0e0e0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  #summary-table tr:last-child td { border-bottom: none; }
+  #summary-table .oa-name { font-weight: 700; color: #fff; }
+  #summary-table .down-count { color: var(--bsnl-red); font-family: var(--font-mono); font-weight: 700; }
+  #summary-table .total-count { color: var(--bsnl-green); font-family: var(--font-mono); }
+  #summary-table .total-row td {
+    background: rgba(0,200,83,0.08);
+    font-weight: 700;
+    color: var(--bsnl-gold);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  /* ── LEGEND ── */
+  #legend {
+    position: fixed;
+    bottom: 24px;
+    right: 14px;
+    z-index: 1050;
+    background: var(--bsnl-panel);
+    border: 1px solid var(--bsnl-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #ccc;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  #legend .leg-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .leg-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+  }
+  .leg-up { background: var(--bsnl-green); }
+  .leg-down { background: var(--bsnl-red); }
+
+  /* ── LOADING OVERLAY ── */
+  #loading {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bsnl-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    transition: opacity 0.4s;
+  }
+  #loading .ld-logo {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 3px;
+  }
+  #loading .ld-logo span { color: var(--bsnl-green); }
+  #loading .ld-bar {
+    width: 220px;
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #loading .ld-bar-inner {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--bsnl-green), var(--bsnl-gold));
+    border-radius: 2px;
+    animation: loadbar 1.4s ease-in-out forwards;
+  }
+  @keyframes loadbar { to { width: 100%; } }
+  #loading .ld-text {
+    color: rgba(255,255,255,0.5);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  /* Popup styling */
+  .leaflet-popup-content-wrapper {
+    background: var(--bsnl-panel) !important;
+    border: 1px solid var(--bsnl-border) !important;
+    border-radius: 8px !important;
+    color: #e0e0e0 !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6) !important;
+    font-family: var(--font-main) !important;
+  }
+  .leaflet-popup-tip { background: rgba(10,15,30,0.92) !important; }
+  .popup-site { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .popup-row { display: flex; gap: 6px; font-size: 12px; margin-bottom: 3px; }
+  .popup-key { color: var(--bsnl-gold); font-weight: 700; min-width: 56px; }
+  .popup-val { color: #ccc; }
+  .popup-status-up { color: var(--bsnl-green); font-weight: 700; font-family: var(--font-mono); }
+  .popup-status-down { color: var(--bsnl-red); font-weight: 700; font-family: var(--font-mono); }
+
+  #site-count {
+    position: fixed;
+    top: 58px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    background: var(--bsnl-panel);
+    border: 1px solid var(--bsnl-border);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 12px;
+    color: var(--bsnl-gold);
+    font-family: var(--font-mono);
+    pointer-events: none;
+    opacity: 0.9;
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading">
+  <div class="ld-logo">BSN<span>L</span> NODE MAP</div>
+  <div class="ld-bar"><div class="ld-bar-inner"></div></div>
+  <div class="ld-text">Fetching node data...</div>
+</div>
+
+<!-- Top Bar -->
+<div id="topbar">
+  <div class="logo">
+    <div class="logo-badge">BSNL</div>
+    <span class="title">Node Status Map (UP/DOWN)</span>
+  </div>
+  <span class="last-updated">Last Updated: <span id="lastUpdated">--</span></span>
+  <div class="topbar-spacer"></div>
+
+  <select id="mapType">
+    <option value="hybrid">Hybrid</option>
+    <option value="satellite">Satellite</option>
+    <option value="street">Street</option>
+    <option value="topo">Topo</option>
+  </select>
+
+  <input type="text" id="searchSite" placeholder="Search Site...">
+  <button class="btn-ctrl" onclick="clearFilters()">Clear</button>
+
+  <!-- OA Filter -->
+  <div class="dropdown-wrap">
+    <button class="btn-ctrl" id="btnOA" onclick="toggleDD('ddOA','btnOA')">Select OA ▾</button>
+    <div class="dropdown-menu" id="ddOA">
+      <div class="dd-title">OA</div>
+      <div id="ddOA-items"></div>
+    </div>
+  </div>
+
+  <!-- SDCA Filter -->
+  <div class="dropdown-wrap">
+    <button class="btn-ctrl" id="btnSDCA" onclick="toggleDD('ddSDCA','btnSDCA')">Select SDCA ▾</button>
+    <div class="dropdown-menu" id="ddSDCA">
+      <div class="dd-title">SDCA</div>
+      <div id="ddSDCA-items"></div>
+    </div>
+  </div>
+
+  <!-- Media Filter -->
+  <div class="dropdown-wrap">
+    <button class="btn-ctrl" id="btnMedia" onclick="toggleDD('ddMedia','btnMedia')">Select Media ▾</button>
+    <div class="dropdown-menu" id="ddMedia">
+      <div class="dd-title">Media</div>
+      <div id="ddMedia-items"></div>
+    </div>
+  </div>
+
+  <!-- Status Filter -->
+  <div class="dropdown-wrap">
+    <button class="btn-ctrl" id="btnStatus" onclick="toggleDD('ddStatus','btnStatus')">Select Status ▾</button>
+    <div class="dropdown-menu" id="ddStatus">
+      <div class="dd-title">Status</div>
+      <div id="ddStatus-items"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- Site count badge -->
+<div id="site-count">Loading...</div>
+
+<!-- OA Summary Panel -->
+<div id="summary-panel">
+  <div class="sp-header">
+    <span>OA Summary</span>
+    <button class="sp-toggle" onclick="toggleSummary()">▼</button>
+  </div>
+  <div id="summary-body">
+    <table id="summary-table">
+      <thead>
+        <tr>
+          <th>OA</th>
+          <th>eNB DOWN</th>
+          <th>Site DOWN</th>
+        </tr>
+      </thead>
+      <tbody id="summary-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Legend -->
+<div id="legend">
+  <div class="leg-row"><div class="leg-dot leg-up"></div> UP</div>
+  <div class="leg-row"><div class="leg-dot leg-down"></div> DOWN</div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script>
+// ── TILE LAYERS ──
+const tileLayers = {
+  hybrid: L.tileLayer(
+    'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+    { subdomains:'0123', attribution:'Google Hybrid', maxZoom:20 }
+  ),
+  satellite: L.tileLayer(
+    'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    { subdomains:'0123', attribution:'Google Satellite', maxZoom:20 }
+  ),
+  street: L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    { attribution:'© OpenStreetMap', maxZoom:19 }
+  ),
+  topo: L.tileLayer(
+    'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    { attribution:'© OpenTopoMap', maxZoom:17 }
+  )
+};
+
+const map = L.map('map', {
+  center: [30.3, 78.5],
+  zoom: 8,
+  layers: [tileLayers.hybrid],
+  zoomControl: false
+});
+
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// Map type switcher
+document.getElementById('mapType').addEventListener('change', function() {
+  Object.values(tileLayers).forEach(l => map.removeLayer(l));
+  tileLayers[this.value].addTo(map);
+});
+
+// ── ICON FACTORIES ──
+function makeIcon(color) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="36" viewBox="0 0 24 36">
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 24 12 24S24 21 24 12C24 5.37 18.63 0 12 0z" fill="${color}" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="5" fill="rgba(255,255,255,0.85)"/>
+  </svg>`;
+  return L.icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(svg),
+    iconSize: [24, 36],
+    iconAnchor: [12, 36],
+    popupAnchor: [0, -36]
+  });
+}
+
+const iconUp   = makeIcon('#00c853');
+const iconDown = makeIcon('#ff3d00');
+
+// ── DATA & STATE ──
+let allData = [];
+let markers = [];
+let layerGroup = L.layerGroup().addTo(map);
+
+let filters = {
+  oa: new Set(),
+  sdca: new Set(),
+  media: new Set(),
+  status: new Set(),
+  search: ''
+};
+
+// ── FETCH DATA ──
+async function fetchData() {
+  try {
+    // Demo data (replace URL below with actual API endpoint)
+    const res = await fetch('bts.php');
+    allData = await res.json();
+
+    // SAMPLE DATA (extended for demo)
+    // allData = [
+    //   {"Site Name":"DL Road","OA":"DEHRADUN","SDCA":"DEHRADUN","Media":"DMW","latitude":30.3369,"longitude":78.0632,"B":"UP","F":"4 days 18 hours 27 minutes"},
+    //   {"Site Name":"Bharuwala","OA":"DEHRADUN","SDCA":"DEHRADUN","Media":"OFC/MW","latitude":30.2713,"longitude":78.0141,"B":"UP","F":"14 days 21 hours 51 minutes"},
+    //   {"Site Name":"Babugarh","OA":"DEHRADUN","SDCA":"CHAKRATA","Media":"OFC/MW","latitude":30.4631,"longitude":77.7651,"B":"UP","F":"14 days 15 hours 0 minutes"},
+    //   {"Site Name":"ENGINEERING ENCL","OA":"DEHRADUN","SDCA":"DEHRADUN","Media":"MAAN","latitude":30.3092,"longitude":78.0061,"B":"UP","F":"22 days 19 hours 37 minutes"},
+    //   {"Site Name":"Banjarawala 2","OA":"DEHRADUN","SDCA":"DEHRADUN","Media":"OFC/MW","latitude":30.2792,"longitude":78.0202,"B":"UP","F":"14 days 21 hours 51 minutes"},
+    //   {"Site Name":"Dunskvir Court","OA":"DEHRADUN","SDCA":"DEHRADUN","Media":"UBR","latitude":30.4588,"longitude":78.0539,"B":"DOWN","F":"9 days 12 hours 24 minutes"},
+    //   {"Site Name":"Almora Main","OA":"ALMORA","SDCA":"ALMORA","Media":"OFC","latitude":29.5971,"longitude":79.6551,"B":"UP","F":"5 days 2 hours"},
+    //   {"Site Name":"Kausani","OA":"ALMORA","SDCA":"ALMORA","Media":"MW","latitude":29.8437,"longitude":79.5997,"B":"DOWN","F":"1 day 3 hours"},
+    //   {"Site Name":"Ranikhet","OA":"ALMORA","SDCA":"RANIKHET","Media":"OFC/MW","latitude":29.6440,"longitude":79.4318,"B":"UP","F":"10 days"},
+    //   {"Site Name":"Bageshwar","OA":"ALMORA","SDCA":"BAGESHWAR","Media":"MW","latitude":29.8357,"longitude":79.7743,"B":"DOWN","F":"2 days 6 hours"},
+    //   {"Site Name":"Haridwar Main","OA":"HARIDWAR","SDCA":"HARIDWAR","Media":"OFC","latitude":29.9457,"longitude":78.1642,"B":"UP","F":"30 days"},
+    //   {"Site Name":"Roorkee","OA":"HARIDWAR","SDCA":"ROORKEE","Media":"OFC","latitude":29.8543,"longitude":77.8880,"B":"UP","F":"12 days"},
+    //   {"Site Name":"Rishikesh","OA":"HARIDWAR","SDCA":"RISHIKESH","Media":"OFC/MW","latitude":30.0869,"longitude":78.2676,"B":"DOWN","F":"3 hours 15 minutes"},
+    //   {"Site Name":"Laksar","OA":"HARIDWAR","SDCA":"HARIDWAR","Media":"MW","latitude":29.7439,"longitude":78.0289,"B":"UP","F":"8 days"},
+    //   {"Site Name":"Nainital Main","OA":"NAINITAL","SDCA":"NAINITAL","Media":"OFC","latitude":29.3803,"longitude":79.4636,"B":"UP","F":"20 days"},
+    //   {"Site Name":"Haldwani","OA":"NAINITAL","SDCA":"HALDWANI","Media":"OFC","latitude":29.2183,"longitude":79.5130,"B":"UP","F":"15 days"},
+    //   {"Site Name":"Ramnagar","OA":"NAINITAL","SDCA":"RAMNAGAR","Media":"MW","latitude":29.3943,"longitude":79.1257,"B":"DOWN","F":"1 day 12 hours"},
+    //   {"Site Name":"Rudrapur","OA":"NAINITAL","SDCA":"RUDRAPUR","Media":"OFC/MW","latitude":28.9848,"longitude":79.4010,"B":"UP","F":"18 days"},
+    //   {"Site Name":"Kashipur","OA":"NAINITAL","SDCA":"KASHIPUR","Media":"OFC","latitude":29.2108,"longitude":78.9643,"B":"DOWN","F":"4 days"},
+    //   {"Site Name":"New Tehri","OA":"NEW TEHRI","SDCA":"TEHRI","Media":"OFC","latitude":30.3780,"longitude":78.4320,"B":"UP","F":"7 days"},
+    //   {"Site Name":"Chamba Tehri","OA":"NEW TEHRI","SDCA":"TEHRI","Media":"MW","latitude":30.3490,"longitude":78.2800,"B":"DOWN","F":"12 hours"},
+    //   {"Site Name":"Narendra Nagar","OA":"NEW TEHRI","SDCA":"TEHRI","Media":"OFC/MW","latitude":30.1670,"longitude":78.2960,"B":"UP","F":"3 days"},
+    //   {"Site Name":"Srinagar Pauri","OA":"SRINAGAR","SDCA":"SRINAGAR","Media":"OFC","latitude":30.2226,"longitude":78.7862,"B":"UP","F":"25 days"},
+    //   {"Site Name":"Pauri Town","OA":"SRINAGAR","SDCA":"PAURI","Media":"MW","latitude":30.1480,"longitude":78.7800,"B":"DOWN","F":"2 days 8 hours"},
+    //   {"Site Name":"Lansdowne","OA":"SRINAGAR","SDCA":"LANSDOWNE","Media":"OFC/MW","latitude":29.8360,"longitude":78.6870,"B":"UP","F":"6 days"},
+    //   {"Site Name":"Kotdwar","OA":"SRINAGAR","SDCA":"KOTDWAR","Media":"OFC","latitude":29.7480,"longitude":78.5210,"B":"DOWN","F":"5 days 14 hours"},
+    // ];
+
+    init();
+  } catch(e) {
+    console.error('Fetch failed:', e);
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+// ── INIT ──
+function init() {
+  buildFilters();
+  applyFilters();
+  updateTime();
+  setTimeout(() => {
+    document.getElementById('loading').style.opacity = '0';
+    setTimeout(() => document.getElementById('loading').style.display = 'none', 400);
+  }, 1400);
+}
+
+// ── BUILD FILTER DROPDOWNS ──
+function buildFilters() {
+  const oas    = [...new Set(allData.map(d => d.OA))].sort();
+  const sdcas  = [...new Set(allData.map(d => d.SDCA))].sort();
+  const medias = [...new Set(allData.map(d => d.Media))].sort();
+  const statuses = [...new Set(allData.map(d => d.B))].sort();
+
+  renderCheckboxes('ddOA-items',    oas,      'oa');
+  renderCheckboxes('ddSDCA-items',  sdcas,    'sdca');
+  renderCheckboxes('ddMedia-items', medias,   'media');
+  renderCheckboxes('ddStatus-items',statuses, 'status');
+}
+
+function renderCheckboxes(containerId, values, filterKey) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = values.map(v => `
+    <label>
+      <input type="checkbox" value="${v}" onchange="onFilterChange('${filterKey}', this)">
+      ${v}
+    </label>
+  `).join('');
+}
+
+function onFilterChange(key, checkbox) {
+  if (checkbox.checked) filters[key].add(checkbox.value);
+  else filters[key].delete(checkbox.value);
+  applyFilters();
+}
+
+// ── SEARCH ──
+document.getElementById('searchSite').addEventListener('input', function() {
+  filters.search = this.value.trim().toLowerCase();
+  applyFilters();
+});
+
+// ── APPLY FILTERS ──
+function applyFilters() {
+  layerGroup.clearLayers();
+  markers = [];
+
+  const visible = allData.filter(d => {
+    if (filters.oa.size    && !filters.oa.has(d.OA))      return false;
+    if (filters.sdca.size  && !filters.sdca.has(d.SDCA))  return false;
+    if (filters.media.size && !filters.media.has(d.Media)) return false;
+    if (filters.status.size && !filters.status.has(d.B))   return false;
+    if (filters.search && !d['Site Name'].toLowerCase().includes(filters.search)) return false;
+    return true;
+  });
+
+  visible.forEach(d => {
+    const icon = d.B === 'UP' ? iconUp : iconDown;
+    const m = L.marker([d.latitude, d.longitude], { icon })
+      .bindPopup(buildPopup(d));
+    layerGroup.addLayer(m);
+    markers.push(m);
+  });
+
+  document.getElementById('site-count').textContent =
+    `Showing ${visible.length} of ${allData.length} sites`;
+
+  updateSummary(visible);
+}
+
+function buildPopup(d) {
+  const statusClass = d.B === 'UP' ? 'popup-status-up' : 'popup-status-down';
+  return `
+    <div class="popup-site">${d['Site Name']}</div>
+    <div class="popup-row"><span class="popup-key">OA</span><span class="popup-val">${d.OA}</span></div>
+    <div class="popup-row"><span class="popup-key">SDCA</span><span class="popup-val">${d.SDCA}</span></div>
+    <div class="popup-row"><span class="popup-key">Media</span><span class="popup-val">${d.Media}</span></div>
+    <div class="popup-row"><span class="popup-key">Status</span><span class="${statusClass}">${d.B}</span></div>
+    <div class="popup-row"><span class="popup-key">Uptime</span><span class="popup-val">${d.F}</span></div>
+    <div class="popup-row"><span class="popup-key">Lat/Lng</span><span class="popup-val">${d.latitude.toFixed(4)}, ${d.longitude.toFixed(4)}</span></div>
+  `;
+}
+
+// ── OA SUMMARY ──
+function updateSummary(visible) {
+  const oaMap = {};
+  visible.forEach(d => {
+    if (!oaMap[d.OA]) oaMap[d.OA] = { total: 0, down: 0 };
+    oaMap[d.OA].total++;
+    if (d.B === 'DOWN') oaMap[d.OA].down++;
+  });
+
+  const tbody = document.getElementById('summary-tbody');
+  let rows = '';
+  let totTotal = 0, totDown = 0;
+  Object.entries(oaMap).sort().forEach(([oa, s]) => {
+    totTotal += s.total; totDown += s.down;
+    rows += `<tr>
+      <td class="oa-name">${oa}</td>
+      <td class="down-count">${s.down}</td>
+      <td class="total-count">${s.total}</td>
+    </tr>`;
+  });
+  rows += `<tr class="total-row">
+    <td>Total</td>
+    <td class="down-count">${totDown}</td>
+    <td class="total-count">${totTotal}</td>
+  </tr>`;
+  tbody.innerHTML = rows;
+}
+
+// ── CLEAR FILTERS ──
+function clearFilters() {
+  filters = { oa: new Set(), sdca: new Set(), media: new Set(), status: new Set(), search: '' };
+  document.getElementById('searchSite').value = '';
+  document.querySelectorAll('.dropdown-menu input[type="checkbox"]').forEach(cb => cb.checked = false);
+  applyFilters();
+}
+
+// ── DROPDOWNS ──
+function toggleDD(ddId, btnId) {
+  const dd = document.getElementById(ddId);
+  const isOpen = dd.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+  if (!isOpen) {
+    dd.classList.add('open');
+    document.getElementById(btnId).classList.add('active');
+  }
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown-wrap') && !e.target.closest('.btn-ctrl[onclick]')) {
+    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+  }
+});
+
+// ── SUMMARY TOGGLE ──
+function toggleSummary() {
+  const body = document.getElementById('summary-body');
+  const btn = document.querySelector('.sp-toggle');
+  if (body.style.display === 'none') {
+    body.style.display = '';
+    btn.textContent = '▼';
+  } else {
+    body.style.display = 'none';
+    btn.textContent = '▲';
+  }
+}
+
+// ── TIME ──
+function updateTime() {
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent =
+    now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+setInterval(updateTime, 1000);
+
+// ── START ──
+fetchData();
+
+// ── TO USE REAL API: replace sample data block with: ──
+// const res = await fetch('/node-map/bts.php');
+// allData = await res.json();
+</script>
+</body>
+</html>

@@ -8,8 +8,8 @@ let baseLayers = {};
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize map
     map = L.map('map', {
-        center: [20.5937, 78.9629], // Center of India, arbitrary default
-        zoom: 5,
+        center: [30.055, 79.325], // Center of India, arbitrary default
+        zoom: 15,
         zoomControl: false // We will move it
     });
 
