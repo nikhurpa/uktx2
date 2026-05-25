@@ -33,13 +33,13 @@
             //     <span>🗺️</span> Get Directions (OSRM)
             // </div> -->
             <div class="ctx-item" data-action="directionsFromHere">
-                <span>🗺️</span> Direction from here
+                <span>➡️</span> Direction from here
             </div>
                         <div class="ctx-item" data-action="directionsToHere">
-                <span>🗺️</span> Direction to Here
+                <span>⬆️</span> Direction to Here
             </div>
                         <div class="ctx-item" data-action="directionsWaypoint">
-                <span>🗺️</span> Set Direction way point
+                <span>🛣️</span> Set Direction way point
             </div>
             <hr style="margin:4px 0;">
             <div class="ctx-item" data-action="zoom-to">
@@ -47,6 +47,9 @@
             </div>
             <div class="ctx-item" data-action="copy-coords">
                 <span>📋</span> Copy Coordinates
+            </div>
+             <div class="ctx-item" data-action="properties">
+                <span>⚙️</span> Properties
             </div>
             <hr style="margin:4px 0;">
             <div class="ctx-item ctx-danger" data-action="delete">
@@ -520,6 +523,16 @@ function actionDelete(layer) {
             }
         }
     }
+
+     $("#jqxTree").jqxTree("removeItem", $("#" + layer.meta.id)[0]);
+}
+function actionProperties(layer) {
+    if (layer instanceof L.Marker || layer instanceof L.Polyline    ) { 
+        editPlacemark.open(layer, map);  
+    } else {
+        alert('Feature properties panel is not available.');
+    }
+
 }
 
 
@@ -589,6 +602,7 @@ document.getElementById('feature-ctx-menu').addEventListener('click', async (e) 
         case 'directionsWaypoint': await actionDirectionsWaypoint(_ctxLayer); break;
         case 'zoom-to':    actionZoomTo(_ctxLayer);           break;
         case 'copy-coords': actionCopyCoords(_ctxLayer);      break;
+        case 'properties': actionProperties(_ctxLayer);      break;
         case 'delete':     actionDelete(_ctxLayer);           break;
 
 

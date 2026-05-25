@@ -44,7 +44,7 @@ window.initMapEdit = function () {
 
     // setupModals();
     // setupUpload();
-    if (window.initDbUploadTreeMenu) window.initDbUploadTreeMenu();
+    // if (window.initDbUploadTreeMenu) window.initDbUploadTreeMenu();
 
     $("#jqxTree").jqxTree({ source: treeSource, width: "95%", height: "300px", checkboxes: true, allowDrag: true, allowDrop: true });
 
@@ -1337,11 +1337,15 @@ function treeEdit() {
           <div class="hover-box" id="addFolder">➕ Add Folder</div>
           <div class="hover-box" id="renameItem">✏️ Rename</div>
           <div class="hover-box" id="deleteItem">🗑️ Delete</div>
-          <div class="hover-box" id="saveItem">💾 Save</div>
+          <div class="hover-box" id="saveItem">💾 Save To my Place</div>
           <hr>
           <div class="hover-box" id="changeMarkerIcon">📍 Change Marker Icon</div>
           <div class="hover-box" id="changePolylineColor">〰️ Change Line Color</div>
           <div class="hover-box" id="changePolygonColor">⬛ Change Polygon Color</div>
+          <div class="hover-box" id="zoomToNode">🔍 Zoom to node</div>
+          <div class="hover-box" id="exportAsKML">🗂️ Export Node as KML</div>
+
+
         </div>`;
     $("body").append(menuHtml);
 
@@ -1457,6 +1461,25 @@ function treeEdit() {
             }
         });
     });
+
+    $("#zoomToNode").on("click", () => {
+        window.zoomToNode(contextTargetId);
+        
+    });
+
+    $("#exportAsKML").on("click", () => {
+        //  const entry = featureLayers[contextTargetId];
+        // if (!entry) return;
+        // const layers = Array.isArray(entry) ? entry : [entry];
+        window.exportNodeKml(contextTargetId);
+        // Implementing this would require traversing the node's layers and building a KML structure,
+        // then offering it as a downloadable file. This is a non-trivial extension.
+    }); 
+
+
+
+
+
 }
 // ─── Export Tree to Server ────────────────────────────────────────────────────
 

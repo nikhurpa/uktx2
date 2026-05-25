@@ -26,53 +26,53 @@ window.DB_UPLOAD_ENDPOINT = '/map/newassets/js/editmap/js/php/api.php?action=sav
 // (uses the same #feature-ctx-menu panel from context_menu.js,
 //  but we add a separate mini-menu for the tree panel)
 // ─────────────────────────────────────────────────────────────────────────────
-(function injectTreeContextMenu() {
-    if (document.getElementById('tree-ctx-menu')) return;
+// (function injectTreeContextMenu() {
+//     if (document.getElementById('tree-ctx-menu')) return;
 
-    const menu = document.createElement('div');
-    menu.id = 'tree-ctx-menu';
-    menu.style.cssText = `
-        display:none; position:fixed; z-index:9200;
-        background:#fff; border:1px solid #ccc; border-radius:6px;
-        box-shadow:0 4px 14px rgba(0,0,0,.25); min-width:210px;
-        font:13px/1.4 sans-serif; overflow:hidden;`;
-    menu.innerHTML = `
-        <div class="ctx-item" data-action="upload-node">
-            <span>☁️</span> Upload Node to Database
-        </div>
-        <div class="ctx-item" data-action="upload-all">
-            <span>📤</span> Upload All Checked Features
-        </div>
-        <hr style="margin:4px 0;">
-        <div class="ctx-item" data-action="zoom-to-node">
-            <span>🔍</span> Zoom To Node
-        </div>
-        <div class="ctx-item" data-action="export-node-kml">
-            <span>💾</span> Export Node as KML
-        </div>`;
-    document.body.appendChild(menu);
+//     const menu = document.createElement('div');
+//     menu.id = 'tree-ctx-menu';
+//     menu.style.cssText = `
+//         display:none; position:fixed; z-index:9200;
+//         background:#fff; border:1px solid #ccc; border-radius:6px;
+//         box-shadow:0 4px 14px rgba(0,0,0,.25); min-width:210px;
+//         font:13px/1.4 sans-serif; overflow:hidden;`;
+//     menu.innerHTML = `
+//         <div class="ctx-item" data-action="upload-node">
+//             <span>☁️</span> Upload Node to Database
+//         </div>
+//         <div class="ctx-item" data-action="upload-all">
+//             <span>📤</span> Upload All Checked Features
+//         </div>
+//         <hr style="margin:4px 0;">
+//         <div class="ctx-item" data-action="zoom-to-node">
+//             <span>🔍</span> Zoom To Node
+//         </div>
+//         <div class="ctx-item" data-action="export-node-kml">
+//             <span>💾</span> Export Node as KML
+//         </div>`;
+//     document.body.appendChild(menu);
 
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#tree-ctx-menu')) {
-            menu.style.display = 'none';
-        }
-    });
+//     // Close on outside click
+//     document.addEventListener('click', (e) => {
+//         if (!e.target.closest('#tree-ctx-menu')) {
+//             menu.style.display = 'none';
+//         }
+//     });
 
-    menu.addEventListener('click', async (e) => {
-        const item = e.target.closest('[data-action]');
-        if (!item) return;
-        menu.style.display = 'none';
+//     menu.addEventListener('click', async (e) => {
+//         const item = e.target.closest('[data-action]');
+//         if (!item) return;
+//         menu.style.display = 'none';
 
-        const nodeId = menu.dataset.nodeId;
-        switch (item.dataset.action) {
-            case 'upload-node':     await window.dbUploadNode(nodeId); break;
-            case 'upload-all':      await window.dbUploadAll();        break;
-            case 'zoom-to-node':    zoomToNode(nodeId);                break;
-            case 'export-node-kml': exportNodeKml(nodeId);             break;
-        }
-    });
-})();
+//         const nodeId = menu.dataset.nodeId;
+//         switch (item.dataset.action) {
+//             case 'upload-node':     await window.dbUploadNode(nodeId); break;
+//             case 'upload-all':      await window.dbUploadAll();        break;
+//             case 'zoom-to-node':    zoomToNode(nodeId);                break;
+//             case 'export-node-kml': exportNodeKml(nodeId);             break;
+//         }
+//     });
+// })();
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -351,7 +351,7 @@ window.dbUploadAll = async function () {
 // ─────────────────────────────────────────────────────────────────────────────
 // Zoom To Node
 // ─────────────────────────────────────────────────────────────────────────────
-function zoomToNode(nodeId) {
+window.zoomToNode = function(nodeId) {
     const items = getSubtreeItems(nodeId);
     const features = collectFeatures(items);
     if (!features.length) return;
@@ -373,7 +373,7 @@ function zoomToNode(nodeId) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Export Node as KML
 // ─────────────────────────────────────────────────────────────────────────────
-function exportNodeKml(nodeId) {
+window.exportNodeKml = function(nodeId) {
     const items    = getSubtreeItems(nodeId);
     const features = collectFeatures(items);
     if (!features.length) { alert('No features to export.'); return; }
@@ -469,8 +469,8 @@ if (!window.showToast) {
 
 
 // Auto-init tree context menu once DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', window.initDbUploadTreeMenu);
-} else {
-    window.initDbUploadTreeMenu();
-}
+// if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', window.initDbUploadTreeMenu);
+// } else {
+//     window.initDbUploadTreeMenu();
+// }

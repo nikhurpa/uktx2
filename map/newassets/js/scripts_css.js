@@ -85,10 +85,11 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
    "./newassets/js/editmap/js/files/context_menu.js",
   "./newassets/js/editmap/js/files/db_upload.js",
   "./newassets/js/editmap/js/files/directions_tool.js",
+  "./newassets/js/editmap/js/files/editPlacemark.js",
        "./newassets/js/editmap/js/load_kml.js",
     //  "./newassets/js/editmap/js/app.js",
     //  "./newassets/js/editmap/js/kml_parser.js",
-     "./newassets/js/editmap/js/editor.js",
+     "./newassets/js/editmap/js/editor1.js",
 
 
 
