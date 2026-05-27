@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Tester</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --accent: #238636;
+    --accent-hover: #2ea043;
+    --blue: #1f6feb;
+    --red: #da3633;
+    --yellow: #d29922;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --font: 'Segoe UI', system-ui, sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  #topbar .logo {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  #topbar .logo span { color: #58a6ff; }
+  #topbar .sub {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  #main {
+    display: flex;
+    flex: 1;
+    gap: 0;
+    height: calc(100vh - 49px);
+  }
+
+  /* ── LEFT PANEL (request) ── */
+  #left {
+    width: 50%;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── RIGHT PANEL (response) ── */
+  #right {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  /* ── URL BAR ── */
+  #url-bar {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+
+  #method {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 90px;
+    outline: none;
+  }
+  #method option { background: #1c2128; }
+
+  #url-input {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  #url-input:focus { border-color: var(--blue); }
+  #url-input::placeholder { color: var(--text-dim); }
+
+  #btn-send {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  #btn-send:hover { background: var(--accent-hover); }
+  #btn-send:disabled { background: #21262d; color: var(--text-dim); cursor: not-allowed; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    flex-shrink: 0;
+  }
+  .tab {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+
+  /* ── EDITORS ── */
+  .tab-content { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+  .tab-content.active { display: flex; }
+
+  textarea {
+    flex: 1;
+    background: var(--bg);
+    border: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 14px 16px;
+    resize: none;
+    outline: none;
+    width: 100%;
+  }
+  textarea::placeholder { color: #3d444d; }
+
+  /* ── PROXY TOGGLE ── */
+  #proxy-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  #proxy-bar label {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  #proxy-bar input[type="checkbox"] { accent-color: var(--blue); }
+  #proxy-url {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    outline: none;
+  }
+  #proxy-url:focus { border-color: var(--blue); }
+  #proxy-url:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── RESPONSE AREA ── */
+  #response-area {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+  }
+
+  #response-meta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .meta-badge {
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .status-2xx { background: rgba(35,134,54,0.2); color: #3fb950; border: 1px solid rgba(35,134,54,0.4); }
+  .status-4xx { background: rgba(218,54,51,0.2); color: #f85149; border: 1px solid rgba(218,54,51,0.4); }
+  .status-5xx { background: rgba(218,54,51,0.2); color: #f85149; border: 1px solid rgba(218,54,51,0.4); }
+  .status-err { background: rgba(210,153,34,0.2); color: #e3b341; border: 1px solid rgba(210,153,34,0.4); }
+  .meta-time { color: var(--text-dim); }
+  .meta-size { color: var(--text-dim); }
+
+  #response-tabs { flex-shrink: 0; }
+
+  #response-pretty {
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+    min-height: 100%;
+  }
+
+  /* JSON syntax highlight */
+  .j-key    { color: #79c0ff; }
+  .j-str    { color: #a5d6ff; }
+  .j-num    { color: #f2cc60; }
+  .j-bool   { color: #ff7b72; }
+  .j-null   { color: #8b949e; }
+  .j-brace  { color: #c9d1d9; }
+
+  /* Raw response */
+  #response-raw {
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text-dim);
+    min-height: 100%;
+  }
+
+  /* ── COPY BTN ── */
+  #btn-copy {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  #btn-copy:hover { border-color: #58a6ff; color: #58a6ff; }
+
+  /* ── PLACEHOLDER ── */
+  #resp-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    color: var(--text-dim);
+  }
+  #resp-placeholder .icon { font-size: 40px; opacity: 0.3; }
+  #resp-placeholder .hint { font-size: 13px; }
+
+  /* ── SPINNER ── */
+  #spinner {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    flex-direction: column;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  .spin {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: #58a6ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── HEADERS TABLE ── */
+  .headers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .headers-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    vertical-align: top;
+  }
+  .headers-table td:first-child { color: #79c0ff; width: 40%; }
+  .headers-table td:last-child { color: var(--text-dim); word-break: break-all; }
+
+  #resp-headers-wrap { padding: 8px 16px; overflow: auto; flex: 1; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+  /* method colors */
+  #method { color: #3fb950; }
+  #method[data-method="POST"] { color: #e3b341; }
+  #method[data-method="PUT"]  { color: #79c0ff; }
+  #method[data-method="DELETE"] { color: #f85149; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">API <span>Tester</span></div>
+  <div class="sub">Test endpoints with GET / POST — CORS-free via proxy</div>
+</div>
+
+<div id="main">
+
+  <!-- ── LEFT: REQUEST ── -->
+  <div id="left">
+    <div class="panel-header">Request</div>
+
+    <!-- URL Bar -->
+    <div id="url-bar">
+      <select id="method" onchange="onMethodChange()">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+        <option value="PATCH">PATCH</option>
+      </select>
+      <input type="text" id="url-input" placeholder="https://your-api-server/node-map/bts.php">
+      <button id="btn-send" onclick="sendRequest()">▶ Send</button>
+    </div>
+
+    <!-- Proxy Bar -->
+    <div id="proxy-bar">
+      <label>
+        <input type="checkbox" id="useProxy" onchange="toggleProxy()">
+        Use Proxy
+      </label>
+      <input type="text" id="proxy-url" placeholder="proxy.php" value="proxy.php" disabled>
+      <span style="font-size:11px;color:var(--text-dim);">Bypasses CORS</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="req-tabs">
+      <div class="tab active" onclick="switchTab('req','body')">Body</div>
+      <div class="tab" onclick="switchTab('req','headers')">Headers</div>
+      <div class="tab" onclick="switchTab('req','params')">Params</div>
+    </div>
+
+    <!-- Body Tab -->
+    <div class="tab-content active" id="req-body">
+      <textarea id="req-body-text" placeholder='// POST body (JSON)&#10;{&#10;  "oa": "DEHRADUN",&#10;  "status": "DOWN"&#10;}'></textarea>
+    </div>
+
+    <!-- Headers Tab -->
+    <div class="tab-content" id="req-headers">
+      <textarea id="req-headers-text" placeholder='// Custom headers (JSON)&#10;{&#10;  "Authorization": "Bearer YOUR_TOKEN",&#10;  "X-Custom-Header": "value"&#10;}'></textarea>
+    </div>
+
+    <!-- Params Tab -->
+    <div class="tab-content" id="req-params">
+      <textarea id="req-params-text" placeholder='// Query params (JSON) — appended to URL&#10;{&#10;  "oa": "DEHRADUN",&#10;  "limit": "100"&#10;}'></textarea>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: RESPONSE ── -->
+  <div id="right">
+    <div class="panel-header">
+      Response
+      <button id="btn-copy" onclick="copyResponse()">Copy</button>
+    </div>
+
+    <!-- Response meta -->
+    <div id="response-meta" style="display:none;">
+      <span id="status-badge" class="meta-badge"></span>
+      <span id="resp-time" class="meta-time"></span>
+      <span id="resp-size" class="meta-size"></span>
+    </div>
+
+    <!-- Response tabs -->
+    <div class="tabs" id="resp-tabs" style="display:none;">
+      <div class="tab active" onclick="switchTab('resp','pretty')">Pretty</div>
+      <div class="tab" onclick="switchTab('resp','raw')">Raw</div>
+      <div class="tab" onclick="switchTab('resp','resp-headers')">Headers</div>
+    </div>
+
+    <div id="response-area">
+
+      <!-- Placeholder -->
+      <div id="resp-placeholder">
+        <div class="icon">⚡</div>
+        <div class="hint">Enter a URL and hit Send</div>
+      </div>
+
+      <!-- Spinner -->
+      <div id="spinner">
+        <div class="spin"></div>
+        <span>Sending request...</span>
+      </div>
+
+      <!-- Pretty -->
+      <div class="tab-content" id="resp-pretty" style="display:none;">
+        <div id="response-pretty"></div>
+      </div>
+
+      <!-- Raw -->
+      <div class="tab-content" id="resp-raw" style="display:none;">
+        <div id="response-raw"></div>
+      </div>
+
+      <!-- Response Headers -->
+      <div class="tab-content" id="resp-resp-headers" style="display:none;">
+        <div id="resp-headers-wrap"><table class="headers-table" id="resp-headers-table"></table></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+let lastRawResponse = '';
+let activeReqTab = 'body';
+let activeRespTab = 'pretty';
+
+function onMethodChange() {
+  const m = document.getElementById('method');
+  m.setAttribute('data-method', m.value);
+}
+
+function toggleProxy() {
+  const cb = document.getElementById('useProxy');
+  document.getElementById('proxy-url').disabled = !cb.checked;
+}
+
+function switchTab(panel, tab) {
+  const prefix = panel === 'req' ? 'req-' : 'resp-';
+  const tabsId = panel === 'req' ? 'req-tabs' : 'resp-tabs';
+
+  document.querySelectorAll(`#${tabsId} .tab`).forEach((t, i) => t.classList.remove('active'));
+  document.querySelectorAll(`#${panel === 'req' ? 'left' : 'right'} .tab-content`).forEach(c => {
+    c.classList.remove('active');
+    c.style.display = 'none';
+  });
+
+  // find clicked tab
+  const allTabs = document.querySelectorAll(`#${tabsId} .tab`);
+  allTabs.forEach(t => { if (t.textContent.toLowerCase().replace(' ','') === tab.replace('-','')) t.classList.add('active'); });
+
+  const content = document.getElementById(`${prefix}${tab}`);
+  if (content) { content.classList.add('active'); content.style.display = 'flex'; }
+
+  if (panel === 'req') activeReqTab = tab;
+  else activeRespTab = tab;
+}
+
+async function sendRequest() {
+  const method  = document.getElementById('method').value;
+  const rawUrl  = document.getElementById('url-input').value.trim();
+  const useProxy = document.getElementById('useProxy').checked;
+  const proxyUrl = document.getElementById('proxy-url').value.trim() || 'proxy.php';
+
+  if (!rawUrl) { alert('Please enter a URL.'); return; }
+
+  // Build query params
+  let finalUrl = rawUrl;
+  const paramsText = document.getElementById('req-params-text').value.trim();
+  if (paramsText) {
+    try {
+      const params = JSON.parse(paramsText);
+      const qs = new URLSearchParams(params).toString();
+      finalUrl += (finalUrl.includes('?') ? '&' : '?') + qs;
+    } catch(e) { alert('Params JSON is invalid:\n' + e.message); return; }
+  }
+
+  // Custom headers
+  let extraHeaders = {};
+  const headersText = document.getElementById('req-headers-text').value.trim();
+  if (headersText) {
+    try { extraHeaders = JSON.parse(headersText); }
+    catch(e) { alert('Headers JSON is invalid:\n' + e.message); return; }
+  }
+
+  // Body
+  const bodyText = document.getElementById('req-body-text').value.trim();
+
+  // Show spinner
+  document.getElementById('resp-placeholder').style.display = 'none';
+  document.getElementById('spinner').style.display = 'flex';
+  document.getElementById('response-meta').style.display = 'none';
+  document.getElementById('resp-tabs').style.display = 'none';
+  ['resp-pretty','resp-raw','resp-resp-headers'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('active'); el.style.display = 'none';
+  });
+
+  document.getElementById('btn-send').disabled = true;
+
+  const t0 = performance.now();
+
+  try {
+    let fetchUrl, fetchOptions;
+
+    if (useProxy) {
+      // Send everything to proxy.php via POST
+      fetchUrl = proxyUrl;
+      fetchOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: finalUrl,
+          method: method,
+          headers: extraHeaders,
+          body: (method !== 'GET' && method !== 'DELETE') ? bodyText : null
+        })
+      };
+    } else {
+      // Direct request
+      fetchUrl = finalUrl;
+      fetchOptions = {
+        method: method,
+        headers: { 'Content-Type': 'application/json', ...extraHeaders }
+      };
+      if (method !== 'GET' && method !== 'DELETE' && bodyText) {
+        fetchOptions.body = bodyText;
+      }
+    }
+
+    const res = await fetch(fetchUrl, fetchOptions);
+    const elapsed = Math.round(performance.now() - t0);
+    const text = await res.text();
+    lastRawResponse = text;
+
+    // Meta
+    showMeta(res.status, elapsed, text.length);
+
+    // Response headers
+    const hdrs = {};
+    res.headers.forEach((v, k) => hdrs[k] = v);
+    showResponseHeaders(hdrs);
+
+    // Pretty / Raw
+    showResponseBody(text);
+
+    // Switch to pretty tab
+    document.getElementById('resp-tabs').style.display = 'flex';
+    switchTab('resp', 'pretty');
+
+  } catch(err) {
+    lastRawResponse = err.message;
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('resp-placeholder').style.display = 'none';
+    document.getElementById('resp-tabs').style.display = 'flex';
+
+    document.getElementById('response-meta').style.display = 'flex';
+    const badge = document.getElementById('status-badge');
+    badge.textContent = 'ERROR';
+    badge.className = 'meta-badge status-err';
+    document.getElementById('resp-time').textContent = '';
+    document.getElementById('resp-size').textContent = '';
+
+    document.getElementById('response-pretty').innerHTML =
+      `<span style="color:#f85149">⚠ ${escapeHtml(err.message)}</span>\n\n<span style="color:#8b949e">Tip: Enable "Use Proxy" to bypass CORS errors.</span>`;
+    const prettyEl = document.getElementById('resp-pretty');
+    prettyEl.style.display = 'flex'; prettyEl.classList.add('active');
+  }
+
+  document.getElementById('btn-send').disabled = false;
+}
+
+function showMeta(status, ms, bytes) {
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('response-meta').style.display = 'flex';
+
+  const badge = document.getElementById('status-badge');
+  badge.textContent = status;
+  if (status >= 200 && status < 300) badge.className = 'meta-badge status-2xx';
+  else if (status >= 400 && status < 500) badge.className = 'meta-badge status-4xx';
+  else if (status >= 500) badge.className = 'meta-badge status-5xx';
+  else badge.className = 'meta-badge status-err';
+
+  document.getElementById('resp-time').textContent = `⏱ ${ms} ms`;
+  const kb = (bytes / 1024).toFixed(1);
+  document.getElementById('resp-size').textContent = `📦 ${bytes < 1024 ? bytes + ' B' : kb + ' KB'}`;
+}
+
+function showResponseBody(text) {
+  document.getElementById('response-raw').textContent = text;
+
+  try {
+    const json = JSON.parse(text);
+    document.getElementById('response-pretty').innerHTML = syntaxHighlight(JSON.stringify(json, null, 2));
+  } catch(e) {
+    document.getElementById('response-pretty').innerHTML = escapeHtml(text);
+  }
+}
+
+function showResponseHeaders(hdrs) {
+  const rows = Object.entries(hdrs).map(([k, v]) =>
+    `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`
+  ).join('');
+  document.getElementById('resp-headers-table').innerHTML = rows;
+}
+
+function syntaxHighlight(json) {
+  return json
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+      let cls = 'j-num';
+      if (/^"/.test(match)) cls = /:$/.test(match) ? 'j-key' : 'j-str';
+      else if (/true|false/.test(match)) cls = 'j-bool';
+      else if (/null/.test(match)) cls = 'j-null';
+      return `<span class="${cls}">${match}</span>`;
+    });
+}
+
+function escapeHtml(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyResponse() {
+  navigator.clipboard.writeText(lastRawResponse).then(() => {
+    const btn = document.getElementById('btn-copy');
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+// Allow Ctrl+Enter to send
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') sendRequest();
+});
+</script>
+
+<!-- ── PROXY PHP (save as proxy.php on your server) ──
+<?php
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit(); }
+
+$input   = json_decode(file_get_contents('php://input'), true);
+$api_url = $input['url']    ?? '';
+$method  = strtoupper($input['method']  ?? 'GET');
+$headers = $input['headers'] ?? [];
+$body    = $input['body']   ?? null;
+
+if (!$api_url) { echo json_encode(['error'=>'No URL provided']); exit(); }
+
+$ch = curl_init($api_url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+
+$hdrs = ['Content-Type: application/json'];
+foreach ($headers as $k => $v) $hdrs[] = "$k: $v";
+curl_setopt($ch, CURLOPT_HTTPHEADER, $hdrs);
+
+if ($body && !in_array($method, ['GET','DELETE'])) {
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+}
+
+$response  = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+http_response_code($http_code);
+echo $response;
+?>
+-->
+
+</body>
+</html>

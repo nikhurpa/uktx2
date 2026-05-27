@@ -1,0 +1,1 @@
+let oa= [{"ssaName":"ALMORA","ssaCode":"AMO"}, {"ssaName":"DEHRADUN","ssaCode":"DDN"}, {"ssaName":"DEHRADUN SSA","ssaCode":"DDN"}, {"ssaName":"HARIDWAR","ssaCode":"HWR"}, {"ssaName":"KOTDWAR","ssaCode":"KTD"}, {"ssaName":"KOTDWARA SSA","ssaCode":"KTD"}, {"ssaName":"NAINITAL SSA","ssaCode":"NNT"}, {"ssaName":"NANITAL","ssaCode":"NNT"}, {"ssaName":"NEW TEHRI","ssaCode":"NWT"}]

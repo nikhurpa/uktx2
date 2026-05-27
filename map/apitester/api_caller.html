@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Caller</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', sans-serif; background:#0d1117; color:#c9d1d9; min-height:100vh; }
+
+#topbar {
+  background:#161b22; border-bottom:1px solid #30363d;
+  padding:12px 20px; display:flex; align-items:center; gap:10px;
+}
+#topbar h1 { font-size:16px; font-weight:700; color:#fff; }
+#topbar h1 span { color:#58a6ff; }
+#topbar small { color:#8b949e; font-size:12px; }
+
+#wrap { display:flex; height:calc(100vh - 49px); }
+
+/* ── LEFT ── */
+#left {
+  width:420px; flex-shrink:0;
+  border-right:1px solid #30363d;
+  display:flex; flex-direction:column;
+  overflow-y:auto;
+}
+
+.section { padding:14px 16px; border-bottom:1px solid #30363d; }
+.section label { display:block; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#8b949e; margin-bottom:6px; }
+
+/* Method + URL */
+#method-url { display:flex; gap:8px; }
+#method {
+  background:#161b22; border:1px solid #30363d; color:#3fb950;
+  font-size:13px; font-weight:700; padding:8px 10px; border-radius:6px;
+  cursor:pointer; outline:none; width:100px;
+}
+#method option { color:#c9d1d9; }
+#url {
+  flex:1; background:#161b22; border:1px solid #30363d; color:#fff;
+  font-size:13px; padding:8px 10px; border-radius:6px; outline:none;
+}
+#url:focus { border-color:#58a6ff; }
+#url::placeholder { color:#3d444d; }
+
+/* Params / Headers table */
+.kv-table { width:100%; border-collapse:collapse; margin-bottom:8px; }
+.kv-table td { padding:3px 4px; }
+.kv-table input {
+  width:100%; background:#0d1117; border:1px solid #30363d;
+  color:#c9d1d9; font-size:12px; padding:5px 8px; border-radius:4px; outline:none;
+}
+.kv-table input:focus { border-color:#58a6ff; }
+.kv-table input::placeholder { color:#3d444d; }
+.kv-table .del {
+  background:none; border:none; color:#f85149; cursor:pointer;
+  font-size:16px; padding:0 4px; line-height:1;
+}
+.btn-add {
+  background:none; border:1px dashed #30363d; color:#8b949e;
+  font-size:12px; padding:5px 12px; border-radius:5px; cursor:pointer;
+  width:100%; transition:all 0.15s;
+}
+.btn-add:hover { border-color:#58a6ff; color:#58a6ff; }
+
+/* Body */
+#body-wrap { display:none; }
+#body-text {
+  width:100%; height:130px; background:#0d1117; border:1px solid #30363d;
+  color:#c9d1d9; font-family:'Cascadia Code','Consolas',monospace; font-size:12px;
+  padding:8px 10px; border-radius:6px; resize:vertical; outline:none;
+}
+#body-text:focus { border-color:#58a6ff; }
+#body-text::placeholder { color:#3d444d; }
+
+/* Cookies */
+#cookie-text {
+  width:100%; height:70px; background:#0d1117; border:1px solid #30363d;
+  color:#c9d1d9; font-family:'Cascadia Code','Consolas',monospace; font-size:11px;
+  padding:8px 10px; border-radius:6px; resize:vertical; outline:none;
+}
+#cookie-text:focus { border-color:#58a6ff; }
+#cookie-text::placeholder { color:#3d444d; }
+.cookie-hint { font-size:11px; color:#8b949e; margin-top:5px; line-height:1.5; }
+.cookie-hint a { color:#58a6ff; cursor:pointer; text-decoration:underline; }
+
+/* Send button */
+#btn-send {
+  margin:14px 16px; background:#238636; border:none; color:#fff;
+  font-size:14px; font-weight:700; padding:10px; border-radius:6px;
+  cursor:pointer; transition:background 0.2s; width:calc(100% - 32px);
+}
+#btn-send:hover { background:#2ea043; }
+#btn-send:disabled { background:#21262d; color:#8b949e; cursor:not-allowed; }
+
+/* ── RIGHT ── */
+#right { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+#resp-meta {
+  display:none; background:#161b22; border-bottom:1px solid #30363d;
+  padding:8px 16px; gap:14px; align-items:center; flex-shrink:0;
+}
+.badge { padding:2px 10px; border-radius:12px; font-size:12px; font-weight:700; font-family:monospace; }
+.s2 { background:rgba(35,134,54,.2); color:#3fb950; border:1px solid rgba(35,134,54,.4); }
+.s4 { background:rgba(218,54,51,.2); color:#f85149; border:1px solid rgba(218,54,51,.4); }
+.s5 { background:rgba(218,54,51,.2); color:#f85149; border:1px solid rgba(218,54,51,.4); }
+.se { background:rgba(210,153,34,.2); color:#e3b341; border:1px solid rgba(210,153,34,.4); }
+#resp-time, #resp-size { font-size:12px; color:#8b949e; }
+
+#resp-tabs {
+  display:none; background:#161b22; border-bottom:1px solid #30363d;
+  display:flex; flex-shrink:0;
+}
+.rtab {
+  padding:8px 16px; font-size:12px; font-weight:600; color:#8b949e;
+  cursor:pointer; border-bottom:2px solid transparent; transition:all 0.15s;
+}
+.rtab:hover { color:#c9d1d9; }
+.rtab.active { color:#58a6ff; border-bottom-color:#58a6ff; }
+
+#resp-body { flex:1; overflow:auto; }
+
+#placeholder {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; height:100%; color:#3d444d; gap:10px;
+}
+#placeholder .icon { font-size:42px; }
+#placeholder p { font-size:13px; }
+
+#spinner {
+  display:none; flex-direction:column; align-items:center;
+  justify-content:center; height:100%; gap:12px; color:#8b949e; font-size:13px;
+}
+.spin {
+  width:30px; height:30px; border:3px solid #30363d;
+  border-top-color:#58a6ff; border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Tab panels */
+.rpanel { display:none; height:100%; }
+.rpanel.active { display:block; }
+
+#pretty-out, #raw-out {
+  padding:14px 16px; font-family:'Cascadia Code','Consolas',monospace;
+  font-size:13px; line-height:1.7; white-space:pre-wrap; word-break:break-all;
+}
+
+/* JSON colors */
+.jk { color:#79c0ff; }
+.js { color:#a5d6ff; }
+.jn { color:#f2cc60; }
+.jb { color:#ff7b72; }
+.jl { color:#8b949e; }
+
+/* Headers table */
+#hdrs-out { padding:10px 16px; }
+.hdrs-tbl { width:100%; border-collapse:collapse; font-size:12px; font-family:monospace; }
+.hdrs-tbl td { padding:6px 10px; border-bottom:1px solid #21262d; vertical-align:top; }
+.hdrs-tbl td:first-child { color:#79c0ff; width:35%; }
+.hdrs-tbl td:last-child { color:#8b949e; word-break:break-all; }
+
+/* Copy btn */
+#btn-copy {
+  margin-left:auto; background:none; border:1px solid #30363d; color:#8b949e;
+  font-size:11px; padding:3px 10px; border-radius:5px; cursor:pointer;
+}
+#btn-copy:hover { border-color:#58a6ff; color:#58a6ff; }
+
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-thumb { background:#30363d; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>API <span>Caller</span></h1>
+  <small>Enter URL · Set params · Send · See response</small>
+</div>
+
+<div id="wrap">
+
+  <!-- ── LEFT: REQUEST ── -->
+  <div id="left">
+
+    <!-- Method + URL -->
+    <div class="section">
+      <label>Endpoint</label>
+      <div id="method-url">
+        <select id="method" onchange="onMethod()">
+          <option>GET</option>
+          <option>POST</option>
+          <option>PUT</option>
+          <option>DELETE</option>
+          <option>PATCH</option>
+        </select>
+        <input type="text" id="url" placeholder="http://10.132.37.10:8081/api/...">
+      </div>
+    </div>
+
+    <!-- Query Params -->
+    <div class="section">
+      <label>Query Parameters</label>
+      <table class="kv-table" id="params-tbl"></table>
+      <button class="btn-add" onclick="addRow('params-tbl')">+ Add Param</button>
+    </div>
+
+    <!-- Request Body -->
+    <div class="section" id="body-wrap">
+      <label>Request Body (JSON / Form Data)</label>
+      <textarea id="body-text" placeholder='{"key": "value"}'></textarea>
+    </div>
+
+    <!-- Headers -->
+    <div class="section">
+      <label>Headers</label>
+      <table class="kv-table" id="headers-tbl"></table>
+      <button class="btn-add" onclick="addRow('headers-tbl')">+ Add Header</button>
+    </div>
+
+    <!-- Cookies -->
+    <div class="section">
+      <label>Cookies <span style="color:#e3b341;font-size:10px;font-weight:400;">(paste from browser DevTools for authenticated APIs)</span></label>
+      <textarea id="cookie-text" placeholder="JSESSIONID=abc123; WWV_PUBLIC_USER_SESSION=10.x.x.x:91807..."></textarea>
+      <div class="cookie-hint">
+        How to get: <strong>F12 → Network → click any request → Request Headers → copy Cookie value</strong>
+        &nbsp;|&nbsp; <a onclick="clearCookie()">Clear</a>
+      </div>
+    </div>
+
+    <button id="btn-send" onclick="send()">▶ &nbsp;Send Request &nbsp;(Ctrl+Enter)</button>
+  </div>
+
+  <!-- ── RIGHT: RESPONSE ── -->
+  <div id="right">
+
+    <div id="resp-meta">
+      <span id="status-badge" class="badge"></span>
+      <span id="resp-time"></span>
+      <span id="resp-size"></span>
+      <button id="btn-copy" onclick="copyResp()">Copy</button>
+    </div>
+
+    <div id="resp-tabs" style="display:flex">
+      <div class="rtab active" onclick="switchTab('pretty')">Pretty</div>
+      <div class="rtab" onclick="switchTab('raw')">Raw</div>
+      <div class="rtab" onclick="switchTab('hdrs')">Resp Headers</div>
+    </div>
+
+    <div id="resp-body">
+
+      <div id="placeholder">
+        <div class="icon">⚡</div>
+        <p>Fill in the URL and hit Send</p>
+      </div>
+
+      <div id="spinner">
+        <div class="spin"></div>
+        <span id="spinner-txt">Sending...</span>
+      </div>
+
+      <div class="rpanel active" id="panel-pretty"><div id="pretty-out"></div></div>
+      <div class="rpanel" id="panel-raw"><div id="raw-out"></div></div>
+      <div class="rpanel" id="panel-hdrs"><div id="hdrs-out"></div></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let lastRaw = '';
+
+// ── Init with default rows ──
+addRow('params-tbl');
+addRow('headers-tbl');
+
+function addRow(tblId) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input placeholder="Key"></td>
+    <td><input placeholder="Value"></td>
+    <td><button class="del" onclick="this.closest('tr').remove()">×</button></td>`;
+  document.getElementById(tblId).appendChild(tr);
+}
+
+function getRows(tblId) {
+  const obj = {};
+  document.querySelectorAll(`#${tblId} tr`).forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const k = inputs[0]?.value.trim();
+    const v = inputs[1]?.value.trim();
+    if (k) obj[k] = v;
+  });
+  return obj;
+}
+
+function onMethod() {
+  const m = document.getElementById('method').value;
+  document.getElementById('body-wrap').style.display =
+    ['POST','PUT','PATCH'].includes(m) ? 'block' : 'none';
+}
+
+function clearCookie() { document.getElementById('cookie-text').value = ''; }
+
+function switchTab(tab) {
+  document.querySelectorAll('.rtab').forEach((t,i) => {
+    t.classList.toggle('active', ['pretty','raw','hdrs'][i] === tab);
+  });
+  ['pretty','raw','hdrs'].forEach(p => {
+    document.getElementById(`panel-${p}`).classList.toggle('active', p === tab);
+  });
+}
+
+async function send() {
+  const method  = document.getElementById('method').value;
+  const rawUrl  = document.getElementById('url').value.trim();
+  const cookie  = document.getElementById('cookie-text').value.trim();
+  const body    = document.getElementById('body-text').value.trim();
+
+  if (!rawUrl) { alert('Please enter a URL.'); return; }
+
+  // Build query params
+  const params = getRows('params-tbl');
+  let finalUrl = rawUrl;
+  if (Object.keys(params).length) {
+    const qs = new URLSearchParams(params).toString();
+    finalUrl += (finalUrl.includes('?') ? '&' : '?') + qs;
+  }
+
+  const headers = getRows('headers-tbl');
+
+  // Show spinner
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('spinner').style.display = 'flex';
+  document.getElementById('resp-meta').style.display = 'none';
+  document.getElementById('pretty-out').innerHTML = '';
+  document.getElementById('raw-out').textContent = '';
+  document.getElementById('btn-send').disabled = true;
+
+  const t0 = performance.now();
+
+  try {
+    const res = await fetch('api_proxy.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: finalUrl,
+        method,
+        headers,
+        body: ['POST','PUT','PATCH'].includes(method) ? body : null,
+        cookie
+      })
+    });
+
+    const elapsed = Math.round(performance.now() - t0);
+    const text = await res.text();
+    lastRaw = text;
+
+    // Meta bar
+    showMeta(res.status, elapsed, text.length);
+
+    // Response headers
+    const rh = {};
+    res.headers.forEach((v,k) => rh[k] = v);
+    showRespHeaders(rh);
+
+    // Body
+    showBody(text);
+
+    switchTab('pretty');
+
+  } catch(err) {
+    lastRaw = err.message;
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('resp-meta').style.display = 'flex';
+    const b = document.getElementById('status-badge');
+    b.textContent = 'ERROR'; b.className = 'badge se';
+    document.getElementById('resp-time').textContent = '';
+    document.getElementById('resp-size').textContent = '';
+    document.getElementById('pretty-out').innerHTML =
+      `<span style="color:#f85149">⚠ ${esc(err.message)}</span>`;
+    document.getElementById('panel-pretty').classList.add('active');
+  }
+
+  document.getElementById('btn-send').disabled = false;
+}
+
+function showMeta(status, ms, bytes) {
+  document.getElementById('spinner').style.display = 'none';
+  const meta = document.getElementById('resp-meta');
+  meta.style.display = 'flex';
+  const b = document.getElementById('status-badge');
+  b.textContent = status;
+  b.className = 'badge ' + (status>=500?'s5':status>=400?'s4':status>=200?'s2':'se');
+  document.getElementById('resp-time').textContent = `⏱ ${ms} ms`;
+  document.getElementById('resp-size').textContent =
+    `📦 ${bytes < 1024 ? bytes+' B' : (bytes/1024).toFixed(1)+' KB'}`;
+}
+
+function showBody(text) {
+  document.getElementById('raw-out').textContent = text;
+  try {
+    const json = JSON.parse(text);
+    document.getElementById('pretty-out').innerHTML =
+      highlight(JSON.stringify(json, null, 2));
+  } catch {
+    document.getElementById('pretty-out').innerHTML = esc(text);
+  }
+}
+
+function showRespHeaders(hdrs) {
+  const rows = Object.entries(hdrs).map(([k,v]) =>
+    `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+  document.getElementById('hdrs-out').innerHTML =
+    `<table class="hdrs-tbl">${rows}</table>`;
+}
+
+function highlight(json) {
+  return json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+      let c = 'jn';
+      if (/^"/.test(m)) c = /:$/.test(m) ? 'jk' : 'js';
+      else if (/true|false/.test(m)) c = 'jb';
+      else if (/null/.test(m)) c = 'jl';
+      return `<span class="${c}">${m}</span>`;
+    });
+}
+
+function esc(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyResp() {
+  navigator.clipboard.writeText(lastRaw).then(() => {
+    const b = document.getElementById('btn-copy');
+    b.textContent = '✓ Copied';
+    setTimeout(() => b.textContent = 'Copy', 1500);
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='Enter') send();
+});
+</script>
+</body>
+</html>

@@ -1,16 +1,32 @@
 <?php
 // db.php - update with your DB credentials
-$DB_HOST = 'localhost';
-$DB_NAME = 'TRANSMISSION1';
-$DB_USER = 'uktx';
-$DB_PASS = 'uktx123';
+// $DB_HOST = 'localhost';
+// $DB_NAME = 'TRANSMISSION1';
+// $DB_USER = 'uktx';
+// $DB_PASS = 'uktx123';
+// $DB_CHARSET = 'utf8mb4';
+// $DB_PORT=3360;
+
+// $host = 'localhost';
+// $dbname = 'TRANSMISSION1';
+// $username = 'uktx';
+// $password = 'uktx123';
+
+
+
+$DB_HOST = 'srv1493.hstgr.io';
+$DB_NAME = 'u642970219_TRANSMISSION1';
+$DB_USER = 'u642970219_uktx';
+$DB_PASS = 'Gmcfa@01';
 $DB_CHARSET = 'utf8mb4';
 $DB_PORT=3360;
 
-$host = 'localhost';
-$dbname = 'TRANSMISSION1';
-$username = 'uktx';
-$password = 'uktx123';
+
+db.php
+$host = 'srv1493.hstgr.io';
+$username = 'u642970219_uktx';
+$password = 'Gmcfa@01'; // Default WAMP password
+$dbname = 'u642970219_TRANSMISSION1';
 
 
 $dsn = "mysql:host=$DB_HOST;port=$DB_PORT;dbname=$DB_NAME;charset=$DB_CHARSET";

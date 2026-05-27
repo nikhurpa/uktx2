@@ -1,0 +1,146 @@
+https://fms.bsnl.in/fetchSsaFranchiseeList- POST
+{
+"userName":"cgm_ut",
+"ssa":"ALL",
+"circleCode":"UT"
+}
+ Resp
+ [
+  {
+    "ssa": "AMO",
+    "npc": "812",
+    "franchiseeName": "M/S MANVI TRADERS",
+    "work": "0",
+    "disc": "1315",
+    "accounts": "294",
+    "circle": "UT",
+    "userId": "10373",
+    "faults": "1",
+    "sales": "0",
+    "username": "mtutamo_utamo"
+  },
+  {
+    "ssa": "AMO",
+    "npc": "2",
+    "franchiseeName": "M/s Multicable Network",
+    "work": "0",
+    "disc": "3",
+    "accounts": "0",
+    "circle": "UT",
+    "userId": "27442",
+    "faults": "0",
+    "sales": "0",
+    "username": "mulair_utamo"
+  },
+ ]
+
+ ///////////////////////////////
+https://fms.bsnl.in/fetchFmBuProvisionReportNew_ms
+ {
+"userName":"cgm_ut",
+"monthYear":"202604",
+"ssa":"ALL",
+"incentiveType":"BUINC"
+}
+
+[
+  {
+    "INSTL_ADDR_SSA": "HWR",
+    "INSTL_DATE": "17/04/2026",
+    "BLOCK_NAME": "BHAGWANPUR",
+    "RURAL_URBAN": "R",
+    "LGD_VILLAGE": "BINDU KHARAK",
+    "OLT_IP": "10.213.107.160",
+    "REMARKS": "ELIGIBLE FOR INCENTIVE AS ON: 19-05-26 WILL BE PROCESSED IN NEXT FORTNIGHT ",
+    "UC_RECEIVED": "Y",
+    "MOBILE_NO": "7817020375",
+    "DKYC": "Y",
+    "STATUS": "success",
+    "WORK_FRAN_CODE": "NUTHWROMTECS_BBNL",
+    "CDR_PLAN": "FIBRE_BASIC",
+    "CUSTOMER_NAME": "HIMANSHU PARMAR",
+    "ADDRESS": ",BINDU KHARAK,,BHAGWAANPUR,UT,HARIDWAR-247661",
+    "INSTL_ADDR_STATE": "HWR",
+    "BBC_APPROVED": "Y",
+    "TELEPHONE_NO": "01332-299275",
+    "GP_NAME": "BINDU KHARAK",
+    "INCENTIVE_TYPE": "BUINC"
+  },
+  {
+    "INSTL_ADDR_SSA": "AMO",
+    "FMS_INVOICE_NO": "UTAMO19468260402126466BUF2",
+    "INSTL_DATE": "06/04/2026",
+    "BLOCK_NAME": "BAGESHWAR",
+    "RURAL_URBAN": "R",
+    "LGD_VILLAGE": "BOHALA",
+    "OLT_IP": "10.211.152.58",
+    "REMARKS": "INCENTIVE PROCESSED IN THE COMM_MONTH OF: 202604 ",
+    "UC_RECEIVED": "Y",
+    "MOBILE_NO": "9456110021",
+    "DKYC": "Y",
+    "STATUS": "success",
+    "WORK_FRAN_CODE": "NUTAMOBAG001_BBNL",
+    "CDR_PLAN": "FIBRE_BASIC",
+    "CUSTOMER_NAME": "LAKSHY CLF BOHALA",
+    "ADDRESS": ",TAKULA ROAD BAGESHWAR,,BOHALA,BAGESHWAR,BAGESHWAR-263628",
+    "INSTL_ADDR_STATE": "AMO",
+    "BBC_APPROVED": "Y",
+    "TELEPHONE_NO": "05963-297010",
+    "GP_NAME": "BOHALA",
+    "INCENTIVE_TYPE": "BUINC"
+  }
+]
+
+////////////////////////////
+
+https://fms.bsnl.in/getOLTOnboardBBNWStatusList_b
+
+{
+"userName":"cgm_ut",
+"q":"2026"
+}
+
+{
+  "ROWSET": {
+    "ROW": [
+      {
+        "OLT_MODEL": "SY-GOPON-4OLT-L3",
+        "OCLAN_PORT": "&apos;D/10",
+        "ORDER_DATE": "05-Feb-2026",
+        "OCLAN_IP": "10.220.60.193",
+        "BNG_IP": "10.218.130.81",
+        "FLAG_INFO": "<b><font style=\"color:green\">OLT INSTALLATION ORDER COMPLETED</font></b>",
+        "ORDER_NO": "OLT194371",
+        "FR_USERNAME": "apxift_utnnt",
+        "OLT_IP": "10.211.152.222",
+        "INSTL_ADDR_STATE_CODE": "UT",
+        "OLT_CAPACITY": 256,
+        "INSTL_ADDR_EXCHG": "NNTSTJ",
+        "INSTL_ADDR_SSA_CODE": "NNT",
+        "VLAN_ID": 3422,
+        "COMPLETED_DATE": "13-May-2026",
+        "OLT_MAKE": "SYROTECH",
+        "INSTL_ADDR_ZONE": "NZ",
+        "SERVICE_TYPE": "BBNL OLTE"
+      },
+      {
+        "OLT_MODEL": "SY-GOPON-4OLT-L3",
+        "OCLAN_PORT": "&apos;D/10",
+        "ORDER_DATE": "02-Feb-2026",
+        "OCLAN_IP": "10.220.60.193",
+        "BNG_IP": "10.218.130.81",
+        "FLAG_INFO": "<b><font style=\"color:green\">OLT INSTALLATION ORDER COMPLETED</font></b>",
+        "ORDER_NO": "OLT194308",
+        "FR_USERNAME": "apxift_utnnt",
+        "OLT_IP": "10.211.152.186",
+        "INSTL_ADDR_STATE_CODE": "UT",
+        "OLT_CAPACITY": 256,
+        "INSTL_ADDR_EXCHG": "NNTSTJ",
+        "INSTL_ADDR_SSA_CODE": "NNT",
+        "VLAN_ID": 3586,
+        "COMPLETED_DATE": "02-May-2026",
+        "OLT_MAKE": "Syrotech",
+        "INSTL_ADDR_ZONE": "NZ",
+        "SERVICE_TYPE": "BBNL OLTE"
+      },
+  }
