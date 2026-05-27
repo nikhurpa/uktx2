@@ -1,13 +1,15 @@
 <?php
 
 // ── CONFIGURE HERE ──────────────────────────────────────────
-$api_url = "http://10.202.212.139/pls/apex/f";   // API endpoint
+// $api_url = "http://10.202.212.139/pls/apex/f";   // API endpoint
+$api_url = "http://10.132.37.10:8081/api/glance-details";   // API endpoint
 
 $method  = "POST";  
 
 // ── Usage ──
-$queryString = "p=101:519:91807162505544:FLOW_PPR_OUTPUT_R162801326805495584_pg_R_162801326805495584:NO&pg_max_rows=3000&pg_min_row=1&pg_rows_fetched=3000";
-// $queryString = "p=101:519:91807162505544:FLOW_PPR_OUTPUT_R162801326805495584_pg_R_162801326805495584:NO";
+// $queryString = "p=101:519:91807162505544:FLOW_PPR_OUTPUT_R162801326805495584_pg_R_162801326805495584:NO&pg_max_rows=3000&pg_min_row=1&pg_rows_fetched=3000";
+//                101:519:91807162505544:FLOW_PPR_OUTPUT_R162801326805495584_pg_R_162801326805495584:NO
+$queryString = "element=TIP-OLT&circle=UTTRANCHAL&ba=DEHRADUN&ssa=ALL";
 $params = queryStringToParams($queryString) ;  // GET or POST
 
 // echo json_encode($params);
@@ -19,7 +21,7 @@ $params = queryStringToParams($queryString) ;  // GET or POST
 //     "pg_rows_fetched"=> "15",
 // ];
 
-$cookie  = "JSESSIONID=abc123; WWV_PUBLIC_USER_SESSION=10.x.x.x:91807162505544";  // paste your cookie here
+$cookie  = "teevra_session=eyJpdiI6IkhSVENuSU5qOG56ZW9UTVBhWVpReUE9PSIsInZhbHVlIjoiWkFFYnFpY3NlamRHZHl1MzJJeGJxMzRvM2pFWjRhQTRiMUdCclRTR3l0OWFFWXFwZkFCMkJ6RHZqUHNjcCtMRzhSRnVscTdFNUY3UElWR3lJVXlia2htWCtaTzNVUGRHY0pKZHRiWXQxZkI0ZytmUTM5cEZhUzY1cjRzeVR1SUMiLCJtYWMiOiJmZTY4MmMxMTgyYmQzMGM2NWMwMDA2NGQzNmI2ZGM5YzBkNGI5MzM1YjEzNGI4YmYwODJiMThhNjE1Y2NlOGRiIiwidGFnIjoiIn0%3D; expires=Wed, 27 May 2026 09:58:17 GMT; Max-Age=7200; path=/; httponly; samesite=lax";  // paste your cookie here
 // ────────────────────────────────────────────────────────────
 
 
