@@ -5,11 +5,11 @@
 // $pass = 'uktx123'; // Default WAMP password
 // $dbname = 'ukcfa';
 
-// db.php
-// $host = 'localhost';
-// $user = 'u642970219_uktx';
-// $pass = 'Gmcfa@01'; // Default WAMP password
-// $dbname = 'u642970219_TRANSMISSION1';
+db.php
+$host = 'srv1493.hstgr.io';
+$user = 'u642970219_uktx';
+$pass = 'Gmcfa@01'; // Default WAMP password
+$dbname = 'u642970219_TRANSMISSION1';
 
 
 try {
