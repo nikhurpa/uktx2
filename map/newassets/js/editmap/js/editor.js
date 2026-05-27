@@ -14,13 +14,13 @@ let selectedVertexIndex = -1;
 
 // API for app.js
 window.editorToolChanged = function(tool) {
-    if(tool !== 'add-polyline') {
+    if(tool !== 'add-polyline'  || tool !== 'add-polygon') {
         map.dragging.enable();
     } else {
         map.dragging.disable();
     }
     
-    if(tool !== 'add-polyline' && tool !== 'edit') {
+    if(tool !== 'add-polyline' && tool !== 'add-polygon' ) {
         clearSelection();
     }
     currentActiveLayer = null;
@@ -46,7 +46,7 @@ window.editorFinalizeFeature = function(name) {
 };
 
 window.clearSelection=function() {
-    if(selectedFeature instanceof L.Polyline) {
+    if(selectedFeature instanceof L.Polyline || selectedFeature instanceof L.Polygon) {
         selectedFeature.setStyle({ color: 'blue', weight: 3 }); 
     }
    console.log("clear selection:",vertexMarkers.length)

@@ -81,7 +81,8 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
 
 
   // <!-- new scripts — order matters -->
-  "https://cdn.jsdelivr.net/npm/chart.js", //  <!-- for elevation chart -->
+  // "https://cdn.jsdelivr.net/npm/chart.js", //  <!-- for elevation chart -->
+   "./newassets/js/chart.js",
    "./newassets/js/editmap/js/files/context_menu.js",
   "./newassets/js/editmap/js/files/db_upload.js",
   "./newassets/js/editmap/js/files/directions_tool.js",
@@ -103,11 +104,11 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
   ]
   const cssFiles = [
     // External Libraries & Frameworks
-    "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+    // "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
     // "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
     "https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css",
 
-    // "./newassets/css/bootstrap.min.css",
+    "./newassets/css/bootstrap.min.css",
     // "./newassets/css/all.min.css",
     // "./newassets/css/ionicons.min.css",
 
