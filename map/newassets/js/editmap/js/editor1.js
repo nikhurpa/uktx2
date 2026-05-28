@@ -118,26 +118,7 @@ window.renderVertexMarkers = function() {
             if (currentTool === 'add-polyline' ||   currentTool === 'add-polygon') {
                 selectedVertexIndex = index;
             }
-        // ✅ redraw preview lines for the newly selected vertex
-            if (selectedFeature instanceof L.Polygon && polygonPoints.length > 1) {
-                clearPolygonPreview();
-
-                const len  = polygonPoints.length;
-                const prev = polygonPoints[(index - 1 + len) % len];
-                const next = polygonPoints[(index + 1) % len];
-                const cur  = polygonPoints[index];
-
-                polygonPreviewLine = L.polyline([prev, cur], {
-                    color: 'cyan', weight: 1.5, dashArray: '6,4', opacity: 0.8
-                }).addTo(map);
-
-                polygonCloseLine = L.polyline([cur, next], {
-                    color: '#aaa', weight: 1, dashArray: '4,6', opacity: 0.6
-                }).addTo(map);
-            }
-
-
-
+          
         });
 
         marker.on('dragstart', (e) => {
@@ -145,19 +126,7 @@ window.renderVertexMarkers = function() {
             if (currentTool === 'add-polyline' || currentTool === 'add-polygon') {
                 selectedVertexIndex = index;
             }
-            clearPolygonPreview();
-            const len  = polygonPoints.length;
-            const prev = polygonPoints[(index - 1 + len) % len];  // wraps around
-            const next = polygonPoints[(index + 1) % len];        // wraps around
-            const cur  = marker.getLatLng();
-
-            polygonPreviewLine = L.polyline([prev, cur], {
-                color: 'cyan', weight: 1.5, dashArray: '6,4', opacity: 0.8
-            }).addTo(map);
-
-            polygonCloseLine = L.polyline([cur, next], {
-                color: '#aaa', weight: 1, dashArray: '4,6', opacity: 0.6
-            }).addTo(map);
+        
 
 
 
@@ -252,8 +221,21 @@ function selectFeature(layer, clickLatlng) {
 // ─── Polygon helpers ──────────────────────────────────────────────────────────
 
 /** Remove temporary preview lines from the map */
+
+function showPolygonPreview() {
+    clearPolygonPreview();
+    if (polygonPoints.length < 2) return;
+
+    const last  = polygonPoints[polygonPoints.length - 1];
+    const first = polygonPoints[0];
+    polygonPreviewLine = L.polyline([last, first], {
+        color: 'cyan', weight: 1.5, dashArray: '6,4', opacity: 0.8
+    }).addTo(map);
+}
+
+
 function clearPolygonPreview() {
-    console.log("clear polygon preview");
+   
     if (polygonPreviewLine) { map.removeLayer(polygonPreviewLine); polygonPreviewLine = null; }
     if (polygonCloseLine)   { map.removeLayer(polygonCloseLine);   polygonCloseLine   = null; }
 }
@@ -411,28 +393,7 @@ window.initMapEeditor = function () {
             }
         }
 
-        // Polygon — show rubber-band preview lines while cursor moves
-        if (currentTool === 'add-polygon' && drawingPolygon && polygonPoints.length > 0) {
-            clearPolygonPreview();
-                const rings = drawingPolygon.getLatLngs();  
-                 polygonPoints = rings[0].map(ll => L.latLng(ll.lat, ll.lng));   
-
-            const last  = polygonPoints[polygonPoints.length - 1];
-            const first = polygonPoints[0];
-
-            // Line from last point to cursor
-            polygonPreviewLine = L.polyline([last, e.latlng], {
-                color: 'cyan', weight: 1.5, dashArray: '6,4', opacity: 0.8
-            }).addTo(map);
-
-            // Closing line from cursor back to first point (only when ≥2 points)
-            if (polygonPoints.length >= 2) {
-                polygonCloseLine = L.polyline([e.latlng, first], {
-                    color: '#aaa', weight: 1, dashArray: '4,6', opacity: 0.6
-                }).addTo(map);
-            }
-        }
-    });
+        });   
 
 
     // ── Mouseup ──────────────────────────────────────────────────────────────
