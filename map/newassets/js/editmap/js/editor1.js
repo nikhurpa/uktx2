@@ -31,17 +31,17 @@ window.editorToolChanged = function(tool) {
         map.dragging.disable();
     }
 
-    // Cancel any in-progress polygon when switching away
-    // if (tool !== 'add-polygon') {
-    //     cancelPolygonDraw();
+     if (tool==='pan' ) {  map.dragging.enable(); }
+     currentActiveLayer = null;
+     clearSelection();
+   
+
+    // if (tool !== 'add-polyline' && tool !== 'edit' && tool !== 'add-polygon') {
+    //     clearSelection();
     // }
 
-    if (tool !== 'add-polyline' && tool !== 'edit' && tool !== 'add-polygon') {
-        clearSelection();
-    }
-
-    currentActiveLayer = null;
-    editModeEnabled    = (tool === 'edit');
+  
+    // editModeEnabled    = (tool === 'edit');
 };
 
 window.editorGetCurrentFeature = function() {
@@ -115,16 +115,52 @@ window.renderVertexMarkers = function() {
 
         marker.on('mousedown', (e) => {
             L.DomEvent.stopPropagation(e);
-            if (currentTool === 'add-polyline' || currentTool === 'edit' || currentTool === 'add-polygon') {
+            if (currentTool === 'add-polyline' ||   currentTool === 'add-polygon') {
                 selectedVertexIndex = index;
             }
+        // ✅ redraw preview lines for the newly selected vertex
+            if (selectedFeature instanceof L.Polygon && polygonPoints.length > 1) {
+                clearPolygonPreview();
+
+                const len  = polygonPoints.length;
+                const prev = polygonPoints[(index - 1 + len) % len];
+                const next = polygonPoints[(index + 1) % len];
+                const cur  = polygonPoints[index];
+
+                polygonPreviewLine = L.polyline([prev, cur], {
+                    color: 'cyan', weight: 1.5, dashArray: '6,4', opacity: 0.8
+                }).addTo(map);
+
+                polygonCloseLine = L.polyline([cur, next], {
+                    color: '#aaa', weight: 1, dashArray: '4,6', opacity: 0.6
+                }).addTo(map);
+            }
+
+
+
         });
 
         marker.on('dragstart', (e) => {
             L.DomEvent.stopPropagation(e);
-            if (currentTool === 'add-polyline' || currentTool === 'edit' || currentTool === 'add-polygon') {
+            if (currentTool === 'add-polyline' || currentTool === 'add-polygon') {
                 selectedVertexIndex = index;
             }
+            clearPolygonPreview();
+            const len  = polygonPoints.length;
+            const prev = polygonPoints[(index - 1 + len) % len];  // wraps around
+            const next = polygonPoints[(index + 1) % len];        // wraps around
+            const cur  = marker.getLatLng();
+
+            polygonPreviewLine = L.polyline([prev, cur], {
+                color: 'cyan', weight: 1.5, dashArray: '6,4', opacity: 0.8
+            }).addTo(map);
+
+            polygonCloseLine = L.polyline([cur, next], {
+                color: '#aaa', weight: 1, dashArray: '4,6', opacity: 0.6
+            }).addTo(map);
+
+
+
         });
 
         marker.on('drag', (e) => {
@@ -136,11 +172,20 @@ window.renderVertexMarkers = function() {
                 const newLatLngs = selectedFeature.getLatLngs();
                 newLatLngs[index] = marker.getLatLng();
                 selectedFeature.setLatLngs(newLatLngs);
+                polygonPoints = rings[0].map(ll => L.latLng(ll.lat, ll.lng));
+
+
+
             }
             selectedVertexIndex = index;
+            
+
+
+
         });
 
         marker.on('dragend', () => {
+            clearPolygonPreview();
             renderVertexMarkers();
         });
 
@@ -152,6 +197,7 @@ window.renderVertexMarkers = function() {
 // ─── Select a feature ─────────────────────────────────────────────────────────
 
 function selectFeature(layer, clickLatlng) {
+    console.log("select feature:", layer);
     clearSelection();
     selectedFeature    = layer;
     currentActiveLayer = layer;
@@ -163,7 +209,7 @@ function selectFeature(layer, clickLatlng) {
         const rings    = layer.getLatLngs();
         const latlngs  = rings[0] || [];
         let closestIndex = latlngs.length - 1;
-
+        polygonPoints = latlngs.map(ll => L.latLng(ll.lat, ll.lng));
         if (clickLatlng && latlngs.length > 0) {
             let minDist = Infinity;
             latlngs.forEach((ll, i) => {
@@ -207,6 +253,7 @@ function selectFeature(layer, clickLatlng) {
 
 /** Remove temporary preview lines from the map */
 function clearPolygonPreview() {
+    console.log("clear polygon preview");
     if (polygonPreviewLine) { map.removeLayer(polygonPreviewLine); polygonPreviewLine = null; }
     if (polygonCloseLine)   { map.removeLayer(polygonCloseLine);   polygonCloseLine   = null; }
 }
@@ -293,11 +340,14 @@ window.initMapEeditor = function () {
                     fillOpacity: 0.15,
                 }).addTo(map);
                 drawingPolygon.meta = { name: 'New Polygon', id: 'polygon_' + (++idCounter) };
-
+                addElementToTree(drawingPolygon);
+                selectFeature(drawingPolygon, e.latlng);
                 // Click on existing polygon to select it
                 drawingPolygon.on('click', function (e2) {
                     L.DomEvent.stopPropagation(e2);
-                    selectFeature(drawingPolygon, e2.latlng);
+                    document.getElementById('tool-polygon').click();
+                    selectFeature(this, e2.latlng);
+                    console.log(selectedFeature);
                 });
             } else {
                 // Update polygon with all points so far
@@ -326,7 +376,7 @@ window.initMapEeditor = function () {
                 if (window.attachContextMenu) window.attachContextMenu(pl);
                 selectFeature(pl, e.latlng);
                 pl.on('click', function (e2) {
-                    document.getElementById('tool-route').click();
+                    document.getElementById('tool-polyline').click();
                     L.DomEvent.stopPropagation(e2);
                     selectFeature(pl, e2.latlng);
                 });
@@ -339,45 +389,7 @@ window.initMapEeditor = function () {
             }
             lastDrawLatLng = e.latlng;
         }
-        //--------- Polygon ------------
-        // if (currentTool === 'add-polygon' && e.originalEvent.button === 0) {
-        //     isDrawingDrag = true;
-
-        //     // If clicking near the first point (within 15px) → close polygon
-        //     if (drawingPolygon && polygonPoints.length >= 3) {
-        //         const firstPt = map.latLngToLayerPoint(polygonPoints[0]);
-        //         const clickPt = map.latLngToLayerPoint(e.latlng);
-        //         if (firstPt.distanceTo(clickPt) < 15) {
-        //             finalizePolygon();
-        //             return;
-        //         }
-        //     }
-
-
-
-        //     if (!drawingPolygon) {
-        //         const pg = L.polyline([e.latlng], { color: 'cyan', weight: 4 }).addTo(map);
-        //         pg.meta   = { name: 'New Polygon', id: 'polygon_' + (++idCounter) };
-        //         addElementToTree(pg);
-        //         if (window.attachContextMenu) window.attachContextMenu(pg);
-        //         selectFeature(pg, e.latlng);
-        //         pg.on('click', function (e2) {
-        //             document.getElementById('tool-route').click();
-        //             L.DomEvent.stopPropagation(e2);
-        //             selectFeature(pg, e2.latlng);
-        //         });
-        //     } else {
-        //         const latlngs = drawingPolygon.getLatLngs();
-        //         latlngs.splice(selectedVertexIndex + 1, 0, e.latlng);
-        //         drawingPolygon.setLatLngs(latlngs);
-        //         selectedVertexIndex++;
-        //         renderVertexMarkers();
-        //     }
-        //     lastDrawLatLng = e.latlng;
-        // }
-
-
-
+        
 
     });
 
@@ -402,6 +414,8 @@ window.initMapEeditor = function () {
         // Polygon — show rubber-band preview lines while cursor moves
         if (currentTool === 'add-polygon' && drawingPolygon && polygonPoints.length > 0) {
             clearPolygonPreview();
+                const rings = drawingPolygon.getLatLngs();  
+                 polygonPoints = rings[0].map(ll => L.latLng(ll.lat, ll.lng));   
 
             const last  = polygonPoints[polygonPoints.length - 1];
             const first = polygonPoints[0];
@@ -450,7 +464,24 @@ window.initMapEeditor = function () {
 
 
     // ── Right-click on map — cancel polygon draw ──────────────────────────────
-    map.on('contextmenu', (e) => {
+
+     map.on('contextmenu', (e) => {
+        if(currentTool === 'add-polyline') {
+            if(drawingPolyline && selectedVertexIndex >= 0) {
+                let latlngs = drawingPolyline.getLatLngs();
+                latlngs.splice(selectedVertexIndex, 1);
+                drawingPolyline.setLatLngs(latlngs);
+                
+                selectedVertexIndex = Math.max(0, selectedVertexIndex - 1);
+                renderVertexMarkers();
+                
+                if(latlngs.length === 0) {
+                    map.removeLayer(drawingPolyline);
+                    clearSelection();
+                }
+            }
+        }
+
         if (currentTool === 'add-polygon' && drawingPolygon) {
             // Right-click removes the last added vertex
             if (polygonPoints.length > 1) {
@@ -464,13 +495,31 @@ window.initMapEeditor = function () {
             }
             L.DomEvent.stopPropagation(e);
         }
+
+
     });
+
+    // map.on('contextmenu', (e) => {
+    //     if (currentTool === 'add-polygon' && drawingPolygon) {
+    //         // Right-click removes the last added vertex
+    //         if (polygonPoints.length > 1) {
+    //             polygonPoints.pop();
+    //             drawingPolygon.setLatLngs([polygonPoints]);
+    //             // Remove last vertex dot
+    //             const lastDot = vertexMarkers.pop();
+    //             if (lastDot) map.removeLayer(lastDot);
+    //         } else {
+    //             cancelPolygonDraw();
+    //         }
+    //         L.DomEvent.stopPropagation(e);
+    //     }
+    // });
 
 
     // ── FeatureGroup mousedown (click existing feature to select) ─────────────
     featureGroup.on('mousedown', (e) => {
         if (e.originalEvent.button === 0 &&
-            (currentTool === 'add-polyline' || currentTool === 'edit' || currentTool === 'add-polygon')) {
+            (currentTool === 'add-polyline' ||  currentTool === 'add-polygon')) {
 
             L.DomEvent.stopPropagation(e);
             selectFeature(e.layer, e.latlng);
@@ -479,6 +528,9 @@ window.initMapEeditor = function () {
                 isDrawingDrag  = true;
                 lastDrawLatLng = e.latlng;
             }
+
+
+
         }
     });
 };

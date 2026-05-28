@@ -2,14 +2,15 @@
 
 // ── CONFIGURE HERE ──────────────────────────────────────────
 // $api_url = "http://10.202.212.139/pls/apex/f";   // API endpoint
-$api_url = "http://10.132.37.10:8081/api/glance-details";   // API endpoint
+$api_url = "https://bharatnetlive.bbnlindia.in/UNMS/modules/FtthBiReports/jsp/_FtthConnectionHistoryDetailedReport.jsp?subCategory=&scheme=ALL&reportName=ftth_gross_hist_report&selectedDate=2026-05-27&reportType=gross&stateColumn=UTTARAKHAND&isCategoryConditionApplied=true&district=&serviceProvider=all&state=UTTARAKHAND&district100RadioBtn=all&districtColumn=&category=ALL&";   // API endpoint
 
-$method  = "POST";  
+$method  = "GET";  
+// $method  = "POST";  
 
 // ── Usage ──
 // $queryString = "p=101:519:91807162505544:FLOW_PPR_OUTPUT_R162801326805495584_pg_R_162801326805495584:NO&pg_max_rows=3000&pg_min_row=1&pg_rows_fetched=3000";
 //                101:519:91807162505544:FLOW_PPR_OUTPUT_R162801326805495584_pg_R_162801326805495584:NO
-$queryString = "element=TIP-OLT&circle=UTTRANCHAL&ba=DEHRADUN&ssa=ALL";
+$queryString = "ehttps://bharatnetlive.bbnlindia.in/UNMS/modules/FtthBiReports/jsp/_FtthConnectionHistoryDetailedReport.jsp?subCategory=&scheme=ALL&reportName=ftth_gross_hist_report&selectedDate=2026-05-27&reportType=gross&stateColumn=UTTARAKHAND&isCategoryConditionApplied=true&district=&serviceProvider=all&state=UTTARAKHAND&district100RadioBtn=all&districtColumn=&category=ALL&";
 $params = queryStringToParams($queryString) ;  // GET or POST
 
 // echo json_encode($params);

@@ -212,23 +212,23 @@ window.initMapEeditor = function () {
 
     
  
-    // map.on('contextmenu', (e) => {
-    //     if(currentTool === 'add-polyline') {
-    //         if(drawingPolyline && selectedVertexIndex >= 0) {
-    //             let latlngs = drawingPolyline.getLatLngs();
-    //             latlngs.splice(selectedVertexIndex, 1);
-    //             drawingPolyline.setLatLngs(latlngs);
+    map.on('contextmenu', (e) => {
+        if(currentTool === 'add-polyline') {
+            if(drawingPolyline && selectedVertexIndex >= 0) {
+                let latlngs = drawingPolyline.getLatLngs();
+                latlngs.splice(selectedVertexIndex, 1);
+                drawingPolyline.setLatLngs(latlngs);
                 
-    //             selectedVertexIndex = Math.max(0, selectedVertexIndex - 1);
-    //             renderVertexMarkers();
+                selectedVertexIndex = Math.max(0, selectedVertexIndex - 1);
+                renderVertexMarkers();
                 
-    //             if(latlngs.length === 0) {
-    //                 map.removeLayer(drawingPolyline);
-    //                 clearSelection();
-    //             }
-    //         }
-    //     }
-    // });
+                if(latlngs.length === 0) {
+                    map.removeLayer(drawingPolyline);
+                    clearSelection();
+                }
+            }
+        }
+    });
 
     map.on('dblclick', (e) => {
         if(currentTool === 'add-polyline' && drawingPolyline) {

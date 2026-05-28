@@ -52,7 +52,7 @@ window.initMapEdit = function () {
         tools: [
             { id: "tool-point",   title: "Point",   icon: "./img/point.svg" },
             { id: "tool-direction",   title: "Direction",   html: '<i class="fas fa-route"></i>' },
-            { id: "tool-route",    title: "Polyline",    icon: "./img/polyline.svg" },
+            { id: "tool-polyline",    title: "Polyline",    icon: "./img/polyline.svg" },
             { id: "tool-polygon", title: "Polygon", icon: "./img/polygon.png" },
             { id: "tool-scale",   title: "Scale",   html: '<i class="fas fa-ruler-horizontal"></i>' },
             { id: "tool-pan",  title: "Pan",  icon: "./img/select.svg" },
@@ -79,12 +79,12 @@ window.initMapEdit = function () {
 
     const toolActions = {
         point()   { console.log("Point mode activated");   currentTool ='add-point' ; window.editorToolChanged(currentTool)},
-        route()   { console.log("Route mode activated");   currentTool ='add-polyline';  ; window.editorToolChanged(currentTool)},
-        direction()    { console.log("Direction mode activated"); currentTool ='add-direction';  ; window.editorToolChanged(currentTool)},
-        polygon() { console.log("Polygon mode activated"); currentTool ='add-polygon';  ; window.editorToolChanged(currentTool)},
-        scale()   { console.log("Scale tool activated"); currentTool ='add-scale';  ; window.editorToolChanged(currentTool)},
-        pan()  { console.log("Pan tool activated"); currentTool ='pan';  ; window.editorToolChanged(currentTool)},
-        edit()  { console.log("Edit tool activated"); currentTool ='edit';  ; window.editorToolChanged(currentTool)},
+        polyline()   { console.log("Polyline mode activated");   currentTool ='add-polyline';   window.editorToolChanged(currentTool)},
+        direction()    { console.log("Direction mode activated"); currentTool ='add-direction';   window.editorToolChanged(currentTool)},
+        polygon() { console.log("Polygon mode activated"); currentTool ='add-polygon';   window.editorToolChanged(currentTool)},
+        scale()   { console.log("Scale tool activated"); currentTool ='add-scale';   window.editorToolChanged(currentTool)},
+        pan()  { console.log("Pan tool activated"); currentTool ='pan';   window.editorToolChanged(currentTool)},
+        edit()  { console.log("Edit tool activated"); currentTool ='edit';   window.editorToolChanged(currentTool)},
         delete()  {
             console.log("Delete all");
             if (mode === "point") editMarker.remove();

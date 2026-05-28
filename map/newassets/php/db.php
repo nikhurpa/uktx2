@@ -22,7 +22,7 @@ $DB_CHARSET = 'utf8mb4';
 $DB_PORT=3360;
 
 
-db.php
+// db.php
 $host = 'srv1493.hstgr.io';
 $username = 'u642970219_uktx';
 $password = 'Gmcfa@01'; // Default WAMP password
