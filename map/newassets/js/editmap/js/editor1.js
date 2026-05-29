@@ -323,6 +323,7 @@ window.initMapEeditor = function () {
                 }).addTo(map);
                 drawingPolygon.meta = { name: 'New Polygon', id: 'polygon_' + (++idCounter) };
                 addElementToTree(drawingPolygon);
+                 if (window.attachContextMenu) window.attachContextMenu(drawingPolygon);
                 selectFeature(drawingPolygon, e.latlng);
                 // Click on existing polygon to select it
                 drawingPolygon.on('click', function (e2) {
