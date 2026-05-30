@@ -409,13 +409,14 @@ document.getElementById('kml-layer').addEventListener('change', async function (
 });
 
 
-function addLayerToTree(fileName,layer,label){
+function addLayerToTree(fileName,layer,labelMarkers){
 
         const kmlFileNodeId = "kml" + (++idCounter);
 
           kmlLayers[kmlFileNodeId] = {
             layer: layer,
-            label: label
+            labelMarkers: labelMarkers,
+            label: fileName
         };
         // kmlLayers[kmlFileNodeId].layer =layer;
         // kmlLayers[kmlFileNodeId].labelMarkers = label;
@@ -450,16 +451,17 @@ function addLayerToTree(fileName,layer,label){
 function removeKmlLayer(kmlId) {
     let layer = kmlLayers[kmlId].layer;
     let label =kmlLayers[kmlId].label;
+    let labelMarkers = kmlLayers[kmlId].labelMarkers;
   if (layer) {
     map.removeLayer(layer);
     kmlLayers[kmlId].layer=null;
   }
 
   // Remove all label markers
-  label.forEach(m => {
+  labelMarkers.forEach(m => {
     if (map.hasLayer(m)) map.removeLayer(m);
   });
-  kmlLayers[kmlId].label = [];
+  kmlLayers[kmlId].labelMarkers = [];
 }
 
 // ── Helper: create a label marker at a position ───────────────────────────────
@@ -1339,9 +1341,9 @@ function treeEdit() {
           <div class="hover-box" id="deleteItem">🗑️ Delete</div>
           <div class="hover-box" id="saveItem">💾 Save To my Place</div>
           <hr>
-          <div class="hover-box" id="changeMarkerIcon">📍 Change Marker Icon</div>
+          <!-- <div class="hover-box" id="changeMarkerIcon">📍 Change Marker Icon</div>
           <div class="hover-box" id="changePolylineColor">〰️ Change Line Color</div>
-          <div class="hover-box" id="changePolygonColor">⬛ Change Polygon Color</div>
+          <div class="hover-box" id="changePolygonColor">⬛ Change Polygon Color</div> -->
           <div class="hover-box" id="zoomToNode">🔍 Zoom to node</div>
           <div class="hover-box" id="exportAsKML">🗂️ Export Node as KML</div>
 
@@ -1383,6 +1385,9 @@ function treeEdit() {
         if (newName) {
             const item = $("#jqxTree").jqxTree("getItem", $("#" + contextTargetId)[0]);
             $("#jqxTree").jqxTree("updateItem", item, { label: newName });
+            kmlLayers[contextTargetId].label = newName; // Update label for KML layer if exists
+            
+
         }
     });
 

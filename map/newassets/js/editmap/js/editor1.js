@@ -268,7 +268,7 @@ function finalizePolygon() {
     drawingPolygon.setStyle({ color: 'blue', weight: 2, fillColor: '#3388ff', fillOpacity: 0.2 });
     drawingPolygon.addTo(featureGroup);
 
-    addElementToTree(drawingPolygon);
+    
 
     if (window.attachContextMenu) window.attachContextMenu(drawingPolygon);
 
@@ -292,7 +292,7 @@ window.initMapEeditor = function () {
         // ── Add Point ────────────────────────────────────────────────────────
         if (currentTool === 'add-point') {
             const marker = L.marker(e.latlng, { draggable: true });
-            marker.meta  = { name: 'New Point', id: 'point_' + (++idCounter) };
+            marker.meta  = { label: 'New Point', id: 'point_' + (++idCounter) ,labelMarkers: []};
             addElementToTree(marker);
             marker.addTo(map);
             if (window.attachContextMenu) window.attachContextMenu(marker);
@@ -321,7 +321,7 @@ window.initMapEeditor = function () {
                     fillColor:   '#00d2ff',
                     fillOpacity: 0.15,
                 }).addTo(map);
-                drawingPolygon.meta = { name: 'New Polygon', id: 'polygon_' + (++idCounter) };
+                drawingPolygon.meta = { label: 'New Polygon', id: 'polygon_' + (++idCounter),labelMarkers: [] };
                 addElementToTree(drawingPolygon);
                  if (window.attachContextMenu) window.attachContextMenu(drawingPolygon);
                 selectFeature(drawingPolygon, e.latlng);
@@ -354,7 +354,7 @@ window.initMapEeditor = function () {
             isDrawingDrag = true;
             if (!drawingPolyline) {
                 const pl = L.polyline([e.latlng], { color: 'cyan', weight: 4 }).addTo(map);
-                pl.meta   = { name: 'New Polyline', id: 'polyline_' + (++idCounter) };
+                pl.meta   = { label: 'New Polyline', id: 'polyline_' + (++idCounter),labelMarkers: [] };
                 addElementToTree(pl);
                 if (window.attachContextMenu) window.attachContextMenu(pl);
                 selectFeature(pl, e.latlng);
@@ -505,15 +505,16 @@ function addElementToTree(element) {
 
     kmlLayers[elementNodeId] = {
         layer: element,
-        label: element.meta.name
+        label: element.meta.label,
+        labelMarkers: element.meta.labelMarkers
     };
-
+    console.log("add element to tree:", elementNodeId, element.meta.label);
     const elementNode = {
         id:      element.meta.id,
-        label:   element.meta.name,
+        label:   element.meta.label,
         icon:    kmlIcon,
         checked: true,
-        value:   element.meta.name
+        value:   element.meta.label
     };
 
     const elementByID = $('#jqxTree').find('#tempplaces')[0];

@@ -152,7 +152,7 @@ window.initMapEeditor = function () {
         console.log(currentTool);
         if(currentTool === 'add-point') {
             const marker = L.marker(e.latlng, { draggable: true });
-            marker.meta = { name: 'New Point', id: 'point_' + (++idCounter) };
+            marker.meta = { label: 'New Point', id: 'point_' + (++idCounter) };
             addElementToTree(marker);
 
             marker.addTo(map);
@@ -167,7 +167,7 @@ window.initMapEeditor = function () {
             isDrawingDrag = true;
             if(!drawingPolyline) {
                 let pl = L.polyline([e.latlng], {color: 'cyan', weight: 4}).addTo(map);
-                pl.meta = { name: 'New Polyline', id: 'polyline_' + (++idCounter) };
+                pl.meta = { label: 'New Polyline', id: 'polyline_' + (++idCounter) };
                 addElementToTree(pl);
                 if (window.attachContextMenu) window.attachContextMenu(pl);
                 selectFeature(pl, e.latlng);
@@ -265,18 +265,18 @@ function addElementToTree(element){
 
           kmlLayers[elementNodeId]   = {
             layer: element,
-            label: element.meta.name
+            label: element.meta.label
         };
         // kmlLayers[kmlFileNodeId].layer =layer;
         // kmlLayers[kmlFileNodeId].labelMarkers = label;
         
         const elementNode = {
             id: element.meta.id,
-            label: element.meta.name,
+            label: element.meta.label,
             icon: kmlIcon,
             checked: true,
             // items: source,
-            value:element.meta.name
+            value:element.meta.label
         };
 
         let elementByID = $('#jqxTree').find("#tempplaces")[0];
