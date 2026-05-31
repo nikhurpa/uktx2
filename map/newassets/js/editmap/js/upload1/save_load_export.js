@@ -51,7 +51,7 @@ window.saveNodeToMyPlace = async function (nodeId) {
 
             if (geomLayer) {
                 popup = getPopupHtml(geomLayer);
-
+                console.log('Saving node', id, 'with popup:', popup);
                 if (geomLayer instanceof L.Marker && !(geomLayer.options.icon instanceof L.DivIcon)) {
                     const ll = geomLayer.getLatLng();
                     geomType = 'Point';
@@ -107,6 +107,9 @@ window.saveNodeToMyPlace = async function (nodeId) {
     }
 
     walkNode(nodeId, null);
+
+
+    console.log('Prepared rows for saving:', rows);
     if (!rows.length) { alert('Nothing to save.'); return; }
 
     try {
