@@ -1391,6 +1391,30 @@ function treeEdit() {
         }
     });
 
+    $("#saveItem").on("click", () => {
+        if (!contextTargetId) return;
+                const ids = treeSource.map(item => item.id);
+                if (ids.includes(contextTargetId)) {
+
+                    alert("Can't Delete");
+                    return;
+                } 
+        window.saveNodeToMyPlace(contextTargetId)
+
+    });
+
+     $("#exportAsKML").on("click", () => {
+        if (!contextTargetId) return;
+                const ids = treeSource.map(item => item.id);
+                if (ids.includes(contextTargetId)) {
+
+                    alert("Can't Delete");
+                    return;
+                } 
+        window.exportNodeKml(contextTargetId)
+
+    });
+
     // ── Delete ──────────────────────────────────────────────────────────────
     $("#deleteItem").on("click", () => {
 
@@ -1413,6 +1437,10 @@ function treeEdit() {
         
     });
      
+
+
+
+
    
     // ── Utility: walk a node and all its descendants, applying fn to each layer ──
     function applyToDescendants(nodeId, fn) {
