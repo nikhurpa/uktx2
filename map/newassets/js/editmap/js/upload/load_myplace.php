@@ -15,7 +15,8 @@ define('DB_USER', 'uktx');
 define('DB_PASS', 'uktx123');
 define('DB_NAME', 'ukcfa');
 
-$userId = intval($_GET['USER_ID'] ?? 1);
+// $userId = intval($_GET['USER_ID'] ?? 1);
+$userId = $_GET['user_id'] ?? 'admin';
 
 try {
     $pdo = new PDO(
@@ -31,18 +32,22 @@ try {
         WHERE  user_id = :uid
         ORDER  BY sort_order ASC
     ");
+    // $stmt->execute([':uid' => $userId]);
     $stmt->execute([':uid' => $userId]);
-    $nodes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $nodes = $stmt->fetchAll(PDO::FETCH_ASSOC);  // ← ensure FETCH_ASSOC
 
-    // Convert parent_id (DB integer) back to client_id string
-    // so the JS idMap can reconstruct the tree hierarchy
+    // Build id → client_id map
     $idToClientId = [];
     foreach ($nodes as $n) {
-        $idToClientId[$n['id']] = $n['client_id'];
+        if (isset($n['id'], $n['client_id'])) {
+            $idToClientId[$n['id']] = $n['client_id'];
+        }
     }
+
+    // Add parent_client_id to each node
     foreach ($nodes as &$n) {
-        $n['parent_client_id'] = $n['parent_id']
-            ? ($idToClientId[$n['parent_id']] ?? null)
+        $n['parent_client_id'] = (!empty($n['parent_id']) && isset($idToClientId[$n['parent_id']]))
+            ? $idToClientId[$n['parent_id']]
             : null;
     }
     unset($n);

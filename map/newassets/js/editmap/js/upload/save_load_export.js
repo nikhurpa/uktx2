@@ -71,6 +71,7 @@ window.saveNodeToMyPlace = async function (nodeId) {
         }
 
         // ── Build row ──────────────────────────────────────────────────────
+        
         const row = {
             client_id:    id,
             parent_id:    parentDbId || null,
@@ -120,6 +121,7 @@ window.saveNodeToMyPlace = async function (nodeId) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 window.loadMyPlaces = async function () {
+    
     try {
         const userId = window.currentUser ? window.currentUser.id : 1;
         const resp   = await fetch(`./newassets/js/editmap/js/upload/load_myplace.php?user_id=${userId}`);

@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS map_places (
     STYLE           TEXT            NULL,
 
     -- Ownership
-    USER_ID         INT UNSIGNED    NOT NULL DEFAULT 1,
+    USER_ID         VARCHAR(50)     NOT NULL DEFAULT "admin",
 
     -- Timestamps
     CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,

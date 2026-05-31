@@ -2,7 +2,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
   const scriptsT = [
     // "https://code.jquery.com/jquery-3.6.4.min.js",
     "./newassets/js/jquery-3.6.4.min.js",
-         "./newassets/js/cookies.js",   
+     "./newassets/js/cookies.js",   
 
 
     // "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
@@ -91,7 +91,7 @@ import { loadJS, loadCSS, loadModule, addDiv, Router } from "./loader.js";
     //  "./newassets/js/editmap/js/app.js",
     //  "./newassets/js/editmap/js/kml_parser.js",
      "./newassets/js/editmap/js/editor1.js",
-     "./newassets/js/editmap/js/upload/save_load_export.js",
+     "./newassets/js/editmap/js/upload1/save_load_export.js",
 
 
 
