@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Downloader</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1117;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 860px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #2d3148;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .icon-box {
+    width: 32px; height: 32px;
+    background: #2563eb22;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .icon-box svg { width: 18px; height: 18px; stroke: #60a5fa; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  .status-pill {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    background: #1e293b;
+    color: #64748b;
+    border: 1px solid #334155;
+    transition: all 0.3s;
+  }
+  .status-pill.running { background: #052e16; color: #4ade80; border-color: #166534; }
+  .status-pill.success { background: #052e16; color: #4ade80; border-color: #166534; }
+  .status-pill.error   { background: #2d0a0a; color: #f87171; border-color: #7f1d1d; }
+
+  .controls {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid #2d3148;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  #btn-run  { background: #2563eb; color: #fff; }
+  #btn-run:hover:not(:disabled)  { background: #1d4ed8; }
+  #btn-stop { background: #dc2626; color: #fff; }
+  #btn-stop:hover:not(:disabled) { background: #b91c1c; }
+  #btn-clear { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+  #btn-clear:hover { background: #273344; }
+
+  .terminal-wrap {
+    padding: 0;
+    position: relative;
+  }
+
+  .terminal-bar {
+    padding: 8px 14px;
+    background: #13151f;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #1e2235;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .terminal-label { margin-left: 6px; font-size: 11px; color: #4b5563; font-family: monospace; }
+
+  #terminal {
+    background: #0d0f18;
+    color: #d4d4d8;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    padding: 1rem 1.25rem;
+    height: 460px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .line { display: block; }
+  .line-divider { color: #4b5563; }
+  .line-success { color: #4ade80; }
+  .line-error   { color: #f87171; }
+  .line-warn    { color: #fbbf24; }
+  .line-info    { color: #60a5fa; }
+  .line-dim     { color: #6b7280; }
+
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 14px;
+    background: #4ade80;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .stats-bar {
+    padding: 0.75rem 1.5rem;
+    border-top: 1px solid #2d3148;
+    display: flex;
+    gap: 1.5rem;
+    font-size: 12px;
+    color: #475569;
+  }
+  .stat span { color: #94a3b8; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      BharatNet FTTH Report Downloader
+    </div>
+    <div class="status-pill" id="status-pill">Idle</div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-run">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Run Script
+    </button>
+    <button id="btn-stop" disabled>
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      Stop
+    </button>
+    <button id="btn-clear">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14H6L5 6M9 6V4h6v2"/></svg>
+      Clear
+    </button>
+  </div>
+
+  <div class="terminal-wrap">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="terminal-label">output — python main1.py</span>
+    </div>
+    <div id="terminal"><span class="line line-dim">Ready. Press Run Script to start.</span>
+</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">Lines: <span id="stat-lines">0</span></div>
+    <div class="stat">Started: <span id="stat-time">—</span></div>
+    <div class="stat">Elapsed: <span id="stat-elapsed">—</span></div>
+  </div>
+</div>
+
+<script>
+  const terminal  = document.getElementById("terminal");
+  const btnRun    = document.getElementById("btn-run");
+  const btnStop   = document.getElementById("btn-stop");
+  const btnClear  = document.getElementById("btn-clear");
+  const pill      = document.getElementById("status-pill");
+  const statLines = document.getElementById("stat-lines");
+  const statTime  = document.getElementById("stat-time");
+  const statElapsed = document.getElementById("stat-elapsed");
+
+  let evtSource = null;
+  let lineCount = 0;
+  let startTime = null;
+  let elapsedTimer = null;
+  let cursorEl = null;
+
+  function classify(text) {
+    const t = text.toUpperCase();
+    if (t.includes("ERROR") || t.includes("[ERROR]")) return "line-error";
+    if (t.includes("[WARN]") || t.includes("WARN")) return "line-warn";
+    if (t.includes("[DONE]") || t.includes("COMPLETED") || t.includes("SUCCESSFUL")) return "line-success";
+    if (t.startsWith("===") || t.endsWith("===")) return "line-divider";
+    if (t.includes("DOWNLOAD") || t.includes("UPLOADING") || t.includes("CONNECTING") || t.includes("READING")) return "line-info";
+    return "line";
+  }
+
+  function appendLine(text) {
+    if (cursorEl) { cursorEl.remove(); cursorEl = null; }
+
+    const span = document.createElement("span");
+    span.className = `line ${classify(text)}`;
+    span.textContent = text;
+    terminal.appendChild(span);
+    terminal.appendChild(document.createTextNode("\n"));
+
+    lineCount++;
+    statLines.textContent = lineCount;
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  function addCursor() {
+    if (cursorEl) return;
+    cursorEl = document.createElement("span");
+    cursorEl.className = "cursor";
+    terminal.appendChild(cursorEl);
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  function setStatus(state) {
+    pill.className = "status-pill " + state;
+    pill.textContent = state === "running" ? "Running…" : state === "success" ? "Done" : state === "error" ? "Error" : "Idle";
+  }
+
+  function startElapsed() {
+    startTime = Date.now();
+    statTime.textContent = new Date().toLocaleTimeString();
+    elapsedTimer = setInterval(() => {
+      const s = Math.floor((Date.now() - startTime) / 1000);
+      statElapsed.textContent = `${Math.floor(s/60).toString().padStart(2,"0")}:${(s%60).toString().padStart(2,"0")}`;
+    }, 1000);
+  }
+
+  function stopElapsed() {
+    clearInterval(elapsedTimer);
+  }
+
+  btnRun.addEventListener("click", () => {
+    if (evtSource) { evtSource.close(); evtSource = null; }
+
+    terminal.innerHTML = "";
+    lineCount = 0;
+    statLines.textContent = 0;
+    statElapsed.textContent = "00:00";
+
+    btnRun.disabled  = true;
+    btnStop.disabled = false;
+    setStatus("running");
+    startElapsed();
+    addCursor();
+
+    evtSource = new EventSource("/run");
+
+    evtSource.onmessage = (e) => {
+      const data = e.data;
+      if (data === "__END__") {
+        evtSource.close();
+        evtSource = null;
+        btnRun.disabled  = false;
+        btnStop.disabled = true;
+        stopElapsed();
+        if (cursorEl) { cursorEl.remove(); cursorEl = null; }
+        return;
+      }
+      appendLine(data);
+      if (data.includes("[DONE]") || data.includes("PROCESS COMPLETED")) setStatus("success");
+      if (data.includes("[ERROR]") || data.includes("ERROR")) setStatus("error");
+    };
+
+    evtSource.onerror = () => {
+      evtSource.close();
+      evtSource = null;
+      appendLine("[ERROR] Connection to server lost.");
+      setStatus("error");
+      btnRun.disabled  = false;
+      btnStop.disabled = true;
+      stopElapsed();
+      if (cursorEl) { cursorEl.remove(); cursorEl = null; }
+    };
+  });
+
+  btnStop.addEventListener("click", async () => {
+    await fetch("/stop", { method: "POST" });
+    if (evtSource) { evtSource.close(); evtSource = null; }
+    appendLine("[STOPPED] Script was manually stopped.");
+    setStatus("idle");
+    btnRun.disabled  = false;
+    btnStop.disabled = true;
+    stopElapsed();
+    if (cursorEl) { cursorEl.remove(); cursorEl = null; }
+  });
+
+  btnClear.addEventListener("click", () => {
+    terminal.innerHTML = '<span class="line line-dim">Ready. Press Run Script to start.</span>\n';
+    lineCount = 0;
+    statLines.textContent = 0;
+    statTime.textContent = "—";
+    statElapsed.textContent = "—";
+    setStatus("idle");
+  });
+</script>
+</body>
+</html>

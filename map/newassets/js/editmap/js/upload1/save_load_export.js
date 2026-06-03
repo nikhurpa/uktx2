@@ -17,13 +17,14 @@ window.saveNodeToMyPlace = async function (nodeId) {
     function getPopupHtml(layer) {
         if (!layer) return '';
         try {
+            console.log('Popup:', layer.getPopup(), 'Fallback _popup:', layer._popup);
             const p = (layer.getPopup && layer.getPopup()) || layer._popup || null;
             if (!p) return '';
             const c = p.getContent();
             // getContent() can return a string or a DOM node
             if (typeof c === 'string') return c;
             if (c && c.outerHTML) return c.outerHTML;
-            return '';
+            // return '';
         } catch (_) { return ''; }
     }
 
@@ -48,10 +49,11 @@ window.saveNodeToMyPlace = async function (nodeId) {
                 l instanceof L.Polyline  ||
                 l instanceof L.Polygon
             ) || null;
-
+            console.log('Found overlays for node', id, 'geomLayer:', geomLayer);
             if (geomLayer) {
                 popup = getPopupHtml(geomLayer);
-                console.log('Saving node', id, 'with popup:', popup);
+                // console.log('Saving node', id, 'with popup:', popup);
+
                 if (geomLayer instanceof L.Marker && !(geomLayer.options.icon instanceof L.DivIcon)) {
                     const ll = geomLayer.getLatLng();
                     geomType = 'Point';
