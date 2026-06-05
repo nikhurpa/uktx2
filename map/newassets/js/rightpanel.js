@@ -6,42 +6,20 @@ function initRightPanel() {
  addDiv({ id: "right-panel", parent: document.body,after: "#main",
                   innerHTML: ` <div id='jqxtabs'>
                               <ul style='margin-left: 20px;'>
-                                <li>Edit Map</li>
                                 <li>kml</li>
                                 <li>Map</li>
                                 <li>Data</li>
                               </ul>
-                              <div id="sidepanel" class="card">
-                                      <!--  <h2>Places</h2>
-                                      <button  id="btn-hide" title="Hide Boxs" style="float:right; background: none; border: none; color: #666; font-size: 20px; padding: 5; margin: 5; min-width: auto;">
-                                      </button>  
-                                      <div class="controls">
-                                        <button id="saveSelected" class="btn small">Save Selected</button>
-                                        <button id="saveAll" class="btn primary small">Save All</button>
-                                        <button id="clearTemp" class="btn small">Clear Temp</button>
-                                      </div> 
-                                      <input id="kmlFile" type="file" accept=".kml" />
-                                      <div style="height:10px"></div>-->
-                                      <div id="jqxTree" class="card-body"></div>
-                                   <div class="edit-map-panel">
-                                  
+                              <div id="kml" class="card"></div>
+                             
 
-                                    <div class="edit-map-action-buttons">
-                                         <input type="file" id="kml-layer" accept=".kml,.kmz" style="display: none;" />
-                                        <button id="btn-load-kml" class="edit-map-btn d-none" onclick="document.getElementById('kml-layer').click();"><i class="fa-solid fa-database"></i> Load kml Layer</button>
-                                        <button id="btn-remove-db"class="edit-map-btn d-none" onclick="removeKmlLayer()"><i class="fa-solid fa-database"></i> Remove kml Layer</button>
-                                        <input type="file" id="kml-upload" accept=".kml,.kmz" style="display: none;" />
-                                        <button id="btn-upload-kml" class="edit-map-btn d-none" onclick="document.getElementById('kml-upload').click();"><i class="fa-solid fa-file-import"></i> Upload KML</button>
-                                    </div>
-                                    </div>
-
-                                </div>
-                                <div id="kml" class="card"></div>
+                               
                                 <div id="infoPanel">
                                     <div id='elementForm' style="width: 280px; height: auto;"></div>   
                                     <div id='elementSubForm' style="width: 280px; height: auto;"></div>   
                                     <div id='elementSubmitForm' style="width: 280px; height: auto;"></div>   
                                 </div>
+
                                 <div id="data" class="card">
                                     <div id='dataElementForm' style="width: 280px; height: auto;"></div>   
                                     <div id='dataElementSubForm' style="width: 280px; height: auto;"></div>  
@@ -53,40 +31,27 @@ function initRightPanel() {
 
 
 addGeoDataMapperElements();
-addBulkUploadElements()
+addBulkUploadElements();
 
   $("#right-panel").rightPullPanel({ width: 300, topOffset: 20 , contentSelector: "#main"});
   $('#jqxtabs').jqxTabs({ width: 295, height: '100%' });
   $('#jqxtabs').on('tabclick', function (event) {
     var clickedItem = event.args.item;
     if (clickedItem === 0) {
-      // initMap();
-    //   map.getDiv().style.display = 'block';
-      // document.getElementById("main").style.display = 'flex';
-      // document.getElementById("main").style.display = 'flex';
-      document.getElementById("main").style.display = 'none';
-      document.getElementById("map").style.display = 'block';
-      document.getElementById("mode-ui").style.display = 'flex';
-    //   document.getElementById("dataTable").style.display = 'none';
-    } else if (clickedItem === 1) {
         
-    //   map.getDiv().style.display = 'block';
       document.getElementById("map").style.display = 'block';
       document.getElementById("main").style.display = 'none';
        document.getElementById("mode-ui").style.display = 'none';
-      // initMap();
-    //   document.getElementById("status").style.display = 'none';
-    //   document.getElementById("dataTable").style.display = 'none';
-    } else if (clickedItem === 2) {
-        // initGrid();
-    //   map.getDiv().style.display = 'none';
+     
+    } else if (clickedItem === 1) {
+   
       document.getElementById("map").style.display = 'block';
-        document.getElementById("main").style.display = 'none';
-         document.getElementById("mode-ui").style.display = 'none';
-    //   document.getElementById("dataTable").style.display = 'block';
-    } else if (clickedItem === 3) {
+      document.getElementById("main").style.display = 'none';
+      document.getElementById("mode-ui").style.display = 'none';
+   
+    } else if (clickedItem === 2) {
         initGrid();
-    //   map.getDiv().style.display = 'none';
+ 
       document.getElementById("map").style.display = 'none';
       document.getElementById("main").style.display = 'block';
       document.getElementById("mode-ui").style.display = 'none';
@@ -94,8 +59,50 @@ addBulkUploadElements()
   });   
   console.log("Right panel initialized");
 
-addDiv({ id: "right-panel1", parent: document.body,after: "#right-panel"});
-$("#right-panel1").rightPullPanel({ width: 300, topOffset: 80 , contentSelector: "#main"});
+
+  // second right panel for map editing and kml upload
+  if (window.currentUser.rights.map === "EDIT") {
+    addDiv({ id: "right-panel1", parent: document.body,after: "#right-panel",
+        innerHTML: ` <div id='jqxtabs1'>
+                              <ul style='margin-left: 20px;'>
+                                <li>Edit Map</li>
+                                <li>kml</li>
+                                
+                              </ul>
+                            
+                                      
+                                      <div id="jqxTree" class="card-body"></div>
+                                      <div id="kml1" class="card"></div>
+                               
+
+                              </div>
+                              <input type="file" id="kml-upload" style="display: none;">
+                              <input type="file" id="kml-layer" style="display: none;">
+                              
+                              
+                              `, });   
+    $("#right-panel1").rightPullPanel({ width: 300, topOffset: 80 , contentSelector: "#main"});
+    $('#jqxtabs1').jqxTabs({ width: 295, height: '100%' });
+    $('#jqxtabs1').on('tabclick', function (event) {
+    var clickedItem = event.args.item;
+    if (clickedItem === 0) {
+   
+      document.getElementById("main").style.display = 'none';
+      document.getElementById("map").style.display = 'block';
+      document.getElementById("mode-ui").style.display = 'flex';
+   
+    } else if (clickedItem === 1) {
+ 
+      document.getElementById("map").style.display = 'block';
+      document.getElementById("main").style.display = 'none';
+       document.getElementById("mode-ui").style.display = 'none';
+     
+    } 
+  });  
+
+  }
+
+
 
 
 }

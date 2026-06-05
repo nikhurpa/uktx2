@@ -65,7 +65,7 @@ Router.add("/main", () => {
         window.initMap();
         window.initForm();
         window.initMapEdit();
-        window.loadMyPlaces();
+        // window.loadMyPlaces();
         // await loadMapData({type:"BTS",block:"Hawalbag",oa:"Almora"});
         
         // await loadMapData({type:"GP",block:"Takula",oa:"Almora"});
