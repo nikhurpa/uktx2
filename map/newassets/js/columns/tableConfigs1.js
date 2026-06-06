@@ -529,3 +529,7 @@ TABLE_CONFIGS = {
     },
 
 };
+
+REPORT_CONFIG= {
+    
+}

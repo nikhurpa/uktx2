@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 import config2
 import traceback
 from datetime import date
-REPORT_DATE = date(2026, 6, 5)
+REPORT_DATE = date(2026, 6, 6)
 from sqlalchemy import text
 
 

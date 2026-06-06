@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jQWidgets Grid and DataAdapter Demo</title>
+    
+    <link rel="stylesheet" href="https://jqwidgets.com/public/jqwidgets/styles/jqx.base.css" type="text/css" />
+    <link rel="stylesheet" href="https://jqwidgets.com/public/jqwidgets/styles/jqx.energyblue.css" type="text/css" />
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxcore.js"></script>
+    
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxdata.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.js"></script>
+    
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxscrollbar.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxbuttons.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxmenu.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.selection.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.sort.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.pager.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxlistbox.js"></script>
+    <script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxdropdownlist.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 30px;
+            background-color: #f7f9fa;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>jQWidgets Grid Live Demo</h2>
+    <p>Constructed utilizing <code>jqxDataAdapter</code> mapping local array structures.</p>
+    <hr><br>
+    
+    <div id="jqxGridElement"></div>
+</div>
+
+<script type="text/javascript">
+   $(document).ready(function () {
+
+    // 1. Configure the source object
+    var source = {
+        datatype: "json", // Mandatorily lowercase 'datatype'
+        datafields: [
+            { name: 'SR', type: 'number' },
+            { name: 'CIRCLE', type: 'string' },
+            { name: 'SSA', type: 'string' },
+            { name: 'DESCRIPTION', type: 'string' },
+            { name: 'LOCATION', type: 'string' },
+            { name: 'IP', type: 'string' },
+            { name: 'MAKE', type: 'string' },
+            { name: 'STATUS', type: 'string' },
+            { name: 'STATUS_SINCE', type: 'string' },
+            { name: 'DURATION', type: 'string' },
+            { name: 'BBC', type: 'string' },
+            { name: 'BBC_MOBILE', type: 'string' },
+            { name: 'SAMPLED_TIME', type: 'string' }
+        ],
+        type: "POST",
+        url: 'http://localhost:8010/proxy/api/glance-details'
+        // url: 'http://10.132.37.10:8081/api/glance-details'
+    };
+
+    // 2. Pass the source and connection settings to the DataAdapter
+    var dataAdapter = new $.jqx.dataAdapter(source, {
+        // formatData executes right before the POST request hits the wire
+        formatData: function (data) {
+            // Merge your static payload with any grid-generated parameters (like paging/sorting if enabled)
+            return $.extend({}, data, {
+                element: 'TIP-OLT',
+                circle: 'UTTARANCHAL',
+                ba: 'ALL',
+                ssa: 'ALL'
+            });
+        },
+        // Correct place to inject headers and AJAX settings
+        loadServerData: function (serverdata, source, callback) {
+    $.ajax({
+        dataType: source.datatype,
+        type: source.type,
+        url: source.url,
+        data: serverdata,
+        xhrFields: {
+            withCredentials: true // Forces the browser to send cookies along with the proxy request
+        },
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (data, status, xhr) {
+            callback({ records: data });
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX Error: ", error);
+        }
+    });
+}
+    });
+
+    // 3. Initialize your grid using the adapter
+    $("#jqxGridElement").jqxGrid({
+        width: '100%',
+        height: 400,
+        source: dataAdapter,
+        columns: [
+            { text: 'SR', datafield: 'SR', width: 60 },
+            { text: 'Circle', datafield: 'CIRCLE', width: 120 },
+            { text: 'SSA', datafield: 'SSA', width: 100 },
+            { text: 'Description', datafield: 'DESCRIPTION', width: 200 },
+            { text: 'Location', datafield: 'LOCATION', width: 150 },
+            { text: 'IP Address', datafield: 'IP', width: 130 },
+            { text: 'Make', datafield: 'MAKE', width: 100 },
+            { text: 'Status', datafield: 'STATUS', width: 100 },
+            { text: 'Status Since', datafield: 'STATUS_SINCE', width: 150 },
+            { text: 'Duration', datafield: 'DURATION', width: 100 },
+            { text: 'BBC', datafield: 'BBC', width: 100 },
+            { text: 'BBC Mobile', datafield: 'BBC_MOBILE', width: 120 },
+            { text: 'Sampleed Time', datafield: 'SAMPLED_TIME', width: 150 }
+        ]
+    });
+});
+</script>
+
+</body>
+</html>

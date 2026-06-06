@@ -6,8 +6,8 @@ function initRightPanel() {
  addDiv({ id: "right-panel", parent: document.body,after: "#main",
                   innerHTML: ` <div id='jqxtabs'>
                               <ul style='margin-left: 20px;'>
-                                <li>kml</li>
-                                <li>Map</li>
+                                <li>Excel-kml</li>
+                                <li>Map Layers</li>
                                 <li>Data</li>
                               </ul>
                               <div id="kml" class="card"></div>
@@ -76,6 +76,7 @@ addBulkUploadElements();
                                
 
                               </div>
+                              <!-    hidden element for inputs -->
                               <input type="file" id="kml-upload" style="display: none;">
                               <input type="file" id="kml-layer" style="display: none;">
                               
