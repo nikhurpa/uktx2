@@ -93,12 +93,16 @@ def download_report():
         page.locator("#P156_UPDATE").wait_for(timeout=10000)
 
         page.wait_for_timeout(3000)
-        text = page.locator("#P156_UPDATE").inner_text().strip()
+        # text = page.locator("#P156_UPDATE").inner_text().strip()
+        text = page.locator("#P156_UPDATE").first.get_attribute("value")
         print(f"Text = [{text}]")
         formatted = datetime.strptime(
-            page.locator("#P156_UPDATE").input_value().strip().title(),
+            # page.locator("#P156_UPDATE").input_value().strip().title(),
+            text,
             "%d-%b-%y"
         ).strftime("%m%d%Y")
+        
+        print(f"Formatted Date = [{formatted}]")
 
         for ssa in SSAs:
             print(f"Processing for SSA: {ssa['name']}")
