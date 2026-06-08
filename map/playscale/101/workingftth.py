@@ -4,13 +4,17 @@ import time
 import pandas as pd
 from playwright.sync_api import sync_playwright
 from sqlalchemy import create_engine
+from sqlalchemy.engine import URL
+from sqlalchemy import text
+
 
 import config2
 import traceback
 from datetime import date
 REPORT_DATE = date(2026, 6, 6)
-from sqlalchemy import text
+
 from datetime import datetime
+import nest_asyncio
 
 
 
@@ -19,58 +23,17 @@ from datetime import datetime
 DOWNLOAD_DIR = "downloads"
 
 # MySQL
-MYSQL_USER = "uktx"
-MYSQL_PASSWORD = "uktx123"
-MYSQL_HOST = "localhost"
-MYSQL_PORT = 3306
-MYSQL_DATABASE = "ukcfa"
+
 
 url="http://10.202.212.139/pls/apex/f?p=101:156:91807162505544::NO:::"
 circle_selector = "#P156_CIRCLE"
 ssa_selector = "#P156_SSA"
 service_type_selector = "#P156_SERV_TYPE"
 go_button_selector = "#P156_GO"
-SSAs=[{"name":"DDN","df":None,"fname":None},{"name":"HWR","df":None,"fname":None},{"name":"KTD","df":None,"fname":None},{"name":"NNT","df":None,"fname":None},{"name":"NWT","df":None,"fname":None},{"name":"AMO","df":None,"fname":None}]
+SSAs=[{"name":"NNT","df":None,"fname":None},{"name":"NWT","df":None,"fname":None},{"name":"AMO","df":None,"fname":None},{"name":"DDN","df":None,"fname":None},{"name":"HWR","df":None,"fname":None},{"name":"KTD","df":None,"fname":None}]
 REPORT_DATE = date.today()
 current_date = REPORT_DATE.strftime("%m%d%Y")
 
-
-def navigate_to_report(page, ssa):
-  
-
-
-    # page.wait_for_load_state("networkidle")
-
-    # Select Options
-    page.select_option(circle_selector, label="UT")
-    page.locator(ssa_selector).select_option(label=ssa['name'])
-    page.locator(service_type_selector).select_option(label="BHARAT FIBER BB")
-    
-    # Click GO button
-    page.locator(go_button_selector).click()
-    page.wait_for_timeout(5000)
-    # page.wait_for_load_state("networkidle")
-
-    print("Clicking CSV export and waiting for download...")
-
-    download_button = page.get_by_text(
-        "DOWNLOAD",
-        exact=True
-    ).nth(0)
-
-    with page.expect_download(timeout=180000) as download_info:
-        download_button.click()
-
-    download = download_info.value
-    download.path()   # wait until fully completed
-
-    suggested = f"report{current_date}_{ssa['name']}.csv"
-    download_path = Path(DOWNLOAD_DIR) / suggested
-    download.save_as(str(download_path))
-    page.wait_for_timeout(2000)
-
-    print(f"Downloaded: {download_path}")
-    return str(download_path)
 
 def download_report():
     Path(DOWNLOAD_DIR).mkdir(exist_ok=True)
@@ -87,37 +50,94 @@ def download_report():
 
         page = context.new_page()
 
-        page.goto(url)
-        page.wait_for_timeout(3000)
+        # # page.goto(url)
+        # page.goto(
+        #     url,
+        #     wait_until="domcontentloaded",
+        #     timeout=120000
+        # )
+        # page.wait_for_timeout(3000)
         
-        page.locator("#P156_UPDATE").wait_for(timeout=10000)
+        # page.locator("#P156_UPDATE").wait_for(timeout=10000)
 
-        page.wait_for_timeout(3000)
-        # text = page.locator("#P156_UPDATE").inner_text().strip()
-        text = page.locator("#P156_UPDATE").first.get_attribute("value")
-        print(f"Text = [{text}]")
-        formatted = datetime.strptime(
-            # page.locator("#P156_UPDATE").input_value().strip().title(),
-            text,
-            "%d-%b-%y"
-        ).strftime("%m%d%Y")
+        # page.wait_for_timeout(3000)
+        # # text = page.locator("#P156_UPDATE").inner_text().strip()
+        # text = page.locator("#P156_UPDATE").first.get_attribute("value")
+        # print(f"Text = [{text}]")
+        # formatted = datetime.strptime(
+        #     # page.locator("#P156_UPDATE").input_value().strip().title(),
+        #     text,
+        #     "%d-%b-%y"
+        # ).strftime("%d%m%Y")
         
-        print(f"Formatted Date = [{formatted}]")
+        # table_name=f"working_ftth_{formatted}"
+        # print(f"Formatted Date = [{table_name}]")
+
+        # page.select_option(circle_selector, label="UT")
+        
+        # page.locator(service_type_selector).select_option(label="BHARAT FIBER BB")
 
         for ssa in SSAs:
+
+             # page.goto(url)
+            page.goto(
+                url,
+                wait_until="domcontentloaded",
+                timeout=120000
+            )
+            page.wait_for_timeout(3000)
+            
+            page.locator("#P156_UPDATE").wait_for(timeout=10000)
+
+            page.wait_for_timeout(3000)
+            # text = page.locator("#P156_UPDATE").inner_text().strip()
+            text = page.locator("#P156_UPDATE").first.get_attribute("value")
+            print(f"Text = [{text}]")
+            formatted = datetime.strptime(
+                # page.locator("#P156_UPDATE").input_value().strip().title(),
+                text,
+                "%d-%b-%y"
+            ).strftime("%d%m%Y")
+            
+            table_name=f"working_ftth_{formatted}"
+            print(f"Formatted Date = [{table_name}]")
+
+            page.select_option(circle_selector, label="UT")
+            
+            page.locator(service_type_selector).select_option(label="BHARAT FIBER BB")
+
+
+
             print(f"Processing for SSA: {ssa['name']}")
-          
-            file_path = navigate_to_report(page,ssa)
-                          
-            ssa['df'] = read_report(file_path, ssa['name'])
-            ssa['fname'] = file_path
+            page.locator(ssa_selector).select_option(label=ssa['name'])
+            # Click GO button
+            # page.locator(go_button_selector).click()
+            page.locator("#P156_GO").click(force=True, no_wait_after=True)
+            page.wait_for_timeout(9000)
+            # page.wait_for_timeout(5000)
+            # page.wait_for_load_state("networkidle")
            
 
+            download_button = page.get_by_text("DOWNLOAD",exact=True).nth(0)
 
-        browser.close()
+            print("Clicking CSV export and waiting for download...")
+            with page.expect_download(timeout=180000) as download_info:
+                download_btn.click(force=True)
+                # page.wait_for_timeout(90000)
 
-        return formatted
+            download = download_info.value
+            # download.path()   # wait until fully completed
 
+            suggested = f"report{formatted}_{ssa['name']}.csv"
+            download_path = Path(DOWNLOAD_DIR) / suggested
+            download.save_as(str(download_path))
+            # page.wait_for_timeout(2000)
+
+            print(f"Downloaded: {download_path}")
+                     
+            ssa['fname'] = download_path
+
+        browser.close()    
 
 def read_report(file_path, ssa_name):
     print("Reading CSV file...")
@@ -204,16 +224,22 @@ def upload_to_mysql(df, table_name):
 
     print("Connecting to MySQL...")
 
-    connection_string = (
-        f"mysql+pymysql://"
-        f"{MYSQL_USER}:"
-        f"{MYSQL_PASSWORD}@"
-        f"{MYSQL_HOST}:"
-        f"{MYSQL_PORT}/"
-        f"{MYSQL_DATABASE}"
+    url = URL.create(
+    "mysql+pymysql",
+    username=config2.MYSQL_USER,
+    password=config2.MYSQL_PASSWORD,
+    host=config2.MYSQL_HOST,
+    port=config2.MYSQL_PORT,
+    database=config2.MYSQL_DATABASE,
     )
 
-    engine = create_engine(connection_string)
+    print(url)
+
+    engine = create_engine(url)
+
+    with engine.connect() as conn:
+        print("Connected successfully")
+
     create_table_if_not_exists(engine, table_name)
 
     print(f"Uploading to table: {table_name}")
@@ -230,18 +256,19 @@ def upload_to_mysql(df, table_name):
 
 
 def main():
+
+
     try:
 
         print("=" * 50)
         print("REPORT DOWNLOAD STARTED")
         print("=" * 50)
 
-        rep_date= download_report()
+        download_report()
     
-
-        table_name=f"working_ftth_{rep_date}"
         for ssa in SSAs:
-          
+             print(f"Reading report: {ssa['name']} from file {ssa['fname']}")
+             ssa['df'] = read_report(ssa['fname'], ssa['name'])
              if ssa['df'] is not None:
                  print(f"Uploading report: {ssa['name']} from file {ssa['fname']}")
                  upload_to_mysql(ssa['df'], table_name)

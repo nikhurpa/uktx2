@@ -4,28 +4,39 @@ import time
 import pandas as pd
 from playwright.sync_api import sync_playwright
 from sqlalchemy import create_engine
+from sqlalchemy.engine import URL
+from sqlalchemy import text
+from sqlalchemy.dialects.mysql import insert
 
 import config2
 import traceback
 from datetime import date
 REPORT_DATE = date(2026, 6, 6)
-from sqlalchemy import text
+
 
 
 
 def navigate_to_report(page, report):
     print(f"Opening report page...: {report['url']}")
 
-    page.goto(report['url'])
+    # page.goto(report['url'])
+
+    page.goto(
+    report['url'],
+    wait_until="domcontentloaded",
+    timeout=120000
+)
 
     page.wait_for_load_state("networkidle")
 
     # Set dates
-    page.locator(report['from_date_selector']).fill("01-May-2026")
-    page.locator(report['to_date_selector']).fill("31-May-2026")
+    print(f"Setting dated ")
+    page.locator(report['from_date_selector']).fill("01-Jun-2026")
+    page.locator(report['to_date_selector']).fill("07-Jun-2026")
 
 
     # Click GO button
+    print(f"Clicking GO button")
     page.locator(report['go_button_selector']).click()
     page.wait_for_load_state("networkidle")
 
@@ -111,22 +122,11 @@ def read_report(file_path, report_name):
 
 def convert_dates(df):
 
-    date_cols = [
-        "DATED"
-    ]
-
-    for col in date_cols:
-
-        if col not in df.columns:
-            continue
-
-        df[col] = df[col].replace("--", pd.NA)
-
-        df[col] = pd.to_datetime(
-            df[col],
-            format="%d-%b-%Y",
-            errors="coerce"
-        ).dt.date
+    df["DATED"] = pd.to_datetime(
+        df["DATED"].astype(str).str.title(),
+        format="%d-%b-%y",
+        errors="coerce"
+        )
 
     return df
 
@@ -136,16 +136,23 @@ def upload_to_mysql(df, table_name):
 
     print("Connecting to MySQL...")
 
-    connection_string = (
-        f"mysql+pymysql://"
-        f"{config2.MYSQL_USER}:"
-        f"{config2.MYSQL_PASSWORD}@"
-        f"{config2.MYSQL_HOST}:"
-        f"{config2.MYSQL_PORT}/"
-        f"{config2.MYSQL_DATABASE}"
+    url = URL.create(
+    "mysql+pymysql",
+    username=config2.MYSQL_USER,
+    password=config2.MYSQL_PASSWORD,
+    host=config2.MYSQL_HOST,
+    port=config2.MYSQL_PORT,
+    database=config2.MYSQL_DATABASE,
     )
 
-    engine = create_engine(connection_string)
+    print(url)
+
+    engine = create_engine(url)
+
+    with engine.connect() as conn:
+        print("Connected successfully")
+
+
   
     print(f"Uploading to table: {table_name}")
 
@@ -154,10 +161,20 @@ def upload_to_mysql(df, table_name):
         con=engine,
         if_exists="append",
         index=False,
-        chunksize=1000
+        chunksize=1000,
+        method=insert_ignore
     )
 
     print(f"{len(df)} rows uploaded")
+
+
+def insert_ignore(table, conn, keys, data_iter):
+    data = [dict(zip(keys, row)) for row in data_iter]
+
+    stmt = insert(table.table).values(data)
+    stmt = stmt.prefix_with("IGNORE")
+
+    conn.execute(stmt)
 
 
 def main():

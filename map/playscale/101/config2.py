@@ -36,13 +36,26 @@ REPORT_URL = [
 
 # Download
 DOWNLOAD_DIR = "downloads"
-
+CSV_FOLDER = "downloads/ftth"
 # MySQL
-MYSQL_USER = "uktx"
-MYSQL_PASSWORD = "uktx123"
-MYSQL_HOST = "localhost"
+# MYSQL_USER = "uktx"
+# MYSQL_PASSWORD = "uktx123"
+# MYSQL_HOST = "localhost"
+# MYSQL_PORT = 3306
+# MYSQL_DATABASE = "ukcfa"
+
+# $DB_HOST = 'srv1493.hstgr.io';
+# $DB_NAME = 'u642970219_TRANSMISSION1';
+# $DB_USER = 'u642970219_uktx';
+# $DB_PASS = 'Gmcfa@01';
+# $DB_CHARSET = 'utf8mb4';
+
+MYSQL_USER = "u642970219_uktx"
+MYSQL_PASSWORD = "Gmcfa@01"
+MYSQL_HOST = "srv1493.hstgr.io"
 MYSQL_PORT = 3306
-MYSQL_DATABASE = "ukcfa"
+MYSQL_DATABASE = "u642970219_TRANSMISSION1"
+TABLE_NAME='working_ftth_08062026'
 
 
 

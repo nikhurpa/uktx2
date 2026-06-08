@@ -4,13 +4,18 @@ import time
 import pandas as pd
 from playwright.sync_api import sync_playwright
 from sqlalchemy import create_engine
+from sqlalchemy.engine import URL
+from sqlalchemy import text
+from sqlalchemy.dialects.mysql import insert
 
 import config2
 import traceback
 from datetime import date
-REPORT_DATE = date(2026, 6, 6)
-from sqlalchemy import text
 
+
+from urllib.parse import quote_plus
+
+REPORT_DATE = date(2026, 6, 8)
 
 def login(page):
     print("Opening login page...")
@@ -256,18 +261,42 @@ def upload_to_mysql(df, table_name):
     print("Converting date columns...")
     df = convert_dates(df)
 
-    print("Connecting to MySQL...")
+    if table_name.startswith("bnu_ftth_"):
+        df = df.drop_duplicates(
+            subset=["CUSTOMER_ID"],
+            keep="first"
+        )
 
+
+    print("Connecting to MySQL...")
     connection_string = (
-        f"mysql+pymysql://"
-        f"{config2.MYSQL_USER}:"
+        f"mysql+pymysql://{config2.MYSQL_USER}:"
         f"{config2.MYSQL_PASSWORD}@"
-        f"{config2.MYSQL_HOST}:"
-        f"{config2.MYSQL_PORT}/"
+        f"{config2.MYSQL_HOST}:{config2.MYSQL_PORT}/"
         f"{config2.MYSQL_DATABASE}"
     )
+    print(connection_string)
 
-    engine = create_engine(connection_string)
+
+
+    url = URL.create(
+    "mysql+pymysql",
+    username=config2.MYSQL_USER,
+    password=config2.MYSQL_PASSWORD,
+    host=config2.MYSQL_HOST,
+    port=config2.MYSQL_PORT,
+    database=config2.MYSQL_DATABASE,
+    )
+
+    print(url)
+
+    engine = create_engine(url)
+
+    with engine.connect() as conn:
+        print("Connected successfully")
+
+
+    # engine = create_engine(connection_string)
     create_table_if_not_exists(engine, table_name)
     print(f"Uploading to table: {table_name}")
 
@@ -276,11 +305,19 @@ def upload_to_mysql(df, table_name):
         con=engine,
         if_exists="append",
         index=False,
-        chunksize=1000
+        chunksize=1000,
+        method=insert_ignore
     )
 
     print(f"{len(df)} rows uploaded")
 
+def insert_ignore(table, conn, keys, data_iter):
+    data = [dict(zip(keys, row)) for row in data_iter]
+
+    stmt = insert(table.table).values(data)
+    stmt = stmt.prefix_with("IGNORE")
+
+    conn.execute(stmt)
 
 def main():
     try:
