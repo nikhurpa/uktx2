@@ -14,7 +14,7 @@ from datetime import date
 REPORT_DATE = date(2026, 6, 6)
 
 from datetime import datetime
-import nest_asyncio
+
 
 
 
@@ -122,7 +122,7 @@ def download_report():
 
             print("Clicking CSV export and waiting for download...")
             with page.expect_download(timeout=180000) as download_info:
-                download_btn.click(force=True)
+                download_button.click(force=True)
                 # page.wait_for_timeout(90000)
 
             download = download_info.value
@@ -271,7 +271,7 @@ def main():
              ssa['df'] = read_report(ssa['fname'], ssa['name'])
              if ssa['df'] is not None:
                  print(f"Uploading report: {ssa['name']} from file {ssa['fname']}")
-                 upload_to_mysql(ssa['df'], table_name)
+                 upload_to_mysql(ssa['df'], config2.TABLE_NAME)
 
        
 

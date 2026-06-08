@@ -32,8 +32,8 @@ def clean_columns(df):
         for col in df.columns
     ]
 
-    df["INST_DATE"] = pd.to_datetime(
-        df["INST_DATE"].astype(str).str.title(),
+    df["DATED"] = pd.to_datetime(
+        df["DATED"].astype(str).str.title(),
         format="%d-%b-%y",
         errors="coerce"
         )
@@ -47,21 +47,51 @@ def upload_file(file_path, engine):
 
     df = pd.read_csv(
         file_path,
+        header=0,   
         encoding="cp1252",
         low_memory=False
     )
+
+    required_headers = [
+        "CIRCLE",
+        "SSA",
+        "EXCHANGE",
+        "SERVICE_TYPE",
+        "OLT_IP",
+        "MAINT_FRAN",
+        "OLT_OWNER",
+        "DATED",
+        "CRM_ORDER_ID",
+        "TEL_NUM"
+    ]
+
+    missing = [
+        col for col in required_headers
+        if col not in df.columns
+    ]
+
+    if missing:
+        print("Wrong File Skipping")
+        return
+   
+
+    if any("ORDER_SUB_TYPE" in col for col in df.columns):
+        table_name="ftth_disconnection"
+    else:
+        table_name="ftth_provisioning"
+
 
     df = clean_columns(df)
 
     print(f"Rows found: {len(df)}")
 
     df.to_sql(
-        config2.TABLE_NAME,
+        table_name,
         con=engine,
         if_exists="append",
         index=False,
         chunksize=1000,
-        method=insert_ignore
+        method=insert_update
     )
 
 
@@ -75,7 +105,7 @@ def insert_ignore(table, conn, keys, data_iter):
     stmt = stmt.prefix_with("IGNORE")
 
     conn.execute(stmt)
-    
+
 def insert_update(table, conn, keys, data_iter):
     data = [dict(zip(keys, row)) for row in data_iter]
 
@@ -89,7 +119,7 @@ def insert_update(table, conn, keys, data_iter):
 
     stmt = stmt.on_duplicate_key_update(**update_cols)
 
-    conn.execute(stmt)        
+    conn.execute(stmt)    
 
 def create_table_if_not_exists(engine, table_name):
     """
@@ -134,7 +164,7 @@ def main():
     print(f"CSV files found: {len(csv_files)}")
 
 
-    create_table_if_not_exists(engine, config2.TABLE_NAME)
+    # create_table_if_not_exists(engine, config2.TABLE_NAME)
     
     for file_path in csv_files:
         try:

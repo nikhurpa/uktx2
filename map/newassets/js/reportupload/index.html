@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>XLSX Upload</title>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<h2>Report Upload</h2>
+<input type="file" id="file">
+<button onclick="uploadFile()">Upload</button>
+<!-- <div style="width:500px;border:1px solid #000;margin-top:10px"> -->
+   
+<div class="progress" style="height:30px;width:200px">
+    <div id="bar" style="height:20px;width:50px;background:green"> 0%</div>
+</div>
+
+
+
+<div id="status"></div>
+
+<script>
+async function uploadFile() {
+
+    const file =
+        document.getElementById("file")
+        .files[0];
+
+    if (!file) {
+        alert("Select file");
+        return;
+    }
+
+    $("#status").html("Reading file...");
+
+    const buffer =
+        await file.arrayBuffer();
+
+    const workbook =
+        XLSX.read(buffer, {
+            type: "array"
+        });
+
+    const sheet =
+        workbook.Sheets[
+            workbook.SheetNames[0]
+        ];
+
+    const rows =
+        XLSX.utils.sheet_to_json(
+            sheet,
+            {
+                defval: "",
+                raw: false
+            }
+        );
+
+    if (rows.length === 0) {
+
+        alert("No data found");
+        return;
+    }
+
+
+
+    const headers =
+        Object.keys(rows[0]);
+
+    let reportType =
+        "uploaded_report";
+
+    const upperHeaders =
+        headers.map(
+            h => h.toUpperCase()
+        );
+
+    
+
+    if (
+        upperHeaders.some(
+            h =>
+            h.includes(
+                "ORDER_SUB_TYPE"
+            )
+        )
+    ) {
+        reportType =
+            "ftth_disconnection";
+    }
+
+    rows.forEach(row => {
+
+      if(row.DATED){
+
+         row.DATED =
+               mysqlDate1(
+                  row.DATED
+               );
+      }
+   });
+
+    const totalRows =
+        rows.length;
+
+    let processedRows = 0;
+    let insertedRows = 0;
+    let updatedRows = 0;
+
+    const chunkSize = 200;
+
+    $("#status").html(
+        `
+        Report Type : ${reportType}<br>
+        Rows Found : ${totalRows}
+        `
+    );
+
+    for (
+        let i = 0;
+        i < totalRows;
+        i += chunkSize
+    ) {
+
+        const chunk =
+            rows.slice(
+                i,
+                i + chunkSize
+            );
+
+        try {
+
+            const response =
+                await $.ajax({
+
+                    url:
+                        "api/upload.php",
+
+                    type:
+                        "POST",
+
+                    contentType:
+                        "application/json",
+
+                    data:
+                        JSON.stringify({
+
+                            report_type:
+                                reportType,
+
+                            rows:
+                                chunk
+                        })
+                });
+
+            processedRows +=
+                chunk.length;
+
+            insertedRows +=
+                parseInt(
+                    response.rows_inserted || 0
+                );
+
+            updatedRows +=
+                parseInt(
+                    response.rows_updated || 0
+                );
+
+            const percent =
+                Math.round(
+                    (
+                        processedRows /
+                        totalRows
+                    ) * 100
+                );
+
+            $("#bar")
+                .css(
+                    "width",
+                    percent + "%"
+                )
+                .text(
+                    percent + "%"
+                );
+
+            $("#status").html(
+                `
+                Report Type : ${reportType}<br>
+                Rows Found : ${totalRows}<br>
+                Rows Processed : ${processedRows}<br>
+          
+                Progress : ${percent}%
+                `
+            );
+
+        } catch (e) {
+
+            console.log(e);
+
+            $("#status").html(
+                "Upload failed at row " +
+                processedRows
+            );
+
+            return;
+        }
+    }
+
+    $("#bar")
+        .css(
+            "width",
+            "100%"
+        )
+        .text(
+            "100%"
+        );
+
+    $("#status").html(
+        `
+        <b>Upload Complete</b><br><br>
+
+        Report Type :
+        ${reportType}<br>
+
+        Rows Found :
+        ${totalRows}<br>
+
+        Rows Processed : ${processedRows}<br>
+       
+
+        Progress :
+        100%
+        `
+    );
+}
+
+
+function mysqlDate1(value) {
+
+    if (!value) return null;
+
+    const p = value.split('/');
+
+    if (p.length !== 3) return value;
+
+    let day = p[0].padStart(2, '0');
+    let month = p[1].padStart(2, '0');
+    let year = p[2];
+
+    if (year.length === 2) {
+        year = '20' + year;
+    }
+
+    return `${year}-${month}-${day} 00:00:00`;
+}
+
+function mysqlDate(value){
+
+    if(value === null || value === undefined || value === "")
+        return null;
+
+    // Excel serial date
+    if(typeof value === "number"){
+
+        const d = XLSX.SSF.parse_date_code(value);
+
+        return (
+            d.y + "-" +
+            String(d.m).padStart(2,"0") + "-" +
+            String(d.d).padStart(2,"0") +
+            " 00:00:00"
+        );
+    }
+
+    value = String(value)
+        .trim()
+        .toUpperCase();
+
+    const months = {
+        JAN:"01",
+        FEB:"02",
+        MAR:"03",
+        APR:"04",
+        MAY:"05",
+        JUN:"06",
+        JUL:"07",
+        AUG:"08",
+        SEP:"09",
+        OCT:"10",
+        NOV:"11",
+        DEC:"12"
+    };
+
+    const p = value.split("-");
+
+    if(p.length !== 3)
+        return null;
+
+    return (
+        "20" + p[2] + "-" +
+        months[p[1]] + "-" +
+        p[0].padStart(2,"0") +
+        " 00:00:00"
+    );
+}
+
+function formatDate(value) {
+
+    if (!value)
+        return null;
+
+    // Excel serial date
+    if (typeof value === "number") {
+
+        const d = XLSX.SSF.parse_date_code(value);
+
+        return (
+            d.y + "-" +
+            String(d.m).padStart(2, "0") + "-" +
+            String(d.d).padStart(2, "0") +
+            " 00:00:00"
+        );
+    }
+
+    value = String(value).trim();
+
+    const months = {
+        JAN:1,FEB:2,MAR:3,APR:4,
+        MAY:5,JUN:6,JUL:7,AUG:8,
+        SEP:9,OCT:10,NOV:11,DEC:12
+    };
+
+    let m = value.match(
+        /^(\d{1,2})-([A-Z]{3})-(\d{2,4})$/i
+    );
+
+    if (m) {
+
+        let year = parseInt(m[3]);
+
+        if (year < 100)
+            year += 2000;
+
+        return (
+            year + "-" +
+            String(months[m[2].toUpperCase()])
+                .padStart(2, "0") +
+            "-" +
+            String(m[1])
+                .padStart(2, "0") +
+            " 00:00:00"
+        );
+    }
+
+    let d = new Date(value);
+
+    if (!isNaN(d)) {
+
+        return (
+            d.getFullYear() + "-" +
+            String(d.getMonth()+1)
+                .padStart(2, "0") +
+            "-" +
+            String(d.getDate())
+                .padStart(2, "0") +
+            " 00:00:00"
+        );
+    }
+
+    return null;
+}
+
+</script>
+</body>
+</html>
