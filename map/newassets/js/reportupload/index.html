@@ -201,7 +201,8 @@ const REPORT_TYPES = [
     fileType:         'csv',
     header_index:     0,
     metadataRowIndex: null,
-    headersToCheck:   ['ORDER_SUB_TYPE', 'DATED', 'CRM_ORDER_ID'],
+    headersToCheck:   ['CIRCLE', 'SSA', 'EXCHANGE', 'SERVICE_TYPE', 'OLT_IP', 'MAINT_FRAN', 'OLT_OWNER', 'DATED', 'CRM_ORDER_ID', 'TEL_NUM', 'ORDER_SUB_TYPE'],
+    headerNotRequired: null, // present only in Disconnection, not in Activation, so gives it higher detection priority
     primaryKeys:      ['CRM_ORDER_ID'],
   },
 
@@ -209,14 +210,15 @@ const REPORT_TYPES = [
   // NOTE: headersToCheck is a subset of Disconnection, so this entry must come
   //       AFTER Disconnection in the list so ORDER_SUB_TYPE takes priority.
   {
-    id:               'ftth_connection',
-    label:            'FTTH Activation',
+    id:               'ftth_provisioning',
+    label:            'FTTH Provisioning',
     badgeClass:       'type-ftth',
-    table:            'ftth_connection',
+    table:            'ftth_provisioning',
     fileType:         'csv',
     header_index:     0,
     metadataRowIndex: null,
-    headersToCheck:   ['DATED', 'CRM_ORDER_ID'],
+    headersToCheck:   ['CIRCLE', 'SSA', 'SERVICE_TYPE' ,'EXCHANGE', 'OLT_IP', 'MAINT_FRAN', 'OLT_OWNER', 'DATED', 'CRM_ORDER_ID', 'TEL_NUM'],
+    headerNotRequired: ['ORDER_SUB_TYPE'], // present only in Disconnection, not in Activation, so gives it higher detection priority
     primaryKeys:      ['CRM_ORDER_ID'],
   },
 
@@ -233,6 +235,8 @@ const REPORT_TYPES = [
     metadataRowIndex: [0, 1],
     headersToCheck:   ['CUSTOMER_ID', 'OLT_IP', 'GP_CODE', 'BLOCK',
                        'CONNECTION_DATE', 'DISCONNECTION_DATE', 'CURRENT_STATUS'],
+    headerNotRequired: null, // present only in Disconnection, not in Activation, so gives it higher detection priority
+                    
     primaryKeys:      ['CUSTOMER_ID'],
   },
 
@@ -247,7 +251,10 @@ const REPORT_TYPES = [
     fileType:         'xlsx',
     header_index:     3,
     metadataRowIndex: [0, 1],
-    headersToCheck:   ['STATE_NAME', 'DISTRICT_NAME', 'LGD_CODE', 'PANCHAYAT_NAME'],
+    headersToCheck:   ['STATE_NAME', 'DISTRICT_NAME', 'BLOCK_NAME',  'PANCHAYAT_NAME','LOCATION_NAME',
+                       'LGD_CODE', 'BLOCK_NODE_LOCATION', 'PIA', 'GP_TYPE'],
+    headerNotRequired: ['CONNECTION_DATE'], // present only in Disconnection, not in Activation, so gives it higher detection priority
+ 
     primaryKeys:      ['LGD_CODE'],
   },
 
@@ -268,6 +275,7 @@ const REPORT_TYPES = [
     headersToCheck:   ['SSA', 'EXG', 'PHONE_NO', 'BA', 'SERVICE_TYPE', 'INST_DATE',
                        'CUST_NAME', 'CUST_ADD', 'PLAN', 'MOBILE_NO', 'EMAIL',
                        'OLT_IP', 'OLT_NAME'],
+    headerNotRequired: null,                    
     primaryKeys:      ['PHONE_NO'],
     requiredSSAs:     ['DDN', 'HWR', 'KTD', 'NNT', 'NWT', 'AMO'],
   },
@@ -322,7 +330,7 @@ async function handleSingleFile(file) {
       if (rt.fileType === 'working_fttn') continue;
       if (!extMatchesType(ext, rt.fileType)) continue;
       const headerRow = (rawRows[rt.header_index] || []).map(h => norm(h));
-      if (allHeadersPresent(headerRow, rt.headersToCheck)) { detectedReport = rt; break; }
+      if (allHeadersPresent(headerRow, rt.headersToCheck, rt.headerNotRequired)) { detectedReport = rt; break; }
     }
     if (!detectedReport) {
       // Show first few rows to help diagnose which header_index / headersToCheck failed
@@ -364,7 +372,7 @@ async function handleFolderFiles(files) {
       const ext = file.name.split('.').pop().toLowerCase();
       const raw = await readRawRows(file, ext);
       const hdr = (raw[ssaRt.header_index] || []).map(h => norm(h));
-      if (!allHeadersPresent(hdr, ssaRt.headersToCheck)) continue;
+      if (!allHeadersPresent(hdr, ssaRt.headersToCheck, ssaRt.headerNotRequired)) continue;
       const ssaIdx = hdr.indexOf('SSA');
       if (ssaIdx === -1) continue;
       const firstData = raw[ssaRt.header_index + 1];
@@ -432,10 +440,75 @@ function extractMeta(rawRows, idx) {
 // ================================================================
 // DETECTION HELPERS
 // ================================================================
-function norm(s) { return String(s||'').toUpperCase().trim(); }
-function allHeadersPresent(fileHeaders, required) {
-  return required.every(r => fileHeaders.includes(norm(r)));
+// function norm(s) { return String(s||'').toUpperCase().trim(); }
+function norm(s) {
+
+    return String(s || '')
+
+        .toUpperCase()
+
+        // replace spaces with _
+        .replace(/\s+/g, '_')
+
+        // replace - with _
+        .replace(/-/g, '_')
+
+        // replace / with _
+        .replace(/\//g, '_')
+
+        // replace ( and ) with _
+        .replace(/[()]/g, '_')
+
+        // collapse multiple underscores
+        .replace(/_+/g, '_')
+
+        // remove trailing _2026, _2025 etc.
+        .replace(/_\d{4}$/, '')
+
+        // remove ending underscore
+        .replace(/^_|_$/g, '');
 }
+
+// function allHeadersPresent(fileHeaders, required,notRequired) {
+
+//     // fileHeaders = fileHeaders.map(norm);
+//     // required = required.map(norm);
+//     // notRequired = notRequired ? notRequired.map(norm) : []; 
+//     notRequired = notRequired ? notRequired: []; 
+
+//     return required.every(r => fileHeaders.includes(norm(r))) &&
+//          notRequired.every(nr => !fileHeaders.includes(norm(nr)));
+
+// }
+
+function allHeadersPresent(fileHeaders, required, notRequired) {
+
+    fileHeaders = fileHeaders.map(norm);
+    required = required.map(norm);
+    notRequired = notRequired ? notRequired.map(norm) : [];
+
+    return required.every(r => fileHeaders.includes(r)) &&
+           notRequired.every(nr => !fileHeaders.includes(nr));
+}
+
+function headersMatchInOrder(fileHeaders, required) {
+
+    fileHeaders = fileHeaders.map(norm);
+    required = required.map(norm);
+
+    if (fileHeaders.length < required.length)
+        return false;
+
+    for (let i = 0; i < required.length; i++) {
+
+        if (fileHeaders[i] !== required[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function extMatchesType(ext, ft) {
   if (ft === 'csv')  return ext === 'csv';
   if (ft === 'xlsx') return ext === 'xlsx' || ext === 'xls';
