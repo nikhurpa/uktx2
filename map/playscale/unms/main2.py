@@ -15,7 +15,7 @@ from datetime import date
 
 from urllib.parse import quote_plus
 
-REPORT_DATE = date(2026, 6, 8)
+REPORT_DATE = date(2026, 6, 9)
 
 def login(page):
     print("Opening login page...")

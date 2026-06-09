@@ -1,375 +1,730 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>XLSX Upload</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report Upload — BSNL UTTRANCHAL</title>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg:#0f1117;--surface:#181c27;--border:#272d3d;
+    --accent:#4f8ef7;--accent2:#38d9a9;--warn:#f7a94f;--danger:#f76f6f;
+    --text:#e4e8f0;--muted:#7a85a0;--bar-bg:#1a1f2e;--radius:10px;
+    --font:'Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:36px 16px 60px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:660px}
+  .card-header{padding:20px 26px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+  .card-header h1{font-size:16px;font-weight:600}
+  .card-header p{font-size:12px;color:var(--muted);margin-top:2px}
+  .card-body{padding:24px 26px}
+  .drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:30px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
+  .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(79,142,247,.05)}
+  .drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+  .drop-icon{width:38px;height:38px;background:rgba(79,142,247,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+  .drop-zone .lbl{font-size:14px;font-weight:500}
+  .drop-zone .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .file-chosen{margin-top:11px;padding:9px 13px;background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.22);border-radius:8px;font-size:13px;display:none;align-items:center;gap:8px}
+  .file-chosen .fname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .file-chosen .fsize{color:var(--muted);font-size:11px;flex-shrink:0}
+  .folder-section{display:none;margin-top:14px}
+  .folder-sep{font-size:12px;color:var(--muted);margin-bottom:8px;text-align:center}
+  .folder-drop{border:2px dashed var(--border);border-radius:8px;padding:16px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s}
+  .folder-drop:hover{border-color:var(--warn)}
+  .folder-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+  .folder-drop .lbl{font-size:13px;font-weight:600;color:var(--warn)}
+  .folder-drop .sub{font-size:11px;color:var(--muted);margin-top:3px}
+  .ssa-grid{display:none;margin-top:10px;gap:6px;flex-wrap:wrap}
+  .ssa-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid}
+  .ssa-chip.ok{background:rgba(56,217,169,.1);color:var(--accent2);border-color:rgba(56,217,169,.3)}
+  .ssa-chip.miss{background:rgba(247,169,79,.1);color:var(--warn);border-color:rgba(247,169,79,.3)}
+  .ssa-chip.extra{background:rgba(122,133,160,.1);color:var(--muted);border-color:rgba(122,133,160,.3)}
+  .detect-row{margin-top:16px;display:none;gap:8px;flex-wrap:wrap;align-items:center}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:1px solid}
+  .badge.type-ftth{background:rgba(79,142,247,.13);color:var(--accent);border-color:rgba(79,142,247,.3)}
+  .badge.type-csv{background:rgba(56,217,169,.13);color:var(--accent2);border-color:rgba(56,217,169,.3)}
+  .badge.type-default{background:rgba(122,133,160,.13);color:var(--muted);border-color:rgba(122,133,160,.3)}
+  .detect-label{font-size:12px;color:var(--muted)}
+  .detect-table{font-size:12px;color:var(--text)}
+  .detect-table span{color:var(--accent2);font-weight:600}
+  .meta-panel{display:none;margin-top:12px;padding:11px 14px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:8px;font-size:12px;gap:16px;flex-wrap:wrap}
+  .meta-field{color:var(--muted)}
+  .meta-field span{color:var(--text);font-weight:600}
+  .warn-banner{display:none;margin-top:10px;padding:9px 13px;background:rgba(247,169,79,.08);border:1px solid rgba(247,169,79,.3);border-radius:8px;font-size:12px;color:var(--warn)}
+  .mode-row{margin-top:16px;display:none;gap:7px}
+  .mode-btn{flex:1;padding:8px 5px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;text-align:center}
+  .mode-btn:hover{border-color:var(--accent);color:var(--text)}
+  .mode-btn.active{background:rgba(79,142,247,.13);border-color:var(--accent);color:var(--accent)}
+  .upload-btn{display:none;width:100%;margin-top:18px;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s}
+  .upload-btn:hover{opacity:.88}
+  .upload-btn:active{transform:scale(.98)}
+  .upload-btn:disabled{opacity:.4;cursor:not-allowed}
+  .divider{border:none;border-top:1px solid var(--border);margin:20px 0;display:none}
+  .progress-section{display:none;padding:18px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:var(--radius)}
+  .progress-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .progress-header .ptitle{font-size:13px;font-weight:600}
+  .progress-header .ppct{font-size:14px;font-weight:700;color:var(--accent)}
+  .bar-track{height:8px;background:var(--bar-bg);border-radius:99px;overflow:hidden}
+  .bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1);position:relative}
+  .bar-fill.active::after{content:'';position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));animation:shimmer 1.1s ease-in-out infinite}
+  @keyframes shimmer{0%,100%{opacity:0}50%{opacity:1}}
+  .prog-stats{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+  .pstat{font-size:12px;color:var(--muted)}
+  .pstat span{color:var(--text);font-weight:600}
+  .result-section{display:none;margin-top:18px}
+  .result-card{border-radius:var(--radius);padding:18px;border:1px solid}
+  .result-card.success{background:rgba(56,217,169,.06);border-color:rgba(56,217,169,.28)}
+  .result-card.error{background:rgba(247,111,111,.06);border-color:rgba(247,111,111,.28)}
+  .rtitle{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:14px}
+  .rtitle.success{color:var(--accent2)}
+  .rtitle.error{color:var(--danger)}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:10px}
+  .stat-box{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:8px;padding:11px 13px}
+  .stat-box .val{font-size:20px;font-weight:700;line-height:1.1}
+  .stat-box .lbl{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:.05em;text-transform:uppercase}
+  .stat-box.ins .val{color:var(--accent2)}
+  .stat-box.upd .val{color:var(--warn)}
+  .stat-box.tot .val{color:var(--text)}
+  .stat-box.tbl .val{font-size:13px;color:var(--accent);word-break:break-all}
+  .stat-box.mdate .val{font-size:13px;color:var(--warn)}
+  .error-msg{font-size:12px;color:var(--danger);margin-top:6px;background:rgba(247,111,111,.07);padding:9px 11px;border-radius:7px;font-family:monospace;word-break:break-all}
+  .reset-btn{margin-top:14px;width:100%;padding:9px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;transition:all .15s}
+  .reset-btn:hover{border-color:var(--text);color:var(--text)}
+  table td,table th{padding:5px 8px 5px 0}
+</style>
 </head>
 <body>
-<h2>Report Upload</h2>
-<input type="file" id="file">
-<button onclick="uploadFile()">Upload</button>
-<!-- <div style="width:500px;border:1px solid #000;margin-top:10px"> -->
-   
-<div class="progress" style="height:30px;width:200px">
-    <div id="bar" style="height:20px;width:50px;background:green"> 0%</div>
+<div class="card">
+  <div class="card-header">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="7" fill="rgba(79,142,247,0.13)"/>
+      <path d="M14 7v10M14 7l-3 3M14 7l3 3" stroke="#4f8ef7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M8 18h12v2a1 1 0 01-1 1H9a1 1 0 01-1-1v-2z" fill="#4f8ef7" opacity=".65"/>
+    </svg>
+    <div>
+      <h1>Report Upload — BSNL UTTRANCHAL</h1>
+      <p>Auto-detects report type &middot; CSV / XLSX / Multi-file SSA folder</p>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+      <div class="drop-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div class="lbl">Drop file here or click to browse</div>
+      <div class="sub">.xlsx &middot; .xls &middot; .csv &nbsp;|&nbsp; For Working FTTH use folder input below</div>
+    </div>
+
+    <div class="folder-section" id="folderSection">
+      <div class="folder-sep">&#8212; or upload Working FTTH folder (all SSA files at once) &#8212;</div>
+      <div class="folder-drop">
+        <input type="file" id="folderInput" webkitdirectory multiple accept=".xlsx,.xls,.csv">
+        <div class="lbl">&#128193; Select Folder</div>
+        <div class="sub">Folder containing DDN, HWR, KTD, NNT, NWT, AMO files</div>
+      </div>
+      <div class="ssa-grid" id="ssaGrid"></div>
+    </div>
+
+    <div class="file-chosen" id="fileChosen">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+      <span class="fname" id="fileName"></span>
+      <span class="fsize" id="fileSize"></span>
+    </div>
+
+    <div class="detect-row" id="detectRow">
+      <span class="detect-label">Detected:</span>
+      <span class="badge" id="reportBadge"></span>
+      <span class="detect-table">&#8594; Table: <span id="tableNameDisplay"></span></span>
+    </div>
+
+    <div class="meta-panel" id="metaPanel">
+      <div class="meta-field">Report Date <span id="metaReportDate">&#8212;</span></div>
+      <div class="meta-field">Generated At <span id="metaGeneratedAt">&#8212;</span></div>
+      <div class="meta-field">Declared Rows <span id="metaTotalRecords">&#8212;</span></div>
+    </div>
+
+    <div class="warn-banner" id="warnBanner"></div>
+
+    <div class="mode-row" id="modeRow">
+      <button class="mode-btn active" data-mode="upsert"        onclick="setMode('upsert')">Insert + Update</button>
+      <button class="mode-btn"        data-mode="insert_only"   onclick="setMode('insert_only')">Insert Only</button>
+      <button class="mode-btn"        data-mode="create_insert" onclick="setMode('create_insert')">Create &amp; Insert</button>
+    </div>
+
+    <button class="upload-btn" id="uploadBtn" onclick="startUpload()">Upload Report</button>
+    <hr class="divider" id="divider">
+
+    <div class="progress-section" id="progressSection">
+      <div class="progress-header">
+        <span class="ptitle" id="progressTitle">Uploading&#8230;</span>
+        <span class="ppct"   id="progressPct">0%</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+      <div class="prog-stats">
+        <div class="pstat">Total    <span id="psTotal">&#8212;</span></div>
+        <div class="pstat">Sent     <span id="psSent">&#8212;</span></div>
+        <div class="pstat">Chunk    <span id="psChunk">&#8212;</span></div>
+        <div class="pstat">Inserted <span id="psIns">0</span></div>
+        <div class="pstat">Updated  <span id="psUpd">0</span></div>
+      </div>
+    </div>
+
+    <div class="result-section" id="resultSection"></div>
+  </div>
 </div>
 
-
-
-<div id="status"></div>
-
 <script>
-async function uploadFile() {
+// ================================================================
+// REPORT TYPE REGISTRY
+// ─ fileType       : 'csv' | 'xlsx' | 'working_fttn'
+// ─ header_index   : 0-based row index of the column-header row
+// ─ metadataRowIndex: null  → no metadata rows in this file
+//                    [r0,r1] → row r0 = report title/date line,
+//                              row r1 = "Showing Records … Generated at …"
+// ─ headersToCheck : ALL must be present (case-insensitive) at header_index
+// ─ requiredSSAs   : (working_fttn only) one file per SSA expected in folder
+// ================================================================
+const REPORT_TYPES = [
 
-    const file =
-        document.getElementById("file")
-        .files[0];
+  // ── 1. FTTH Disconnection  (CSV, headers on row 0, no metadata) ──────────
+  {
+    id:               'ftth_disconnection',
+    label:            'FTTH Disconnection',
+    badgeClass:       'type-ftth',
+    table:            'ftth_disconnection',
+    fileType:         'csv',
+    header_index:     0,
+    metadataRowIndex: null,
+    headersToCheck:   ['ORDER_SUB_TYPE', 'DATED', 'CRM_ORDER_ID'],
+    primaryKeys:      ['CRM_ORDER_ID'],
+  },
 
-    if (!file) {
-        alert("Select file");
-        return;
+  // ── 2. FTTH Activation  (CSV, headers on row 0, no metadata) ─────────────
+  // NOTE: headersToCheck is a subset of Disconnection, so this entry must come
+  //       AFTER Disconnection in the list so ORDER_SUB_TYPE takes priority.
+  {
+    id:               'ftth_connection',
+    label:            'FTTH Activation',
+    badgeClass:       'type-ftth',
+    table:            'ftth_connection',
+    fileType:         'csv',
+    header_index:     0,
+    metadataRowIndex: null,
+    headersToCheck:   ['DATED', 'CRM_ORDER_ID'],
+    primaryKeys:      ['CRM_ORDER_ID'],
+  },
+
+  // ── 3. BNU FTTH Gross History  (XLSX, headers on row 3, metadata rows 0-1)
+  // row 0 cell A1: "Gross Connection Report  State :UTTARAKHAND  …  Date : 02-06-2026"
+  // row 1 cell A2: "Showing Records 1 to 25404   , Report Generated at : 03-06-2026 21:57:00"
+  {
+    id:               'bnu_ftth_gross_hist_report',
+    label:            'BNU FTTH Gross History Report',
+    badgeClass:       'type-csv',
+    table:            'bnu_ftth',
+    fileType:         'xlsx',
+    header_index:     3,
+    metadataRowIndex: [0, 1],
+    headersToCheck:   ['CUSTOMER_ID', 'OLT_IP', 'GP_CODE', 'BLOCK',
+                       'CONNECTION_DATE', 'DISCONNECTION_DATE', 'CURRENT_STATUS'],
+    primaryKeys:      ['CUSTOMER_ID'],
+  },
+
+  // ── 4. GP Monthly Availability  (XLSX, headers on row 3, metadata rows 0-1)
+  // row 0 cell A1: "Monthly GP Node Availability (%) Detailed Report"
+  // row 1 cell A2: "Showing Records 1 to 2019   , Report Generated at : 03-06-2026 21:57:25"
+  {
+    id:               'gp_monthly_availability_report',
+    label:            'Monthly GP Node Availability (%) Detailed Report',
+    badgeClass:       'type-default',
+    table:            'gp_avl',
+    fileType:         'xlsx',
+    header_index:     3,
+    metadataRowIndex: [0, 1],
+    headersToCheck:   ['STATE_NAME', 'DISTRICT_NAME', 'LGD_CODE', 'PANCHAYAT_NAME'],
+    primaryKeys:      ['LGD_CODE'],
+  },
+
+  // ── 5. Working FTTH  (special folder type) ───────────────────────────────
+  // fileType:'working_fttn' means the user selects a FOLDER, not a single file.
+  // The folder must contain exactly 6 files, one per SSA (DDN/HWR/KTD/NNT/NWT/AMO).
+  // Detection: read each file's header row (header_index:0), verify headersToCheck,
+  //            then read the SSA value from the first data row's SSA column.
+  // Every file in the folder must map to a different required SSA.
+  {
+    id:               'working_fttn',
+    label:            'Working FTTH',
+    badgeClass:       'type-default',
+    table:            'working_ftth',
+    fileType:         'working_fttn',
+    header_index:     0,
+    metadataRowIndex: null,
+    headersToCheck:   ['SSA', 'EXG', 'PHONE_NO', 'BA', 'SERVICE_TYPE', 'INST_DATE',
+                       'CUST_NAME', 'CUST_ADD', 'PLAN', 'MOBILE_NO', 'EMAIL',
+                       'OLT_IP', 'OLT_NAME'],
+    primaryKeys:      ['PHONE_NO'],
+    requiredSSAs:     ['DDN', 'HWR', 'KTD', 'NNT', 'NWT', 'AMO'],
+  },
+
+];
+
+// ================================================================
+// STATE
+// ================================================================
+let currentFile    = null;
+let currentFiles   = [];
+let detectedReport = null;
+let parsedMeta     = null;
+let ssaFileMap     = {};
+let uploadMode     = 'upsert';
+const CHUNK_SIZE   = 200;
+const REQUIRED_SSAS = ['DDN','HWR','KTD','NNT','NWT','AMO'];
+
+// ================================================================
+// WIRING
+// ================================================================
+const dropZone    = document.getElementById('dropZone');
+const fileInput   = document.getElementById('fileInput');
+const folderInput = document.getElementById('folderInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleSingleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) handleSingleFile(fileInput.files[0]);
+});
+folderInput.addEventListener('change', () => {
+  if (folderInput.files.length) handleFolderFiles(Array.from(folderInput.files));
+});
+document.getElementById('folderSection').style.display = 'block';
+
+// ================================================================
+// SINGLE FILE HANDLER
+// ================================================================
+async function handleSingleFile(file) {
+  resetUI();
+  currentFile = file;
+  showFileChip(file.name, file.size);
+  const ext = file.name.split('.').pop().toLowerCase();
+  try {
+    const rawRows = await readRawRows(file, ext);
+    detectedReport = null;
+    for (const rt of REPORT_TYPES) {
+      if (rt.fileType === 'working_fttn') continue;
+      if (!extMatchesType(ext, rt.fileType)) continue;
+      const headerRow = (rawRows[rt.header_index] || []).map(h => norm(h));
+      if (allHeadersPresent(headerRow, rt.headersToCheck)) { detectedReport = rt; break; }
     }
-
-    $("#status").html("Reading file...");
-
-    const buffer =
-        await file.arrayBuffer();
-
-    const workbook =
-        XLSX.read(buffer, {
-            type: "array"
-        });
-
-    const sheet =
-        workbook.Sheets[
-            workbook.SheetNames[0]
-        ];
-
-    const rows =
-        XLSX.utils.sheet_to_json(
-            sheet,
-            {
-                defval: "",
-                raw: false
-            }
-        );
-
-    if (rows.length === 0) {
-
-        alert("No data found");
-        return;
+    if (!detectedReport) {
+      // Show first few rows to help diagnose which header_index / headersToCheck failed
+      const preview = [0,1,2,3].map(i =>
+        (rawRows[i]||[]).filter(c=>String(c).trim()).slice(0,6).join(', ')
+      ).filter(r=>r).slice(0,4);
+      showError(
+        'Could not identify report type for this <b>' + ext.toUpperCase() + '</b> file.<br>' +
+        'First rows found:<br>' +
+        preview.map((r,i) => 'Row ' + i + ': <code>' + escHtml(r) + '</code>').join('<br>')
+      );
+      return;
     }
-
-
-
-    const headers =
-        Object.keys(rows[0]);
-
-    let reportType =
-        "uploaded_report";
-
-    const upperHeaders =
-        headers.map(
-            h => h.toUpperCase()
-        );
-
-    
-
-    if (
-        upperHeaders.some(
-            h =>
-            h.includes(
-                "ORDER_SUB_TYPE"
-            )
-        )
-    ) {
-        reportType =
-            "ftth_disconnection";
-    }
-
-    rows.forEach(row => {
-
-      if(row.DATED){
-
-         row.DATED =
-               mysqlDate1(
-                  row.DATED
-               );
-      }
-   });
-
-    const totalRows =
-        rows.length;
-
-    let processedRows = 0;
-    let insertedRows = 0;
-    let updatedRows = 0;
-
-    const chunkSize = 200;
-
-    $("#status").html(
-        `
-        Report Type : ${reportType}<br>
-        Rows Found : ${totalRows}
-        `
-    );
-
-    for (
-        let i = 0;
-        i < totalRows;
-        i += chunkSize
-    ) {
-
-        const chunk =
-            rows.slice(
-                i,
-                i + chunkSize
-            );
-
-        try {
-
-            const response =
-                await $.ajax({
-
-                    url:
-                        "api/upload.php",
-
-                    type:
-                        "POST",
-
-                    contentType:
-                        "application/json",
-
-                    data:
-                        JSON.stringify({
-
-                            report_type:
-                                reportType,
-
-                            rows:
-                                chunk
-                        })
-                });
-
-            processedRows +=
-                chunk.length;
-
-            insertedRows +=
-                parseInt(
-                    response.rows_inserted || 0
-                );
-
-            updatedRows +=
-                parseInt(
-                    response.rows_updated || 0
-                );
-
-            const percent =
-                Math.round(
-                    (
-                        processedRows /
-                        totalRows
-                    ) * 100
-                );
-
-            $("#bar")
-                .css(
-                    "width",
-                    percent + "%"
-                )
-                .text(
-                    percent + "%"
-                );
-
-            $("#status").html(
-                `
-                Report Type : ${reportType}<br>
-                Rows Found : ${totalRows}<br>
-                Rows Processed : ${processedRows}<br>
-          
-                Progress : ${percent}%
-                `
-            );
-
-        } catch (e) {
-
-            console.log(e);
-
-            $("#status").html(
-                "Upload failed at row " +
-                processedRows
-            );
-
-            return;
-        }
-    }
-
-    $("#bar")
-        .css(
-            "width",
-            "100%"
-        )
-        .text(
-            "100%"
-        );
-
-    $("#status").html(
-        `
-        <b>Upload Complete</b><br><br>
-
-        Report Type :
-        ${reportType}<br>
-
-        Rows Found :
-        ${totalRows}<br>
-
-        Rows Processed : ${processedRows}<br>
-       
-
-        Progress :
-        100%
-        `
-    );
+    parsedMeta = detectedReport.metadataRowIndex
+      ? extractMeta(rawRows, detectedReport.metadataRowIndex) : null;
+    showDetection(detectedReport);
+    showMetaPanel(parsedMeta);
+    const dataCount = rawRows.length - detectedReport.header_index - 1;
+    if (parsedMeta && parsedMeta.totalRecords && Math.abs(dataCount - parsedMeta.totalRecords) > 5)
+      showWarn('File has ' + dataCount.toLocaleString() + ' data rows but report declares ' +
+               parsedMeta.totalRecords.toLocaleString() + ' — file may be truncated.');
+    showUploadControls();
+  } catch(e) { showError('File read error: ' + e.message); }
 }
 
-
-function mysqlDate1(value) {
-
-    if (!value) return null;
-
-    const p = value.split('/');
-
-    if (p.length !== 3) return value;
-
-    let day = p[0].padStart(2, '0');
-    let month = p[1].padStart(2, '0');
-    let year = p[2];
-
-    if (year.length === 2) {
-        year = '20' + year;
-    }
-
-    return `${year}-${month}-${day} 00:00:00`;
+// ================================================================
+// FOLDER HANDLER (working_fttn)
+// ================================================================
+async function handleFolderFiles(files) {
+  resetUI();
+  currentFiles = files;
+  const valid = files.filter(f => /\.(xlsx|xls|csv)$/i.test(f.name));
+  if (!valid.length) { showError('No xlsx/xls/csv files in folder.'); return; }
+  showFileChip(valid.length + ' files selected', valid.reduce((s,f)=>s+f.size,0));
+  const ssaRt = REPORT_TYPES.find(rt => rt.fileType === 'working_fttn');
+  ssaFileMap = {};
+  for (const file of valid) {
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      const raw = await readRawRows(file, ext);
+      const hdr = (raw[ssaRt.header_index] || []).map(h => norm(h));
+      if (!allHeadersPresent(hdr, ssaRt.headersToCheck)) continue;
+      const ssaIdx = hdr.indexOf('SSA');
+      if (ssaIdx === -1) continue;
+      const firstData = raw[ssaRt.header_index + 1];
+      if (!firstData) continue;
+      const ssaVal = norm(firstData[ssaIdx]);
+      if (ssaVal) ssaFileMap[ssaVal] = file;
+    } catch(e) {}
+  }
+  detectedReport = ssaRt;
+  showDetection(detectedReport);
+  showSSAGrid(ssaFileMap, REQUIRED_SSAS);
+  showUploadControls();
 }
 
-function mysqlDate(value){
-
-    if(value === null || value === undefined || value === "")
-        return null;
-
-    // Excel serial date
-    if(typeof value === "number"){
-
-        const d = XLSX.SSF.parse_date_code(value);
-
-        return (
-            d.y + "-" +
-            String(d.m).padStart(2,"0") + "-" +
-            String(d.d).padStart(2,"0") +
-            " 00:00:00"
-        );
-    }
-
-    value = String(value)
-        .trim()
-        .toUpperCase();
-
-    const months = {
-        JAN:"01",
-        FEB:"02",
-        MAR:"03",
-        APR:"04",
-        MAY:"05",
-        JUN:"06",
-        JUL:"07",
-        AUG:"08",
-        SEP:"09",
-        OCT:"10",
-        NOV:"11",
-        DEC:"12"
-    };
-
-    const p = value.split("-");
-
-    if(p.length !== 3)
-        return null;
-
-    return (
-        "20" + p[2] + "-" +
-        months[p[1]] + "-" +
-        p[0].padStart(2,"0") +
-        " 00:00:00"
+// ================================================================
+// RAW ROW READER  → array of arrays
+// ================================================================
+function readRawRows(file, ext) {
+  if (ext === 'csv') {
+    return file.text().then(text =>
+      text.split('\n')
+          .map(line => line.split(',').map(c => c.replace(/^"|"$/g,'').trim()))
+          .filter(row => row.some(c => c))
     );
+  }
+  return file.arrayBuffer().then(buf => {
+    const wb = XLSX.read(buf, { type:'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws, { header:1, defval:'', raw:false });
+  });
 }
 
-function formatDate(value) {
-
-    if (!value)
-        return null;
-
-    // Excel serial date
-    if (typeof value === "number") {
-
-        const d = XLSX.SSF.parse_date_code(value);
-
-        return (
-            d.y + "-" +
-            String(d.m).padStart(2, "0") + "-" +
-            String(d.d).padStart(2, "0") +
-            " 00:00:00"
-        );
-    }
-
-    value = String(value).trim();
-
-    const months = {
-        JAN:1,FEB:2,MAR:3,APR:4,
-        MAY:5,JUN:6,JUL:7,AUG:8,
-        SEP:9,OCT:10,NOV:11,DEC:12
-    };
-
-    let m = value.match(
-        /^(\d{1,2})-([A-Z]{3})-(\d{2,4})$/i
-    );
-
-    if (m) {
-
-        let year = parseInt(m[3]);
-
-        if (year < 100)
-            year += 2000;
-
-        return (
-            year + "-" +
-            String(months[m[2].toUpperCase()])
-                .padStart(2, "0") +
-            "-" +
-            String(m[1])
-                .padStart(2, "0") +
-            " 00:00:00"
-        );
-    }
-
-    let d = new Date(value);
-
-    if (!isNaN(d)) {
-
-        return (
-            d.getFullYear() + "-" +
-            String(d.getMonth()+1)
-                .padStart(2, "0") +
-            "-" +
-            String(d.getDate())
-                .padStart(2, "0") +
-            " 00:00:00"
-        );
-    }
-
-    return null;
+// ================================================================
+// RAW → OBJECT ROWS  using report's header_index
+// ================================================================
+function rawToObjects(rawRows, rt) {
+  const headers  = (rawRows[rt.header_index] || []).map(h => String(h).trim());
+  const dataRows = rawRows.slice(rt.header_index + 1);
+  return dataRows
+    .map(row => {
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = row[i] != null && row[i] !== '' ? row[i] : null; });
+      return obj;
+    })
+    .filter(row => Object.values(row).some(v => v !== null));
 }
 
+// ================================================================
+// METADATA EXTRACTOR
+// ================================================================
+function extractMeta(rawRows, idx) {
+  const row0 = String(rawRows[idx[0]]?.[0] ?? '');
+  const row1 = String(rawRows[idx[1]]?.[0] ?? '');
+  const dm   = row0.match(/Date\s*:\s*(\d{2}-\d{2}-\d{4})/i);
+  const rm   = row1.match(/Showing Records\s+\d+\s+to\s+(\d+)/i);
+  const gm   = row1.match(/Report Generated at\s*:\s*([\d\-]+\s+[\d:]+)/i);
+  return {
+    reportTitle:  row0.split(/\n/)[0].trim().replace(/\r/g,''),
+    reportDate:   dm ? dm[1] : null,
+    totalRecords: rm ? parseInt(rm[1]) : null,
+    generatedAt:  gm ? gm[1].trim() : null,
+  };
+}
+
+// ================================================================
+// DETECTION HELPERS
+// ================================================================
+function norm(s) { return String(s||'').toUpperCase().trim(); }
+function allHeadersPresent(fileHeaders, required) {
+  return required.every(r => fileHeaders.includes(norm(r)));
+}
+function extMatchesType(ext, ft) {
+  if (ft === 'csv')  return ext === 'csv';
+  if (ft === 'xlsx') return ext === 'xlsx' || ext === 'xls';
+  return false;
+}
+
+// ================================================================
+// DATE NORMALISER
+// ================================================================
+function mysqlDateFlex(v) {
+  if (!v) return null;
+  v = String(v).trim();
+  const M = {JAN:'01',FEB:'02',MAR:'03',APR:'04',MAY:'05',JUN:'06',
+             JUL:'07',AUG:'08',SEP:'09',OCT:'10',NOV:'11',DEC:'12'};
+  let m;
+  m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) { let y=m[3]; if(y.length===2)y='20'+y; return y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')+' 00:00:00'; }
+  m = v.match(/^(\d{1,2})-(\d{2})-(\d{4})$/);
+  if (m) return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')+' 00:00:00';
+  m = v.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);
+  if (m) { let y=m[3]; if(y.length===2)y='20'+y; const mo=M[m[2].toUpperCase()]; if(mo) return y+'-'+mo+'-'+m[1].padStart(2,'0')+' 00:00:00'; }
+  m = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[1]+'-'+m[2]+'-'+m[3]+' 00:00:00';
+  return v;
+}
+
+function transformDates(rows) {
+  const DATE_COLS = ['DATED','CONNECTION_DATE','DISCONNECTION_DATE','INST_DATE'];
+  rows.forEach(row => { DATE_COLS.forEach(c => { if (row[c]) row[c] = mysqlDateFlex(row[c]); }); });
+}
+
+// ================================================================
+// UPLOAD MODE
+// ================================================================
+function setMode(mode) {
+  uploadMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === mode));
+}
+
+// ================================================================
+// UPLOAD ENTRY
+// ================================================================
+async function startUpload() {
+  if (!detectedReport) return;
+  if (detectedReport.fileType === 'working_fttn') { await uploadFolder(); return; }
+  let rows;
+  try {
+    const ext = currentFile.name.split('.').pop().toLowerCase();
+    rows = rawToObjects(await readRawRows(currentFile, ext), detectedReport);
+    transformDates(rows);
+  } catch(e) { showError('Parse error: ' + e.message); return; }
+  if (!rows.length) { showError('No data rows found.'); return; }
+  await runLoop(rows, detectedReport, parsedMeta);
+}
+
+// ── Folder upload ─────────────────────────────────────────────────
+async function uploadFolder() {
+  const rt = detectedReport;
+  let gTotal=0, gIns=0, gUpd=0;
+  const results = [];
+  document.getElementById('uploadBtn').disabled = true;
+  document.getElementById('divider').style.display = 'block';
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('barFill').classList.add('active');
+  const ssaList = Object.keys(ssaFileMap);
+  let done = 0;
+  for (const ssa of ssaList) {
+    document.getElementById('progressTitle').textContent = 'Uploading SSA: ' + ssa + '...';
+    let rows;
+    try {
+      const f   = ssaFileMap[ssa];
+      const ext = f.name.split('.').pop().toLowerCase();
+      rows = rawToObjects(await readRawRows(f, ext), rt);
+      transformDates(rows);
+    } catch(e) { results.push({ssa, error:e.message}); done++; continue; }
+    const {inserted,updated,error} = await chunkUpload(rows, rt, null, done/ssaList.length, (done+1)/ssaList.length);
+    done++;
+    if (error) results.push({ssa, rows:rows.length, error});
+    else { results.push({ssa, rows:rows.length, inserted, updated}); gTotal+=rows.length; gIns+=inserted; gUpd+=updated; }
+  }
+  setProgress(100,gTotal,gTotal);
+  document.getElementById('progressTitle').textContent = 'Upload complete';
+  document.getElementById('barFill').classList.remove('active');
+  document.getElementById('uploadBtn').disabled = false;
+  showFolderResult(results, gTotal, gIns, gUpd, rt.table);
+}
+
+// ── Core chunk sender ─────────────────────────────────────────────
+async function chunkUpload(rows, rt, meta, p0, p1) {
+  if (p0===undefined){p0=0;p1=1;}
+  const total=rows.length; let sent=0,ins=0,upd=0;
+  const chunks=[];
+  for(let i=0;i<total;i+=CHUNK_SIZE) chunks.push(rows.slice(i,i+CHUNK_SIZE));
+  for(let ci=0;ci<chunks.length;ci++){
+    const chunk=chunks[ci];
+    try {
+      const r = await $.ajax({
+        url:'api/upload.php', type:'POST', contentType:'application/json',
+        data: JSON.stringify({
+          report_type:rt.id, table:rt.table, primary_keys:rt.primaryKeys,
+          upload_mode:uploadMode,
+          report_date:meta?.reportDate??null, generated_at:meta?.generatedAt??null,
+          rows:chunk
+        })
+      });
+      sent+=chunk.length; ins+=parseInt(r.rows_inserted||0); upd+=parseInt(r.rows_updated||0);
+      const pct=Math.round((p0+(sent/total)*(p1-p0))*100);
+      setProgress(pct,sent,total,ci+1,chunks.length,ins,upd);
+    } catch(e) {
+      return {inserted:ins, updated:upd, error:e.responseJSON?.message||e.statusText||'Network error'};
+    }
+  }
+  return {inserted:ins, updated:upd, error:null};
+}
+
+// ── Single-file run loop ──────────────────────────────────────────
+async function runLoop(rows, rt, meta) {
+  document.getElementById('uploadBtn').disabled = true;
+  document.getElementById('divider').style.display = 'block';
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('barFill').classList.add('active');
+  document.getElementById('psTotal').textContent = rows.length.toLocaleString();
+  setProgress(0,0,rows.length);
+  const {inserted,updated,error} = await chunkUpload(rows,rt,meta);
+  setProgress(100,rows.length,rows.length,null,null,inserted,updated);
+  document.getElementById('progressTitle').textContent = error ? 'Upload failed' : 'Upload complete';
+  document.getElementById('barFill').classList.remove('active');
+  document.getElementById('uploadBtn').disabled = false;
+  if (error) showResult(false,{error,processed:rows.length});
+  else showResult(true,{total:rows.length,inserted,updated,table:rt.table,
+                         reportDate:meta?.reportDate??null,generatedAt:meta?.generatedAt??null});
+}
+
+// ================================================================
+// PROGRESS
+// ================================================================
+function setProgress(pct,sent,total,cd,ct,ins,upd) {
+  document.getElementById('barFill').style.width     = pct+'%';
+  document.getElementById('progressPct').textContent = pct+'%';
+  document.getElementById('psSent').textContent      = (sent||0).toLocaleString();
+  document.getElementById('psTotal').textContent     = (total||0).toLocaleString();
+  if(cd!==undefined&&cd!==null) document.getElementById('psChunk').textContent = cd+' / '+ct;
+  if(ins!==undefined) document.getElementById('psIns').textContent = ins.toLocaleString();
+  if(upd!==undefined) document.getElementById('psUpd').textContent = upd.toLocaleString();
+}
+
+// ================================================================
+// RESULT CARDS
+// ================================================================
+function showResult(success, d) {
+  const rs = document.getElementById('resultSection');
+  rs.style.display = 'block';
+  if (success) {
+    rs.innerHTML = `
+      <div class="result-card success">
+        <div class="rtitle success">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Upload Successful
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box tot"><div class="val">${d.total.toLocaleString()}</div><div class="lbl">Found</div></div>
+          <div class="stat-box ins"><div class="val">${d.inserted.toLocaleString()}</div><div class="lbl">Inserted</div></div>
+          <div class="stat-box upd"><div class="val">${d.updated.toLocaleString()}</div><div class="lbl">Updated</div></div>
+          <div class="stat-box tbl"><div class="val">${escHtml(d.table)}</div><div class="lbl">Table</div></div>
+          ${d.reportDate?`<div class="stat-box mdate"><div class="val">${escHtml(d.reportDate)}</div><div class="lbl">Report Date</div></div>`:''}
+        </div>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">Upload another file</button>`;
+  } else {
+    rs.innerHTML = `
+      <div class="result-card error">
+        <div class="rtitle error">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Upload Failed
+        </div>
+        <div class="error-msg">${escHtml(d.error)}</div>
+        ${d.processed?`<p style="font-size:12px;color:var(--muted);margin-top:8px">${d.processed.toLocaleString()} rows processed before failure.</p>`:''}
+      </div>
+      <button class="reset-btn" onclick="resetAll()">Try again</button>`;
+  }
+}
+
+function showFolderResult(results, gTotal, gIns, gUpd, table) {
+  const rs = document.getElementById('resultSection');
+  rs.style.display = 'block';
+  const rows = results.map(r => r.error
+    ? `<tr><td style="color:var(--warn);font-weight:700">${escHtml(r.ssa)}</td><td>${(r.rows||0).toLocaleString()}</td><td colspan="2" style="color:var(--danger)">${escHtml(r.error)}</td></tr>`
+    : `<tr><td style="font-weight:600">${escHtml(r.ssa)}</td><td style="color:var(--muted)">${r.rows.toLocaleString()}</td><td style="color:var(--accent2)">${r.inserted.toLocaleString()}</td><td style="color:var(--warn)">${r.updated.toLocaleString()}</td></tr>`
+  ).join('');
+  rs.innerHTML = `
+    <div class="result-card success">
+      <div class="rtitle success">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Folder Upload Complete
+      </div>
+      <div class="stat-grid" style="margin-bottom:14px">
+        <div class="stat-box tot"><div class="val">${gTotal.toLocaleString()}</div><div class="lbl">Total Rows</div></div>
+        <div class="stat-box ins"><div class="val">${gIns.toLocaleString()}</div><div class="lbl">Inserted</div></div>
+        <div class="stat-box upd"><div class="val">${gUpd.toLocaleString()}</div><div class="lbl">Updated</div></div>
+        <div class="stat-box tbl"><div class="val">${escHtml(table)}</div><div class="lbl">Table</div></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;color:var(--text)">
+        <thead><tr style="color:var(--muted);border-bottom:1px solid var(--border)">
+          <th style="text-align:left">SSA</th><th style="text-align:left">Rows</th>
+          <th style="text-align:left">Inserted</th><th style="text-align:left">Updated</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">Upload another</button>`;
+}
+
+// ================================================================
+// UI HELPERS
+// ================================================================
+function showFileChip(name, size) {
+  document.getElementById('fileName').textContent = name;
+  document.getElementById('fileSize').textContent = formatBytes(size);
+  document.getElementById('fileChosen').style.display = 'flex';
+}
+function showDetection(rt) {
+  const b = document.getElementById('reportBadge');
+  b.textContent = rt.label; b.className = 'badge ' + rt.badgeClass;
+  document.getElementById('tableNameDisplay').textContent = rt.table;
+  document.getElementById('detectRow').style.display = 'flex';
+}
+function showMetaPanel(meta) {
+  if (!meta) return;
+  document.getElementById('metaReportDate').textContent   = meta.reportDate    || '\u2014';
+  document.getElementById('metaGeneratedAt').textContent  = meta.generatedAt   || '\u2014';
+  document.getElementById('metaTotalRecords').textContent = meta.totalRecords ? meta.totalRecords.toLocaleString() : '\u2014';
+  document.getElementById('metaPanel').style.display = 'flex';
+}
+function showWarn(msg) {
+  const b = document.getElementById('warnBanner');
+  b.textContent = msg; b.style.display = 'block';
+}
+function showUploadControls() {
+  document.getElementById('modeRow').style.display   = 'flex';
+  document.getElementById('uploadBtn').style.display = 'block';
+}
+function showSSAGrid(map, required) {
+  const grid = document.getElementById('ssaGrid');
+  grid.innerHTML = ''; grid.style.display = 'flex';
+  const found = Object.keys(map);
+  required.forEach(ssa => {
+    const c = document.createElement('span');
+    c.className = 'ssa-chip ' + (found.includes(ssa) ? 'ok' : 'miss');
+    c.textContent = (found.includes(ssa) ? '\u2713 ' : '\u2717 ') + ssa + (found.includes(ssa) ? '' : ' missing');
+    grid.appendChild(c);
+  });
+  found.filter(s=>!required.includes(s)).forEach(ssa => {
+    const c = document.createElement('span');
+    c.className = 'ssa-chip extra';
+    c.textContent = '? ' + ssa;
+    grid.appendChild(c);
+  });
+  const missing = required.filter(s => !found.includes(s));
+  if (missing.length) showWarn('Missing SSA files: ' + missing.join(', ') + ' — upload continues for available SSAs.');
+}
+function showError(msg) {
+  const rs = document.getElementById('resultSection');
+  rs.style.display = 'block';
+  rs.innerHTML = `<div class="result-card error"><div class="rtitle error">Detection Error</div><div class="error-msg">${msg}</div></div>`;
+}
+function resetUI() {
+  currentFile=null;currentFiles=[];detectedReport=null;parsedMeta=null;ssaFileMap={};
+  ['fileChosen','detectRow','metaPanel','warnBanner','modeRow','uploadBtn','divider',
+   'progressSection','resultSection'].forEach(id=>document.getElementById(id).style.display='none');
+  const sg=document.getElementById('ssaGrid'); sg.style.display='none'; sg.innerHTML='';
+}
+function resetAll() {
+  resetUI(); fileInput.value=''; folderInput.value='';
+  setProgress(0,0,0);
+  document.getElementById('progressTitle').textContent='Uploading\u2026';
+  document.getElementById('psChunk').textContent='\u2014';
+  document.getElementById('psIns').textContent='0';
+  document.getElementById('psUpd').textContent='0';
+}
+function formatBytes(b) {
+  if(b<1024) return b+' B';
+  if(b<1048576) return (b/1024).toFixed(1)+' KB';
+  return (b/1048576).toFixed(1)+' MB';
+}
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 </script>
 </body>
 </html>

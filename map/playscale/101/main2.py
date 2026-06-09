@@ -11,7 +11,7 @@ from sqlalchemy.dialects.mysql import insert
 import config2
 import traceback
 from datetime import date
-REPORT_DATE = date(2026, 6, 6)
+REPORT_DATE = date(2026, 5, 31)
 
 
 
@@ -31,8 +31,8 @@ def navigate_to_report(page, report):
 
     # Set dates
     print(f"Setting dated ")
-    page.locator(report['from_date_selector']).fill("01-Jun-2026")
-    page.locator(report['to_date_selector']).fill("07-Jun-2026")
+    page.locator(report['from_date_selector']).fill("01-May-2026")
+    page.locator(report['to_date_selector']).fill("31-May-2026")
 
 
     # Click GO button
