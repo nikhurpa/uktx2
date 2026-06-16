@@ -102,7 +102,7 @@ BEGIN
 END$$
 
 DELIMITER ;
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS GetBbmMonthlyBnuDisconnections$$
@@ -165,3 +165,130 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+CREATE PROCEDURE `GetBbmMonthlyBnuConnectionsABPList`(
+    IN input_bbm_name VARCHAR(100),
+    IN input_date VARCHAR(10),
+    IN input_table VARCHAR(64),
+    IN input_gp_filter VARCHAR(20),
+    IN input_opened_after_date VARCHAR(10)
+)
+BEGIN
+    -- Handle default baseline date if NULL or empty string is passed
+    SET @opened_after = IF(input_opened_after_date IS NULL OR input_opened_after_date = '' , '01-05-2025', input_opened_after_date);
+
+    SET @sql_query = CONCAT('
+        SELECT 
+            f.*,
+            g.*,
+            ''Y'' AS IS_ABP,
+            CASE 
+                WHEN (g.SAMRIDH COLLATE utf8mb4_general_ci) = ''Y'' THEN ''Samridh''
+                WHEN (g.GP_TYPE COLLATE utf8mb4_general_ci) = ''PRIORITY'' THEN ''PRIORITY''
+                WHEN (g.GP_TYPE COLLATE utf8mb4_general_ci) = ''REST'' THEN ''REST''
+                ELSE ''UNCLASSIFIED''
+            END AS CONNECTION_CATEGORY
+        FROM ', input_table, ' f
+        INNER JOIN olt o ON (f.OLT_IP COLLATE utf8mb4_general_ci) = (o.OLT_IP COLLATE utf8mb4_general_ci)
+        INNER JOIN bbm b ON (o.BBM_NAME COLLATE utf8mb4_general_ci) = (b.BBM_NAME COLLATE utf8mb4_general_ci)
+        -- Fixed: Added explicit collation safe casting onto the dynamic string evaluation
+        LEFT JOIN gp g ON (g.LGD_CODE COLLATE utf8mb4_general_ci) = 
+            CASE 
+                WHEN f.VILLAGE_CODE LIKE ''BH%'' 
+                    THEN f.VILLAGE_CODE COLLATE utf8mb4_general_ci
+                ELSE TRIM(LEADING ''0'' FROM f.GP_CODE)
+            END
+        WHERE (b.BBM_NAME COLLATE utf8mb4_general_ci) = ?
+          AND (b.ACTIVE COLLATE utf8mb4_general_ci)= ''Y''
+          AND f.CONNECTION_DATE IS NOT NULL
+          AND (DATE_FORMAT(f.CONNECTION_DATE, ''%d-%m-%Y'') COLLATE utf8mb4_general_ci) 
+              LIKE CONCAT(''%'', ?, ''%'') COLLATE utf8mb4_general_ci
+          AND ((? COLLATE utf8mb4_general_ci) = ''ALL'' OR f.CONNECTION_DATE > STR_TO_DATE(?, ''%d-%m-%Y'')) 
+          -- Fixed: Aligned all input parameters and table filters to match collations
+          AND (
+                (? COLLATE utf8mb4_general_ci) = ''ALL''
+                OR (? COLLATE utf8mb4_general_ci) = ''ABP''
+                OR ((? COLLATE utf8mb4_general_ci) IN (''PRIORITY'', ''REST'') AND (g.GP_TYPE COLLATE utf8mb4_general_ci) = (? COLLATE utf8mb4_general_ci))
+                OR ((? COLLATE utf8mb4_general_ci) = ''SAMRIDH'' AND (g.SAMRIDH COLLATE utf8mb4_general_ci) = ''Y'')
+          )
+        ORDER BY f.CONNECTION_DATE DESC;
+    ');
+
+    SET @param_bbm_name = input_bbm_name;
+    SET @param_date = input_date;
+    SET @param_opened_after1 = @opened_after;
+    SET @param_opened_after2 = @opened_after;
+    SET @filter1 = input_gp_filter;
+    SET @filter2 = input_gp_filter;
+    SET @filter3 = input_gp_filter;
+    SET @filter4 = input_gp_filter;
+    SET @filter5 = input_gp_filter;
+
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt USING @param_bbm_name, @param_date, @param_opened_after1, @param_opened_after2, @filter1, @filter2, @filter3, @filter4, @filter5;
+    DEALLOCATE PREPARE stmt;
+END
+
+CREATE PROCEDURE `GetBbmMonthlyBnuDisconnectionsABPList`(
+    IN input_bbm_name VARCHAR(100),
+    IN input_date VARCHAR(10),
+    IN input_table VARCHAR(64),
+    IN input_gp_filter VARCHAR(20),
+    IN input_opened_after_date VARCHAR(10)
+)
+BEGIN
+    -- Handle default baseline date if NULL or empty string is passed
+    SET @opened_after = IF(input_opened_after_date IS NULL OR input_opened_after_date = '' , '01-05-2025', input_opened_after_date);
+
+    SET @sql_query = CONCAT('
+        SELECT 
+            f.*,
+            g.*,
+            ''Y'' AS IS_ABP,
+            CASE 
+                WHEN (g.SAMRIDH COLLATE utf8mb4_general_ci) = ''Y'' THEN ''Samridh''
+                WHEN (g.GP_TYPE COLLATE utf8mb4_general_ci) = ''PRIORITY'' THEN ''PRIORITY''
+                WHEN (g.GP_TYPE COLLATE utf8mb4_general_ci) = ''REST'' THEN ''REST''
+                ELSE ''UNCLASSIFIED''
+            END AS CONNECTION_CATEGORY
+        FROM ', input_table, ' f
+        INNER JOIN olt o ON (f.OLT_IP COLLATE utf8mb4_general_ci) = (o.OLT_IP COLLATE utf8mb4_general_ci)
+        INNER JOIN bbm b ON (o.BBM_NAME COLLATE utf8mb4_general_ci) = (b.BBM_NAME COLLATE utf8mb4_general_ci)
+        -- Fixed: Added explicit collation safe casting onto the dynamic string evaluation
+        LEFT JOIN gp g ON (g.LGD_CODE COLLATE utf8mb4_general_ci) = 
+            CASE 
+                WHEN f.VILLAGE_CODE LIKE ''BH%'' 
+                    THEN f.VILLAGE_CODE COLLATE utf8mb4_general_ci
+                ELSE TRIM(LEADING ''0'' FROM f.GP_CODE)
+            END
+        WHERE (b.BBM_NAME COLLATE utf8mb4_general_ci) = ?
+          AND (b.ACTIVE COLLATE utf8mb4_general_ci)= ''Y''
+          AND f.DISCONNECTION_DATE IS NOT NULL
+          AND (DATE_FORMAT(f.DISCONNECTION_DATE, ''%d-%m-%Y'') COLLATE utf8mb4_general_ci) 
+              LIKE CONCAT(''%'', ?, ''%'') COLLATE utf8mb4_general_ci
+          AND ((? COLLATE utf8mb4_general_ci) = ''ALL'' OR f.CONNECTION_DATE > STR_TO_DATE(?, ''%d-%m-%Y'')) 
+          -- Fixed: Aligned all input parameters and table filters to match collations
+          AND (
+                (? COLLATE utf8mb4_general_ci) = ''ALL''
+                OR (? COLLATE utf8mb4_general_ci) = ''ABP''
+                OR ((? COLLATE utf8mb4_general_ci) IN (''PRIORITY'', ''REST'') AND (g.GP_TYPE COLLATE utf8mb4_general_ci) = (? COLLATE utf8mb4_general_ci))
+                OR ((? COLLATE utf8mb4_general_ci) = ''SAMRIDH'' AND (g.SAMRIDH COLLATE utf8mb4_general_ci) = ''Y'')
+          )
+        ORDER BY f.CONNECTION_DATE DESC;
+    ');
+
+    SET @param_bbm_name = input_bbm_name;
+    SET @param_date = input_date;
+    SET @param_opened_after1 = @opened_after;
+    SET @param_opened_after2 = @opened_after;
+    SET @filter1 = input_gp_filter;
+    SET @filter2 = input_gp_filter;
+    SET @filter3 = input_gp_filter;
+    SET @filter4 = input_gp_filter;
+    SET @filter5 = input_gp_filter;
+
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt USING @param_bbm_name, @param_date, @param_opened_after1, @param_opened_after2, @filter1, @filter2, @filter3, @filter4, @filter5;
+    DEALLOCATE PREPARE stmt;
+END
