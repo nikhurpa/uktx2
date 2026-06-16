@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UKCFA CRM Reporting Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://jqwidgets.com/public/jqwidgets/styles/jqx.base.css" type="text/css" />
+    <link rel="stylesheet" href="https://jqwidgets.com/public/jqwidgets/styles/jqx.bootstrap.css" type="text/css" />
+    <link rel="stylesheet" href="http://127.0.0.1/bnadminlte/dist/css/adminlte.min.css" type="text/css" />
+    
+    <style>
+        body { background-color: #f8f9fa; min-height: 100vh; font-size: 13px; }
+        .sidebar { background-color: #212529; color: #fff; min-height: 100vh; font-size: 13px; }
+        .sidebar .nav-link { color: #cfd4da; border-radius: 4px; margin-bottom: 3px; padding: 8px 16px; }
+        .sidebar .nav-link:hover { background-color: #343a40; color: #fff; }
+        .sidebar .nav-link.active { background-color: #0d6efd; color: #fff; }
+        
+        #param-form label { font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; color: #495057; }
+        #param-form .form-control, #param-form .form-select { font-size: 13px; padding: 6px 12px; height: 38px; }
+        #param-form .btn { font-size: 13px; padding: 6px 12px; height: 38px; }
+        
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+        .param-group { display: none; }
+        
+        /* Font sizing constraints (12px-13px) forced into the jqxGrid DOM container */
+        #report-grid-container { font-size: 12px !important; font-family: inherit !important; }
+        .jqx-grid-header { font-weight: 600 !important; font-size: 12px !important; }
+        .jqx-grid-cell { font-size: 12px !important; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-3 col-lg-2 sidebar p-3 d-flex flex-column">
+            <h6 class="py-2 border-bottom border-secondary text-white text-center mb-3 fw-bold" style="font-size:14px; letter-spacing: 0.5px;">UKCFA OPERATIONS</h6>
+            
+            <div class="text-uppercase text-muted small fw-bold mb-2 px-2" style="font-size:10px;">Summary Matrices</div>
+            <ul class="nav flex-column mb-4">
+                <li class="nav-item"><a class="nav-link active" href="#" data-report="getSsaProvisioning">SSA Provisioning</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getSsaDisconnection">SSA Disconnections</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getBbmProvisioning">BBM Provisioning</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getBbmDisconnection">BBM Disconnections</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getFranchiseeProvisioning">Franchisee Provisioning</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getFranchiseeDisconnection">Franchisee Disconnections</a></li>
+            </ul>
+
+            <div class="text-uppercase text-muted small fw-bold mb-2 px-2" style="font-size:10px;">Granular Detail Lists</div>
+            <ul class="nav flex-column mb-auto">
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getSsaProvisioningList">SSA Provisioning Rows</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getSsaDisconnectionList">SSA Disconnection Rows</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getBbmProvisioningList">BBM Provisioning Rows</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getBbmDisconnectionList">BBM Disconnection Rows</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getFranchiseeProvisioningList">Franchisee Provision Rows</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-report="getFranchiseeDisconnectionList">Franchisee Disconnect Rows</a></li>
+            </ul>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h5 class="fw-bold mb-0" id="current-report-title" style="font-size: 18px;">SSA Provisioning Matrix Report</h5>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-secondary" id="export-excel">Export Excel</button>
+                    <button type="button" class="btn btn-outline-secondary" id="export-csv">Export CSV</button>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body bg-light rounded border">
+                    <form id="param-form" class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                       
+
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn bg-olive active">
+                                <input type="radio" name="opt1" id="option_SSA" autocomplete="off" checked> SSA
+                            </label>
+                            <label class="btn bg-olive">
+                                <input type="radio" name="opt1" id="option_BBM" autocomplete="off"> BBM
+                            </label>
+                            <label class="btn bg-olive">
+                                <input type="radio" name="opt1" id="option_TIP" autocomplete="off"> TIP
+                            </label>
+                             <label class="btn bg-olive">
+                                <input type="radio" name="opt1" id="option_GP" autocomplete="off"> GP
+                            </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                       
+
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn bg-olive active">
+                                <input type="radio" name="opt2" id="option_ALL" autocomplete="off" checked> ALL
+                            </label>
+                            <label class="btn bg-olive">
+                                <input type="radio" name="opt2" id="option_BNU" autocomplete="off"> BNU
+                            </label>
+                            <label class="btn bg-olive">
+                                <input type="radio" name="opt2" id="option_ABP" autocomplete="off"> ABP
+                            </label>
+                            
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-2">
+                            <label class="form-label">Time Scale Type</label>
+                            <select class="form-select" id="date_scale_type">
+                                <option value="ALL">All-Time History</option>
+                                <option value="MONTH" selected>Monthly Calendar</option>
+                                <option value="DATE">Specific Calendar Date</option>
+                                <option value="YEAR">Annual Year Scope</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-2" id="wrapper-date-input">
+                            <label class="form-label" id="date-input-label">Select Month</label>
+                            <input type="month" class="form-control" id="calendar_picker" value="2026-06">
+                        </div>
+                        
+                        <div class="col-md-2 param-group" id="group-subtype">
+                            <label class="form-label">CRM Order Sub-Type</label>
+                            <select class="form-select" id="input_sub_type">
+                                <option value="ALL">ALL Subtypes</option>
+                                <option value="Disconnect">Disconnect</option>
+                                <option value="Disconnect Due to NP">Disconnect Due to NP</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2 param-group" id="group-entity">
+                            <label class="form-label" id="entity-label">Target Entity</label>
+                            <select class="form-select" id="input_entity_select">
+                                <option value="">Loading Options...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">Generate Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-0 border rounded">
+                    <div id="report-grid-container"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxcore.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxdata.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxbuttons.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxscrollbar.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxmenu.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.sort.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.filter.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.selection.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.columnsresize.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.pager.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxlistbox.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxdropdownlist.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxgrid.export.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxdata.export.js"></script>
+<!-- <script type="text/javascript" src="http://127.0.0.1/bnadminlte/dist/js/adminlte.min.js"></script>
+<script type="text/javascript" src="http://127.0.0.1/bnadminlte/dist/js/demo.js"></script> -->
+<script type="text/javascript" src="app.js"></script>
+</body>
+</html>
