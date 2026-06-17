@@ -8,7 +8,7 @@
     
     <link rel="stylesheet" href="https://jqwidgets.com/public/jqwidgets/styles/jqx.base.css" type="text/css" />
     <link rel="stylesheet" href="https://jqwidgets.com/public/jqwidgets/styles/jqx.bootstrap.css" type="text/css" />
-    <link rel="stylesheet" href="http://127.0.0.1/bnadminlte/dist/css/adminlte.min.css" type="text/css" />
+    <link rel="stylesheet" href="http://127.0.0.1/uktx/map/newassets/css/adminlte.css" type="text/css" />
     
     <style>
         body { background-color: #f8f9fa; min-height: 100vh; font-size: 13px; }
@@ -67,80 +67,140 @@
                 </div>
             </div>
 
-            <div class="card mb-3">
+            <div class="card mb-2">
                 <div class="card-body bg-light rounded border">
                     <form id="param-form" class="row g-3 align-items-end">
-                        <div class="col-md-2">
+                         <div class="row g-2 align-items-start mb-2">
+                                     <div class="col-lg-3 col-md-3">
+                                    
+                                            <label class="form-label">Report Type</label>
+                                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                            <label class="btn bg-olive active">
+                                                <input type="radio" name="opt1" id="option_SSA" autocomplete="off" checked> SSA
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt1" id="option_BBM" autocomplete="off"> BBM
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt1" id="option_TIP" autocomplete="off"> TIP
+                                            </label>
+                                            <label class="btn bg-olive d-none">
+                                                <input type="radio" name="opt1" id="option_OLT" autocomplete="off"> OLT
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt1" id="option_GP" autocomplete="off"> GP
+                                            </label>    
+                                            </div>
+                                        </div>
+
+                                     
+
+                                        <div class="col-lg-3 col-md-3">
+                                            <label class="form-label">GP TYPE</label>
+                                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                            
+                                            <label class="btn bg-olive active">
+                                                <input type="radio" name="opt4" id="option_ALL" autocomplete="off" checked> ALL
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt4" id="option_BNU" autocomplete="off"> PRIORITY
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt4" id="option_ABP" autocomplete="off"> SAMRIDH
+                                            </label>
+                                                                        <label class="btn bg-olive">
+                                                <input type="radio" name="opt4" id="option_ABP" autocomplete="off"> REST
+                                            </label>
+                                            
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-lg-3 col-md-3">
+                                            <label class="form-label">GP PHASE</label>
+                                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                            
+                                            <label class="btn bg-olive active">
+                                                <input type="radio" name="opt3" id="option_PHASE_ALL" autocomplete="off" checked> ALL
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt3" id="option_PHASE_I" autocomplete="off"> PHASE#I
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt3" id="option_PHASE_ABP" autocomplete="off"> ABP
+                                            </label>
+                                                                       
+                                            
+                                            </div>
+                                        </div>
+
+
+                                           <div class="col-lg-3 col-md-3">
+                                            <label class="form-label">BNU or ABP</label>
+                                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                            
+                                            <label class="btn bg-olive active">
+                                                <input type="radio" name="opt2" id="option_ALL" autocomplete="off" checked> ALL
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt2" id="option_BNU" autocomplete="off"> BNU
+                                            </label>
+                                            <label class="btn bg-olive">
+                                                <input type="radio" name="opt2" id="option_ABP" autocomplete="off"> ABP
+                                            </label>
+                                            
+                                            </div>
+                                        </div>
+
+
+                                        
+
+                         </div>
+
+                          <div class="row g-3 align-items-end">
+                                    <div class="col-md-2">
+                                        <label class="form-label">Time Scale Type</label>
+                                        <select class="form-select" id="date_scale_type">
+                                            <option value="ALL">All-Time History</option>
+                                            <option value="MONTH" selected>Monthly Calendar</option>
+                                            <option value="DATE">Specific Calendar Date</option>
+                                            <option value="YEAR">Annual Year Scope</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-2" id="wrapper-date-input">
+                                        <label class="form-label" id="date-input-label">Select Month</label>
+                                        <input type="month" class="form-control" id="calendar_picker" value="2026-06">
+                                    </div>
+                                    
+                                    <div class="col-md-2 param-group" id="group-subtype">
+                                        <label class="form-label">CRM Order Sub-Type</label>
+                                        <select class="form-select" id="input_sub_type">
+                                            <option value="ALL">ALL Subtypes</option>
+                                            <option value="Disconnect">Disconnect</option>
+                                            <option value="Disconnect Due to NP">Disconnect Due to NP</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-2 param-group" id="group-entity">
+                                        <label class="form-label" id="entity-label">Target Entity</label>
+                                        <select class="form-select" id="input_entity_select">
+                                            <option value="">Loading Options...</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-primary w-100 fw-bold">Generate</button>
+                                    </div>
+
+
+                          </div>
+                        
+
+
                        
 
-                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                            <label class="btn bg-olive active">
-                                <input type="radio" name="opt1" id="option_SSA" autocomplete="off" checked> SSA
-                            </label>
-                            <label class="btn bg-olive">
-                                <input type="radio" name="opt1" id="option_BBM" autocomplete="off"> BBM
-                            </label>
-                            <label class="btn bg-olive">
-                                <input type="radio" name="opt1" id="option_TIP" autocomplete="off"> TIP
-                            </label>
-                             <label class="btn bg-olive">
-                                <input type="radio" name="opt1" id="option_GP" autocomplete="off"> GP
-                            </label>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2">
                        
-
-                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                            <label class="btn bg-olive active">
-                                <input type="radio" name="opt2" id="option_ALL" autocomplete="off" checked> ALL
-                            </label>
-                            <label class="btn bg-olive">
-                                <input type="radio" name="opt2" id="option_BNU" autocomplete="off"> BNU
-                            </label>
-                            <label class="btn bg-olive">
-                                <input type="radio" name="opt2" id="option_ABP" autocomplete="off"> ABP
-                            </label>
-                            
-                            </div>
-                        </div>
-
-
-                        <div class="col-md-2">
-                            <label class="form-label">Time Scale Type</label>
-                            <select class="form-select" id="date_scale_type">
-                                <option value="ALL">All-Time History</option>
-                                <option value="MONTH" selected>Monthly Calendar</option>
-                                <option value="DATE">Specific Calendar Date</option>
-                                <option value="YEAR">Annual Year Scope</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-2" id="wrapper-date-input">
-                            <label class="form-label" id="date-input-label">Select Month</label>
-                            <input type="month" class="form-control" id="calendar_picker" value="2026-06">
-                        </div>
-                        
-                        <div class="col-md-2 param-group" id="group-subtype">
-                            <label class="form-label">CRM Order Sub-Type</label>
-                            <select class="form-select" id="input_sub_type">
-                                <option value="ALL">ALL Subtypes</option>
-                                <option value="Disconnect">Disconnect</option>
-                                <option value="Disconnect Due to NP">Disconnect Due to NP</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-2 param-group" id="group-entity">
-                            <label class="form-label" id="entity-label">Target Entity</label>
-                            <select class="form-select" id="input_entity_select">
-                                <option value="">Loading Options...</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100 fw-bold">Generate Report</button>
-                        </div>
                     </form>
                 </div>
             </div>

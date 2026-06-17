@@ -37,7 +37,7 @@ REPORT_URL = [
 # Download
 DOWNLOAD_DIR = "downloads"
 # CSV_FOLDER = "downloads/ftth"
-CSV_FOLDER = "downloads/conn"
+CSV_FOLDER = "downloads/disc"
 
 # MySQL
 # MYSQL_USER = "uktx"

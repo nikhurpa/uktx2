@@ -20,7 +20,7 @@ USERNAME = "PR_Sh_utrakhand"
 PASSWORD = "Bbnl@0520"
 
 # Download
-DOWNLOAD_DIR = "downloads"
+DOWNLOAD_DIR = "downloads2"
 
 # MySQL
 MYSQL_USER = "u642970219_uktx"
@@ -28,6 +28,12 @@ MYSQL_PASSWORD = "Gmcfa@01"
 MYSQL_HOST = "srv1493.hstgr.io"
 MYSQL_PORT = 3306
 MYSQL_DATABASE = "u642970219_TRANSMISSION1"
+
+# MYSQL_USER = "uktx"
+# MYSQL_PASSWORD = "uktx123"
+# MYSQL_HOST = "localhost"
+# MYSQL_PORT = 3306
+# MYSQL_DATABASE = "ukcfa"
 
 TABLE_NAME = "bnu_ftth"
 
