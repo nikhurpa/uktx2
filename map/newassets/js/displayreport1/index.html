@@ -28,16 +28,49 @@
         #report-grid-container { font-size: 12px !important; font-family: inherit !important; }
         .jqx-grid-header { font-weight: 600 !important; font-size: 12px !important; }
         .jqx-grid-cell { font-size: 12px !important; }
+
+        .sidebar {
+            width: 260px;
+            transition: all .3s ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed .nav-link,
+        .sidebar.collapsed .text-uppercase,
+        .sidebar.collapsed h6 {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: clip;
+        }
+
+        #main-content {
+            transition: all .3s ease;
+        }
     </style>
+   
 </head>
 <body>
 
+
+
 <div class="container-fluid">
     <div class="row">
-        <nav class="col-md-3 col-lg-2 sidebar p-3 d-flex flex-column">
+        <nav id="sidebar" class="col-md-3 col-lg-2 sidebar p-3 d-flex flex-column">
             <h6 class="py-2 border-bottom border-secondary text-white text-center mb-3 fw-bold" style="font-size:14px; letter-spacing: 0.5px;">UKCFA OPERATIONS</h6>
-            
-            <div class="text-uppercase text-muted small fw-bold mb-2 px-2" style="font-size:10px;">Summary Matrices</div>
+            <div class="d-flex align-items-center pb-2 mb-3 border-bottom">
+                <button class="btn btn-outline-secondary me-2" id="sidebar-toggle">
+                    ☰
+                </button>
+
+                <h5 class="fw-bold mb-0" id="current-report-title">
+                    SSA Provisioning Matrix Report
+                </h5>
+            </div>
+            <div  class="text-uppercase text-muted small fw-bold mb-2 px-2" style="font-size:10px;">Summary Matrices</div>
             <ul class="nav flex-column mb-4">
                 <li class="nav-item"><a class="nav-link active" href="#" data-report="getSsaProvisioning">SSA Provisioning</a></li>
                 <li class="nav-item"><a class="nav-link" href="#" data-report="getSsaDisconnection">SSA Disconnections</a></li>
@@ -58,7 +91,7 @@
             </ul>
         </nav>
 
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+        <main id="main-content"  class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                 <h5 class="fw-bold mb-0" id="current-report-title" style="font-size: 18px;">SSA Provisioning Matrix Report</h5>
                 <div class="btn-group">
@@ -70,8 +103,8 @@
             <div class="card mb-2">
                 <div class="card-body bg-light rounded border">
                     <form id="param-form" class="row g-3 align-items-end">
-                         <div class="row g-2 align-items-start mb-2">
-                                     <div class="col-lg-3 col-md-3">
+                         <div class="d-flex gap-2 flex-wrap mb-2">
+                                     <div class="col-lg-2 col-md-2">
                                     
                                             <label class="form-label">Report Type</label>
                                             <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -116,7 +149,7 @@
                                         </div>
 
 
-                                        <div class="col-lg-3 col-md-3">
+                                        <div class="col-lg-2 col-md-2">
                                             <label class="form-label">GP PHASE</label>
                                             <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                             
@@ -135,29 +168,46 @@
                                         </div>
 
 
-                                           <div class="col-lg-3 col-md-3">
-                                            <label class="form-label">BNU or ABP</label>
-                                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                            
-                                            <label class="btn bg-olive active">
-                                                <input type="radio" name="opt2" id="option_ALL" autocomplete="off" checked> ALL
-                                            </label>
-                                            <label class="btn bg-olive">
-                                                <input type="radio" name="opt2" id="option_BNU" autocomplete="off"> BNU
-                                            </label>
-                                            <label class="btn bg-olive">
-                                                <input type="radio" name="opt2" id="option_ABP" autocomplete="off"> ABP
-                                            </label>
-                                            
+                                           <div class="col-lg-2 col-md-2">
+                                                <label class="form-label">BNU or ABP</label>
+                                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                
+                                                <label class="btn bg-olive active">
+                                                    <input type="radio" name="opt2" id="option_ALL" autocomplete="off" checked> ALL
+                                                </label>
+                                                <label class="btn bg-olive">
+                                                    <input type="radio" name="opt2" id="option_BNU" autocomplete="off"> BNU
+                                                </label>
+                                                <label class="btn bg-olive">
+                                                    <input type="radio" name="opt2" id="option_ABP" autocomplete="off"> ABP
+                                                </label>
+                                                
+                                                </div>
                                             </div>
-                                        </div>
+
+                                            <div class="col-lg-2 col-md-2">
+                                                <label class="form-label">Disconnection Type</label>
+                                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                
+                                                <label class="btn bg-olive active">
+                                                    <input type="radio" name="opt5" id="option_DISC_ALL" autocomplete="off" checked> ALL
+                                                </label>
+                                                <label class="btn bg-olive">
+                                                    <input type="radio" name="opt5" id="option_DISC_VOL" autocomplete="off"> VOL
+                                                </label>
+                                                <label class="btn bg-olive">
+                                                    <input type="radio" name="opt5" id="option_DISC_DNP" autocomplete="off"> DNP
+                                                </label>
+                                                
+                                                </div>
+                                            </div>
 
 
                                         
 
                          </div>
 
-                          <div class="row g-3 align-items-end">
+                          <div class="d-flex gap-2 flex-wrap mb-2">
                                     <div class="col-md-2">
                                         <label class="form-label">Time Scale Type</label>
                                         <select class="form-select" id="date_scale_type">
@@ -182,6 +232,17 @@
                                         </select>
                                     </div>
 
+                                       <div class="col-md-2 " id="gp_avl">
+                                        <label class="form-label">GP Avl. Grater Than</label>
+                                        <select class="form-select" id="select_gp_avl">
+                                            <option value="90">90%</option>
+                                            <option value="98">98%</option>
+                                            <option value="99">99%</option>
+                                            <option value="UP">UP</option>
+                                            <option value="DN">DN</option>
+                                        </select>
+                                    </div>
+
                                     <div class="col-md-2 param-group" id="group-entity">
                                         <label class="form-label" id="entity-label">Target Entity</label>
                                         <select class="form-select" id="input_entity_select">
@@ -190,6 +251,8 @@
                                     </div>
 
                                     <div class="col-md-2">
+                                        
+                                                                  <label class="form-label">&nbsp;</label>        
                                         <button type="submit" class="btn btn-primary w-100 fw-bold">Generate</button>
                                     </div>
 
@@ -233,5 +296,11 @@
 <!-- <script type="text/javascript" src="http://127.0.0.1/bnadminlte/dist/js/adminlte.min.js"></script>
 <script type="text/javascript" src="http://127.0.0.1/bnadminlte/dist/js/demo.js"></script> -->
 <script type="text/javascript" src="app.js"></script>
+ <script>
+        $('#sidebar-toggle').on('click', function () {
+            $('#sidebar').toggleClass('collapsed');
+            
+        });
+        </script>
 </body>
 </html>
