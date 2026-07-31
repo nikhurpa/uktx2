@@ -13,7 +13,7 @@ from sqlalchemy import text
 import config2
 import traceback
 from datetime import date
-REPORT_DATE = date(2026, 6, 6)
+REPORT_DATE = date(2026, 6, 30)
 
 from datetime import datetime
 
@@ -44,11 +44,12 @@ def navigate_to_report(page, ssa):
 
     # Select Options
     page.select_option(circle_selector, label="UT")
-    page.locator(ssa_selector).select_option(label=ssa['name'])
+  
     page.locator(service_type_selector).select_option(label="BHARAT FIBER BB")
+    page.locator(ssa_selector).select_option(label=ssa['name'])
     
     # Click GO button
-    page.locator(go_button_selector).click()
+    # page.locator(go_button_selector).click()
     page.wait_for_timeout(5000)
     # page.wait_for_load_state("networkidle")
 
